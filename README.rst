@@ -6,7 +6,7 @@ A simple API wrapper for `discordbots.org`_ written in Python
 Installation
 ------------
 
-Install via pip (recommended)
+Install via pip (recommended) [NOT WORKING YET]
 
 .. code:: bash
 
