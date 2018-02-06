@@ -339,8 +339,8 @@ class Client:
     async def generate_widget_large(self, id: int, top: str = '2C2F33', mid: str = '23272A', user: str = 'FFFFFF', cert: str = 'FFFFFF', data: str = 'FFFFFF', label: str = '99AAB5', highlight: str = '2C2F33'):
         """This function is a coroutine.
 
-        #` to the color codes (e.g. #FF00FF become FF00FF).
-        Generates a custom large widget. Do not add `
+        Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
+
 
 
         Parameters
@@ -423,8 +423,7 @@ class Client:
     async def generate_widget_small(self, id: int, avabg: str = '2C2F33', lcol: str = '23272A', rcol: str = '2C2F33', ltxt: str = 'FFFFFF', rtxt: str = 'FFFFFF'):
         """This function is a coroutine.
 
-        #` to the color codes (e.g. #FF00FF become FF00FF).
-        Generates a custom large widget. Do not add `
+        Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
 
         Parameters
         ==========

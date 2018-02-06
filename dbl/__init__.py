@@ -2,7 +2,7 @@
 
 """
 DBL Python API Wrapper
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 A basic wrapper for the discordbots.org API.
 :copyright: (c) 2018 Francis Taylor & discordbots.org
 :license: MIT, see LICENSE for more details.
