@@ -32,17 +32,13 @@ from .errors import *
 from .http import HTTPClient
 
 BASE = 'https://discordbots.org/api'
-BOT = BASE + '/bots'
-USER = BASE + '/users'
-
-# rewrite to move functions to http.py (see https://github.com/Rapptz/discord.py/blob/async/discord/http.py#L243 and https://github.com/Rapptz/discord.py/blob/async/discord/http.py#L297)
 
 
 class Client:
 
-    def __init__(self, *, loop=None):
+    def __init__(self, *, loop=None, **options):
         self.loop = loop or asyncio.get_event_loop()
-        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.http = HTTPClient(loop=self.loop)
         self._is_closed = False
 
     async def post_server_count(self, id: int, token: str, guild_count: int, shard_count: int = None, shard_no: int = None):
@@ -56,19 +52,13 @@ class Client:
         id: int
             The id of the bot you want to post the server count of.
         token:
-            The DBL token. Visit https://discordbots.org/api to generate one.
+            The DBL Bot token. Visit https://discordbots.org/api to generate one.
         guild_count: int
             The number of guilds the bot (or current shard) is in.
         shard_count: int
             (Optional) The total number of shards.
         shard_no: int
             (Optional) The index of the current shard. DBL uses 0 indexed shards (the first shard is 0).
-
-        Returns
-        =======
-
-        200
-            Successfully received data.
 
         Raises
         ======
@@ -86,7 +76,7 @@ class Client:
         500
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
 
-        return self.http.post_server_count(id, token, guild_count=guild_count, shard_count=shard_count, shard_no=shard_no)
+        await self.http.post_server_count(id, token, guild_count, shard_count, shard_no)
 
     async def get_server_count(self, id: int):
         """This function is a coroutine.
@@ -120,8 +110,7 @@ class Client:
             You are being ratelimited.
         500
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
-
-        return self.http.get_server_count(id)
+        return await self.http.get_server_count(id)
 
     async def get_upvote_count(self, id: int):
         """This function is a coroutine.
@@ -156,9 +145,9 @@ class Client:
         500
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
 
-        return self.http.get_upvote_count(id)
+        return await self.http.get_upvote_count(id)
 
-    async def get_upvote_info(self, id: int, token: str):
+    async def get_upvote_info(self, id: int, token: str, onlyids: bool = False):
         """This function is a coroutine.
 
         Gets information about who upvoted a bot from discordbots.org
@@ -171,12 +160,14 @@ class Client:
             The id of the bot you want to lookup.
         token: str
             The DBL token. Visit https://discordbots.org/api to generate one.
+        onlyids: bool
+            If true, will return only the ids of who upvoted your bot.
 
         Returns
         =======
 
-        votes: int
-            The number of upvotes the bot has received.
+        votes: json
+            A json object containing info about who upvoted a bot.
 
         Raises
         ======
@@ -194,7 +185,7 @@ class Client:
         500
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
 
-        return self.http.get_upvote_info(id, token=token)
+        return await self.http.get_upvote_info(id, token, onlyids)
 
     async def get_bot_info(self, id: int):
         """This function is a coroutine.
@@ -206,8 +197,6 @@ class Client:
 
         id: int
             The id of the bot you want to lookup.
-        token:
-            The DBL token. Visit https://discordbots.org/api to generate one.
 
         Returns
         =======
@@ -276,7 +265,8 @@ class Client:
             You are being ratelimited.
         500
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
-        return self.http.get_bot_info(id)
+
+        return await self.http.get_bot_info(id)
 
     async def get_bots(self, limit: int = 50, offset: int = 0):
         """This function is a coroutine.
@@ -311,7 +301,7 @@ class Client:
         500
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
 
-        return self.http.get_bots(limit=limit, offset=offset)
+        return await self.http.get_bots(limit, offset)
 
     async def get_user(self, id: int):
         """This function is a coroutine.
@@ -344,7 +334,7 @@ class Client:
         500
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
 
-        return self.http.get_user(id)
+        return await self.http.get_user(id)
 
     async def generate_widget_large(self, id: int, top: str = '2C2F33', mid: str = '23272A', user: str = 'FFFFFF', cert: str = 'FFFFFF', data: str = 'FFFFFF', label: str = '99AAB5', highlight: str = '2C2F33'):
         """This function is a coroutine.
@@ -393,9 +383,9 @@ class Client:
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request.
         """
 
-        url = '/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'.format(
+        url = 'https://discordbots.org/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'.format(
             id, top, mid, user, cert, data, label, highlight)
-        return self.http.gen_widget_lrg(url=url)
+        return url
 
     async def get_widget_large(self, id: int):
         """This function is a coroutine.
@@ -427,8 +417,8 @@ class Client:
         500
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request.
         """
-        url = '/widget/{0}.png'.format(id)
-        return self.http.gen_widget_lrg(url=url)
+        url = 'https://discordbots.org/api/widget/{0}.png'.format(id)
+        return url
 
     async def generate_widget_small(self, id: int, avabg: str = '2C2F33', lcol: str = '23272A', rcol: str = '2C2F33', ltxt: str = 'FFFFFF', rtxt: str = 'FFFFFF'):
         """This function is a coroutine.
@@ -472,10 +462,10 @@ class Client:
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request.
         """
 
-        url = '/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'.format(
+        url = 'https://discordbots.org/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'.format(
             id, avabg, ltxt, rtxt, lcol, rcol)
 
-        return self.http.gen_widget_small(url=url)
+        return url
 
     async def get_widget_small(self, id: int):
         """This function is a coroutine.
@@ -508,17 +498,16 @@ class Client:
             Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request.
         """
 
-        url = '/widget/lib/{0}.png'.format(id)
-        return self.http.gen_widget_small(url=url)
+        url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(id)
+        return url
 
-    @asyncio.coroutine
-    def close(self):
+    async def close(self):
         """This function is a coroutine.
         Closes all connections."""
         if self._is_closed:
             return
         else:
-            yield from self.http.close()
+            await self.http.close()
             self._is_closed = True
 
     @property

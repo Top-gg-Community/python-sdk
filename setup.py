@@ -26,7 +26,7 @@ setup(name='dblpy',
       install_requires=requirements,
       keywords='discord bot list discordbots botlist',
       classifiers=[
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 4 - Beta',
           'License :: OSI Approved :: MIT License',
           'Intended Audience :: Developers',
           'Natural Language :: English',

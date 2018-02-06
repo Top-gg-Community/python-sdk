@@ -73,6 +73,13 @@ class HTTPException(DBLException):
         super().__init__(fmt.format(self.response, self.text))
 
 
+class Unauthorized(HTTPException):
+    """Exception that's thrown for when status code 401 occurs.
+    Subclass of :exc:`HTTPException`
+    """
+    pass
+
+
 class Forbidden(HTTPException):
     """Exception that's thrown for when status code 403 occurs.
     Subclass of :exc:`HTTPException`
@@ -82,6 +89,13 @@ class Forbidden(HTTPException):
 
 class NotFound(HTTPException):
     """Exception that's thrown for when status code 404 occurs.
+    Subclass of :exc:`HTTPException`
+    """
+    pass
+
+
+class Ratelimited(HTTPException):
+    """Exception that's thrown for when status code 429 occurs.
     Subclass of :exc:`HTTPException`
     """
     pass
