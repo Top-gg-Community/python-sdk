@@ -1,5 +1,10 @@
 DBL Python Library
 ==================
+.. image:: https://img.shields.io/pypi/v/dblpy.svg
+   :target: https://pypi.python.org/pypi/dblpy
+.. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
+   :target: https://pypi.python.org/pypi/dblpy
+
 
 A simple API wrapper for `discordbots.org`_ written in Python
 
