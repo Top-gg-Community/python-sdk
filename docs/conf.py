@@ -36,9 +36,9 @@ extensions = ['sphinx.ext.autodoc',
 
 on_rtd = os.getenv('READTHEDOCS') == 'True'
 if on_rtd:
-  extensions.append('sphinxcontrib.napoleon')
+    extensions.append('sphinxcontrib.napoleon')
 else:
-extensions.append('sphinx.ext.napoleon')
+    extensions.append('sphinx.ext.napoleon')
 
 autodoc_member_order = 'bysource'
 
