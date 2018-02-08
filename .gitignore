@@ -1,4 +1,7 @@
 dblpy.egg-info/
-dblpy/__pycache__/
+dbl/__pycache__/
 build/
 dist/
+/docs/_build
+/docs/_static/
+/docs/_templates

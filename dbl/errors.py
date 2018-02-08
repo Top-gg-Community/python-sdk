@@ -26,7 +26,8 @@ DEALINGS IN THE SOFTWARE.
 
 
 class DBLException(Exception):
-    """Base exception class for discord.py
+    """Base exception class for dblpy
+
     Ideally speaking, this could be caught to handle any exceptions thrown from this library.
     """
     pass
@@ -34,26 +35,20 @@ class DBLException(Exception):
 
 class ClientException(DBLException):
     """Exception that's thrown when an operation in the :class:`Client` fails.
+
     These are usually for exceptions that happened due to user input.
     """
     pass
 
 
-class GatewayNotFound(DBLException):
-    """An exception that is usually thrown when the gateway hub
-    for the :class:`Client` websocket is not found."""
-
-    def __init__(self):
-        message = 'The gateway to connect to DBL was not found.'
-        super(GatewayNotFound, self).__init__(message)
-
-
 class HTTPException(DBLException):
     """Exception that's thrown when an HTTP request operation fails.
+
     .. attribute:: response
         The response of the failed HTTP request. This is an
         instance of `aiohttp.ClientResponse`__.
         __ http://aiohttp.readthedocs.org/en/stable/client_reference.html#aiohttp.ClientResponse
+
     .. attribute:: text
         The text of the error. Could be an empty string.
     """
@@ -75,6 +70,7 @@ class HTTPException(DBLException):
 
 class Unauthorized(HTTPException):
     """Exception that's thrown for when status code 401 occurs.
+
     Subclass of :exc:`HTTPException`
     """
     pass
@@ -82,6 +78,7 @@ class Unauthorized(HTTPException):
 
 class Forbidden(HTTPException):
     """Exception that's thrown for when status code 403 occurs.
+
     Subclass of :exc:`HTTPException`
     """
     pass
@@ -89,6 +86,7 @@ class Forbidden(HTTPException):
 
 class NotFound(HTTPException):
     """Exception that's thrown for when status code 404 occurs.
+
     Subclass of :exc:`HTTPException`
     """
     pass
@@ -96,6 +94,7 @@ class NotFound(HTTPException):
 
 class Ratelimited(HTTPException):
     """Exception that's thrown for when status code 429 occurs.
+
     Subclass of :exc:`HTTPException`
     """
     pass
@@ -104,6 +103,7 @@ class Ratelimited(HTTPException):
 class InvalidArgument(ClientException):
     """Exception that's thrown when an argument to a function
     is invalid some way (e.g. wrong value or wrong type).
+
     This could be considered the analogous of ``ValueError`` and
     ``TypeError`` except derived from :exc:`ClientException` and thus
     :exc:`DBLException`.
@@ -114,6 +114,7 @@ class InvalidArgument(ClientException):
 class ConnectionClosed(ClientException):
     """Exception that's thrown when the gateway connection is
     closed for reasons that could not be handled internally.
+
     Attributes
     -----------
     code : int

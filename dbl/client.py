@@ -35,8 +35,19 @@ BASE = 'https://discordbots.org/api'
 
 
 class Client:
+    """Represents a client connection that connects to discordbots.org.
+    This class is used to interact with the DBL API.
 
-    def __init__(self, *, loop=None, **options):
+    .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
+
+    Parameters
+    ----------
+    loop : Optional[event loop].
+        The `event loop`_ to use for asynchronous operations. Defaults to ``None``,
+        in which case the default event loop is used via ``asyncio.get_event_loop()``.
+    """
+
+    def __init__(self, *, loop=None):
         self.loop = loop or asyncio.get_event_loop()
         self.http = HTTPClient(loop=self.loop)
         self._is_closed = False
@@ -45,6 +56,8 @@ class Client:
         """This function is a coroutine.
 
         Posts the server count to discordbots.org
+
+        .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
         Parameters
         ==========
@@ -58,23 +71,8 @@ class Client:
         shard_count: int
             (Optional) The total number of shards.
         shard_no: int
-            (Optional) The index of the current shard. DBL uses 0 indexed shards (the first shard is 0).
-
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        401
-            Unauthorized. Check your DBL token.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found. Unlikely, but probably caused by maintenance. Try again later.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
+            (Optional) The index of the current shard. DBL uses `0 based indexing`_ for shards.
+        """
 
         await self.http.post_server_count(id, token, guild_count, shard_count, shard_no)
 
@@ -95,21 +93,7 @@ class Client:
         count: int
             The number of servers the bot is on.
 
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        401
-            Unauthorized. Check your DBL token.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found. Unlikely, but probably caused by maintenance. Try again later.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
+        """
         return await self.http.get_server_count(id)
 
     async def get_upvote_count(self, id: int):
@@ -128,22 +112,7 @@ class Client:
 
         votes: int
             The number of upvotes the bot has received.
-
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        401
-            Unauthorized. Check your DBL token.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found. Unlikely, but probably caused by maintenance. Try again later.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
+        """
 
         return await self.http.get_upvote_count(id)
 
@@ -151,7 +120,8 @@ class Client:
         """This function is a coroutine.
 
         Gets information about who upvoted a bot from discordbots.org
-        Available to the owner of the bot only.
+
+        **Available to the owner of the bot only.**
 
         Parameters
         ==========
@@ -167,23 +137,9 @@ class Client:
         =======
 
         votes: json
-            A json object containing info about who upvoted a bot.
+            Info about who upvoted your bot.
 
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        401
-            Unauthorized. Check your DBL token.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found. Unlikely, but probably caused by maintenance. Try again later.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
+        """
 
         return await self.http.get_upvote_info(id, token, onlyids)
 
@@ -249,22 +205,7 @@ class Client:
             JSON object containing a list of tags.
         legacy: bool
             Is the bot using the old profile format? True if the bot hasn't been edited since 2017-12-31.
-
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        401
-            Unauthorized. Check your DBL token.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found. Unlikely, but probably caused by maintenance. Try again later.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
+        """
 
         return await self.http.get_bot_info(id)
 
@@ -284,22 +225,10 @@ class Client:
         Returns
         =======
 
-        bots
-            Returns all of the bots in json format.
+        bots: json
+            Returns info on the bots on DBL.
 
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
+        """
 
         return await self.http.get_bots(limit, offset)
 
@@ -317,22 +246,9 @@ class Client:
         Returns
         =======
 
-        user_data
-            Returns information about the user in json format.
-
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request."""
+        user_data: json
+            Info about the user.
+        """
 
         return await self.http.get_user(id)
 
@@ -340,8 +256,6 @@ class Client:
         """This function is a coroutine.
 
         Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
-
-
 
         Parameters
         ==========
@@ -367,20 +281,6 @@ class Client:
         =======
 
         URL with the widget.
-
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request.
         """
 
         url = 'https://discordbots.org/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'.format(
@@ -402,20 +302,6 @@ class Client:
         =======
 
         URL with the widget.
-
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request.
         """
         url = 'https://discordbots.org/api/widget/{0}.png'.format(id)
         return url
@@ -445,20 +331,6 @@ class Client:
         =======
 
         URL with the widget.
-
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request.
         """
 
         url = 'https://discordbots.org/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'.format(
@@ -481,20 +353,6 @@ class Client:
         =======
 
         URL with the widget.
-
-        Raises
-        ======
-
-        400
-            Bad Request. You should not repeat this request without modification of your code.
-        403
-            Forbidden. You can't access this resource.
-        404
-            Page not found.
-        429
-            You are being ratelimited.
-        500
-            Internal Server Error. The server encountered an unexpected condition that prevented it from fulfilling the request.
         """
 
         url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(id)
