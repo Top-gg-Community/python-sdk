@@ -44,12 +44,15 @@ class ClientException(DBLException):
 class HTTPException(DBLException):
     """Exception that's thrown when an HTTP request operation fails.
 
-    .. attribute:: response
-        The response of the failed HTTP request. This is an
-        instance of `aiohttp.ClientResponse`__.
-        __ http://aiohttp.readthedocs.org/en/stable/client_reference.html#aiohttp.ClientResponse
+    .. _aiohttp.ClientResponse: http://aiohttp.readthedocs.org/en/stable/client_reference.html#aiohttp.ClientResponse
 
-    .. attribute:: text
+
+    Attributes
+    -----------
+    response
+        The response of the failed HTTP request. This is an
+        instance of `aiohttp.ClientResponse`_.
+    text: str
         The text of the error. Could be an empty string.
     """
 

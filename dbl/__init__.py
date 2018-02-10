@@ -15,6 +15,7 @@ __copyright__ = 'Copyright 2018 Francis Taylor'
 __version__ = '0.1.3'
 
 from .client import Client
+from .errors import *
 from .http import HTTPClient
 
 from collections import namedtuple

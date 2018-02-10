@@ -134,6 +134,9 @@ class HTTPClient:
     async def get_bots(self, limit, offset):
         return await self.request('GET', f'{self.BASE}/bots?limit={limit}&offset={offset}')
 
+    # async def get_bots(self, limit, offset, query):
+    #     return await self.request('GET', f'{self.BASE}/bots?limit={limit}&offset={offset}&search={query}')
+
     async def get_user(self, id):
         return await self.request('GET', f'{self.BASE}/users/{id}')
 

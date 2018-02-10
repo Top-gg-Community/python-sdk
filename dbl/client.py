@@ -218,9 +218,9 @@ class Client:
         ==========
 
         limit: int
-            The number of results you wish to lookup. Leave blank for max (50).
+            (Optional) The number of results you wish to lookup. Defaults to 50.
         offset: int
-            The page number to search. Leave blank for default (0).
+            (Optional) The page number to search. Defaults to 0.
 
         Returns
         =======
@@ -231,6 +231,38 @@ class Client:
         """
 
         return await self.http.get_bots(limit, offset)
+    #
+    # async def search_bots(self, limit: int = 50, offset: int = 0, **kwargs):
+    #     """This function is a coroutine.
+    #
+    #     Searches bots on discordbots.org via the API
+    #
+    #     Parameters
+    #     ==========
+    #
+    #     limit: int
+    #         (Optional) The number of results you wish to lookup. Defaults to 50.
+    #     offset: int
+    #         (Optional) The page number to search. Defaults to 0.
+    #     tag: str
+    #         Keyword argument that specifies the tag to search.
+    #     library: str
+    #         Keyword argument that specifies the library to search.
+    #
+    #
+    #     Returns
+    #     =======
+    #
+    #     bots: json
+    #         Returns bots matching your search results.
+    #     """
+    #     query = ''
+    #     if 'tag' in kwargs:
+    #         query = f'tag:{tag}'
+    #     if 'library' in kwargs:
+    #         query = f'library:{library}'
+
+        return await self.http.search_bots(limit, offset, query=query)
 
     async def get_user(self, id: int):
         """This function is a coroutine.
