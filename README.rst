@@ -30,6 +30,11 @@ Install from source
     cd DBL-Python-Library
     pip install -R requirements.txt
 
+Documentation
+-------------
+
+Documentation can be found `here`_
+
 Working
 -------
 
@@ -75,3 +80,4 @@ Example
 
 .. _discordbots.org: https://discordbots.org/
 .. _discordbots.org/api/docs: https://discordbots.org/api/docs
+.. _here: http://dblpy.rtfd.io
