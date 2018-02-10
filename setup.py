@@ -3,8 +3,15 @@ import sys
 
 from setuptools import setup, find_packages
 
+
+on_rtd = os.getenv('READTHEDOCS') == 'True'
+
+requirements = []
 with open('requirements.txt') as f:
-    requirements = f.readlines()
+    requirements = f.read().splitlines()
+
+if on_rtd:
+    requirements.append('sphinxcontrib-napoleon')
 
 with open('dbl/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
