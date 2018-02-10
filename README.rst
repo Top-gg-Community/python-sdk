@@ -6,10 +6,11 @@ DBL Python Library
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
    :alt: v0.1.3
-.. image:: https://readthedocs.org/projects/dblpy/badge/?version=latest
-   :target: http://dblpy.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/dblpy/badge/?version=v0.1.3
+   :target: http://dblpy.readthedocs.io/en/latest/?badge=v0.1.3
    :alt: Documentation Status
-
+.. image:: https://discordapp.com/api/v7/guilds/264445053596991498/embed.png?style=shield
+   :target: https://discord.gg/EYHTgJX
 
 A simple API wrapper for `discordbots.org`_ written in Python
 
