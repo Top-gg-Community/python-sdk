@@ -9,8 +9,6 @@ DBL Python Library
 .. image:: https://readthedocs.org/projects/dblpy/badge/?version=v0.1.3
    :target: http://dblpy.readthedocs.io/en/latest/?badge=v0.1.3
    :alt: Documentation Status
-.. image:: https://discordapp.com/api/v7/guilds/264445053596991498/embed.png?style=shield
-   :target: https://discord.gg/EYHTgJX
 
 A simple API wrapper for `discordbots.org`_ written in Python
 
