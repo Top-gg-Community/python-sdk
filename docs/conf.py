@@ -34,7 +34,7 @@ sys.path.insert(0, os.path.abspath('../'))
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode']
 
-on_rtd = os.getenv('READTHEDOCS') == 'False'
+on_rtd = os.getenv('READTHEDOCS') == 'True'
 if on_rtd:
     extensions.append('sphinxcontrib.napoleon')
 else:
