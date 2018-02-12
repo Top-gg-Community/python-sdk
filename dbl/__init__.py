@@ -14,11 +14,11 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright 2018 Francis Taylor'
 __version__ = '0.1.3'
 
+from collections import namedtuple
+
 from .client import Client
 from .errors import *
 from .http import HTTPClient
-
-from collections import namedtuple
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
 

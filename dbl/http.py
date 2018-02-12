@@ -24,31 +24,43 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-import aiohttp
 import asyncio
 import json
-import sys
 import logging
+import sys
+from datetime import datetime
 
+import aiohttp
 
 from . import __version__
 from .errors import *
 
 
 class HTTPClient:
-    """Represents an HTTP client sending HTTP requests to the DBL API."""
+    """Represents an HTTP client sending HTTP requests to the DBL API.
 
-    BASE = 'https://discordbots.org/api'
+    .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
 
-    def __init__(self, connector=None, *, loop=None):
-        self.loop = asyncio.get_event_loop() if loop is None else loop
-        self.session = aiohttp.ClientSession(connector=connector, loop=self.loop)
-        self.token = 'a'
+    Parameters
+    ----------
+    token :
+        A DBL API Token
+    **session : Optional[aiohttp session]
+        The session used to request to the API
+    **loop
+    """
+
+    def __init__(self, token, **kwargs):
+        self.BASE = 'https://discordbots.org/api'
+        self.token = token
+        self.session = kwargs.get('session') or aiohttp.ClientSession(loop=kwargs.get('loop'))
 
         user_agent = 'DBL-Python-Library (https://github.com/DiscordBotList/DBL-Python-Library {0}) Python/{1[0]}.{1[1]} aiohttp/{2}'
         self.user_agent = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
 
     async def request(self, method, url, **kwargs):
+        if not self.token:
+            raise Unauthorized_Detected('Unauthorized (status code: 401): No TOKEN provided')
         headers = {
             'User-Agent': self.user_agent,
             'Authorization': self.token
@@ -61,45 +73,35 @@ class HTTPClient:
         kwargs['headers'] = headers
 
         # add auth like above??
-        async with self.session.request(method, url, **kwargs) as response:
-            text = await response.text()
+        async with self.session.request(method, url, **kwargs) as resp:
+            text = await resp.text()
             try:
                 data = json.loads(text)
-            except json.decoder.JSONDecodeError:
-                data = {'message': text} if text else None
-            except ValueError:
+            except (json.decoder.JSONDecodeError, ValueError):
                 data = {'message': text} if text else None
 
-            if 300 > response.status >= 200:
+            if 300 > resp.status >= 200:
                 return data
-            elif response.status == 400:
-                raise HTTPException(data.pop('message', 'unknown'))
-            elif response.status == 401:
-                raise Unauthorized(data.pop('message', 'unknown'))
-            elif response.status == 403:
-                raise Forbidden(data.pop('message', 'unknown'))
-            elif response.status == 404:
-                raise NotFound(data.pop('message', 'unknown'))
-            elif response.status == 429:
-                raise Ratelimited(data.pop('message', 'unknown'))
+            elif resp.status == 400:
+                raise HTTPException(resp, data.pop('message', 'unknown'))
+            elif resp.status == 401:
+                raise Unauthorized(resp, data.pop('message', 'unknown'))
+            elif resp.status == 403:
+                raise Forbidden(resp, data.pop('message', 'unknown'))
+            elif resp.status == 404:
+                raise NotFound(resp, data.pop('message', 'unknown'))
+            elif resp.status == 429:
+                raise RateLimited(resp, data.pop('message', 'unknown'))
             else:
-                raise HTTPException(data.pop('message', 'Unknown error'), response)
-
-    # async def get(self, *args, **kwargs):
-    #     return self.request('GET', *args, **kwargs)
-    #
-    # async def post(self, *args, **kwargs):
-    #     return self.request('POST', *args, **kwargs)
-
-    # state management
+                raise HTTPException(resp, data.pop('message', 'Unknown error'))
 
     async def close(self):
         await self.session.close()
 
-    async def recreate(self):
-        self.session = aiohttp.ClientSession(connector=self.connector, loop=self.loop)
+    def recreate(self):
+        self.session = aiohttp.ClientSession(loop=self.session.loop)
 
-    async def post_server_count(self, id, token, guild_count, shard_count, shard_no):
+    async def post_server_count(self, bot_id, guild_count, shard_count, shard_no):
         if shard_count:
             payload = {
                 'server_count': guild_count,
@@ -110,26 +112,26 @@ class HTTPClient:
             payload = {
                 'server_count': guild_count
             }
-        self.token = token
-        await self.request('POST', f'{self.BASE}/bots/{id}/stats', json=payload)
+        await self.request('POST', f'{self.BASE}/bots/{bot_id}/stats', json=payload)
 
-    async def get_server_count(self, id):
-        scount = await self.request('GET', f'{self.BASE}/bots/{id}/stats')
-        return scount['server_count']
+    async def get_server_count(self, bot_id):
+        '''Gets the server count of the given Bot ID'''
+        return await self.request('GET', f'{self.BASE}/bots/{bot_id}/stats')
 
-    async def get_upvote_count(self, id):
-        ucount = await self.request('GET', f'{self.BASE}/bots/{id}')
-        return ucount['points']
+    async def get_bot_info(self, bot_id):
+        '''Gets the information of the given Bot ID'''
+        resp = await self.request('GET', f'{self.BASE}/bots/{bot_id}')
+        resp['date'] = datetime.strptime(resp['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        for k in resp:
+            if resp[k] == '':
+                resp[k] = None
+        return resp
 
-    async def get_upvote_info(self, id, token, onlyids):
-        self.token = token
+    async def get_upvote_info(self, bot_id, onlyids):
+        '''Gets the upvote information of the given Bot ID'''
         if onlyids is True:
-            return await self.request('GET', f'{self.BASE}/bots/{id}/votes?onlyids=true')
-        else:
-            return await self.request('GET', f'{self.BASE}/bots/{id}/votes')
-
-    async def get_bot_info(self, id):
-        return await self.request('GET', f'{self.BASE}/bots/{id}/stats')
+            return await self.request('GET', f'{self.BASE}/bots/{bot_id}/votes?onlyids=true')
+        return await self.request('GET', f'{self.BASE}/bots/{bot_id}/votes')
 
     async def get_bots(self, limit, offset):
         return await self.request('GET', f'{self.BASE}/bots?limit={limit}&offset={offset}')
@@ -137,8 +139,8 @@ class HTTPClient:
     # async def get_bots(self, limit, offset, query):
     #     return await self.request('GET', f'{self.BASE}/bots?limit={limit}&offset={offset}&search={query}')
 
-    async def get_user(self, id):
-        return await self.request('GET', f'{self.BASE}/users/{id}')
+    async def get_user_info(self, user_id):
+        return await self.request('GET', f'{self.BASE}/users/{user_id}')
 
 
 def to_json(obj):
