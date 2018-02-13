@@ -49,21 +49,21 @@ class Client:
 
     **loop : Optional[event loop].
         The `event loop`_ to use for asynchronous operations.
-        Defaults to ``asyncio.get_event_loop()``.
+        Defaults to ``bot.loop``.
     **session : Optional 
     """
 
     def __init__(self, token, bot, **kwargs):
         self.bot = bot
         self.bot_id = None
-        self.loop = kwargs.get('loop') or asyncio.get_event_loop()
+        self.loop = kwargs.get('loop') or bot.loop
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get('session'))
         self._is_closed = False
+        self.loop.create_task(self.__ainit__())
+        #print(self.loop.run_until_complete(bot.application_info()).id)
 
-    def bot_user_init(self):
-        '''Initialises bot_id'''
-        if not self.bot.is_ready():
-            raise ClientException('Bot is not ready yet!')
+    async def __ainit__(self):
+        await self.bot.wait_until_ready()
         self.bot_id = self.bot.user.id
 
     def guild_count(self):
@@ -91,8 +91,6 @@ class Client:
         shard_no: int
             (Optional) The index of the current shard. DBL uses `0 based indexing`_ for shards.
         """
-        if self.bot_id is None:
-            self.bot_user_init()
         await self.http.post_server_count(self.bot_id, self.guild_count(), shard_count, shard_no)
 
     async def get_server_count(self, bot_id: int=None):
@@ -115,8 +113,6 @@ class Client:
             The date object is returned in a datetime.datetime object
 
         """
-        if self.bot_id is None:
-            self.bot_user_init()
         if bot_id is None:
             bot_id = self.bot_id
         return await self.http.get_server_count(bot_id)
@@ -131,8 +127,11 @@ class Client:
         Parameters
         ==========
         **onlyids: bool[Optional]
-            If True, return a list of IDs that upvoted the bot
+            Whether to return an array of simple user objects or an array of ids
             Defaults to False
+        **days: int[Optional]
+            Limits the votes to ones done within the amount of days you specify.
+            Defaults to 31
 
         Returns
         =======
@@ -140,12 +139,11 @@ class Client:
             Info about who upvoted your bot.
 
         """
-        if self.bot_id is None:
-            self.bot_user_init()
         bot_id = kwargs.get('bot_id', self.bot_id)
         onlyids = kwargs.get('onlyids', False)
+        days = kwargs.get('days', 31)
 
-        return await self.http.get_upvote_info(bot_id, onlyids)
+        return await self.http.get_upvote_info(bot_id, onlyids, days)
 
     async def get_bot_info(self, bot_id: int = None):
         """This function is a coroutine.
@@ -211,8 +209,6 @@ class Client:
             Is the bot using the old profile format?
             True if the bot hasn't been edited since 2017-12-31.
         """
-        if self.bot_id is None:
-            self.bot_user_init()
         if bot_id is None:
             bot_id = self.bot_id
         return await self.http.get_bot_info(bot_id)
@@ -237,8 +233,6 @@ class Client:
             Returns info on the bots on DBL.
 
         """
-        if self.bot_id is None:
-            self.bot_user_init()
         return await self.http.get_bots(limit, offset)
     #
     # async def search_bots(self, limit: int = 50, offset: int = 0, **kwargs):
@@ -290,13 +284,11 @@ class Client:
         user_data: json
             Info about the user.
         """
-        if self.bot_id is None:
-            self.bot_user_init()
         return await self.http.get_user_info(user_id)
 
     async def generate_widget_large(
             self,
-            bot_id: int,
+            bot_id: int = None,
             top: str = '2C2F33',
             mid: str = '23272A',
             user: str = 'FFFFFF',
@@ -334,13 +326,13 @@ class Client:
 
         URL with the widget.
         """
-        if self.bot_id is None:
-            self.bot_user_init()
+        if bot_id is None:
+            bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'.format(
             bot_id, top, mid, user, cert, data, label, highlight)
         return url
 
-    async def get_widget_large(self, bot_id: int):
+    async def get_widget_large(self, bot_id: int = None):
         """This function is a coroutine.
 
         Generates the default large widget.
@@ -356,14 +348,14 @@ class Client:
 
         URL with the widget.
         """
-        if self.bot_id is None:
-            self.bot_user_init()
+        if bot_id is None:
+            bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/{0}.png'.format(bot_id)
         return url
 
     async def generate_widget_small(
             self,
-            bot_id: int,
+            bot_id: int = None,
             avabg: str = '2C2F33',
             lcol: str = '23272A',
             rcol: str = '2C2F33',
@@ -395,14 +387,14 @@ class Client:
 
         URL with the widget.
         """
-        if self.bot_id is None:
-            self.bot_user_init()
+        if bot_id is None:
+            bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'.format(
             bot_id, avabg, ltxt, rtxt, lcol, rcol)
 
         return url
 
-    async def get_widget_small(self, bot_id: int):
+    async def get_widget_small(self, bot_id: int = None):
         """This function is a coroutine.
 
         Generates the default small widget.
@@ -418,8 +410,8 @@ class Client:
 
         URL with the widget.
         """
-        if self.bot_id is None:
-            self.bot_user_init()
+        if bot_id is None:
+            bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(bot_id)
         return url
 

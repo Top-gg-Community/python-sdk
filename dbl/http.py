@@ -29,6 +29,7 @@ import json
 import logging
 import sys
 from datetime import datetime
+from urllib.parse import urlencode
 
 import aiohttp
 
@@ -127,11 +128,13 @@ class HTTPClient:
                 resp[k] = None
         return resp
 
-    async def get_upvote_info(self, bot_id, onlyids):
+    async def get_upvote_info(self, bot_id, onlyids, days):
         '''Gets the upvote information of the given Bot ID'''
-        if onlyids is True:
-            return await self.request('GET', f'{self.BASE}/bots/{bot_id}/votes?onlyids=true')
-        return await self.request('GET', f'{self.BASE}/bots/{bot_id}/votes')
+        params = {
+            'onlyids':onlyids,
+            'days':days
+        }
+        return await self.request('GET', f'{self.BASE}/bots/{bot_id}/votes' + urlencode(params))
 
     async def get_bots(self, limit, offset):
         return await self.request('GET', f'{self.BASE}/bots?limit={limit}&offset={offset}')
