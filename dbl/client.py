@@ -53,7 +53,7 @@ class Client:
     **session : Optional 
     """
 
-    def __init__(self, token, bot, **kwargs):
+    def __init__(self, bot, token, **kwargs):
         self.bot = bot
         self.bot_id = None
         self.loop = kwargs.get('loop') or bot.loop
