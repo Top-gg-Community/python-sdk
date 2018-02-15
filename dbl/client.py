@@ -25,7 +25,6 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import asyncio
-import aiohttp
 
 from . import __version__ as library_version
 from .errors import *
@@ -39,20 +38,45 @@ class Client:
     This class is used to interact with the DBL API.
 
     .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
-
+    .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
     Parameters
     ----------
-    loop : Optional[event loop].
-        The `event loop`_ to use for asynchronous operations. Defaults to ``None``,
-        in which case the default event loop is used via ``asyncio.get_event_loop()``.
+    token :
+    An API Token
+
+    bot :
+    An instance of a discord.py Bot or Client object
+
+    **loop : Optional[event loop].
+        The `event loop`_ to use for asynchronous operations.
+        Defaults to ``bot.loop``.
+    **session : Optional 
     """
 
-    def __init__(self, *, loop=None):
-        self.loop = loop or asyncio.get_event_loop()
-        self.http = HTTPClient(loop=self.loop)
+    def __init__(self, bot, token, **kwargs):
+        self.bot = bot
+        self.bot_id = None
+        self.loop = kwargs.get('loop') or bot.loop
+        self.http = HTTPClient(token, loop=self.loop, session=kwargs.get('session'))
         self._is_closed = False
+        self.loop.create_task(self.__ainit__())
+        #print(self.loop.run_until_complete(bot.application_info()).id)
 
-    async def post_server_count(self, id: int, token: str, guild_count: int, shard_count: int = None, shard_no: int = None):
+    async def __ainit__(self):
+        await self.bot.wait_until_ready()
+        self.bot_id = self.bot.user.id
+
+    def guild_count(self):
+        try:
+            return len(self.bot.guilds)
+        except AttributeError:
+            return len(self.bot.servers)
+
+    async def post_server_count(
+            self,
+            shard_count: int = None,
+            shard_no: int = None
+        ):
         """This function is a coroutine.
 
         Posts the server count to discordbots.org
@@ -62,21 +86,14 @@ class Client:
         Parameters
         ==========
 
-        id: int
-            The id of the bot you want to post the server count of.
-        token:
-            The DBL Bot token. Visit https://discordbots.org/api to generate one.
-        guild_count: int
-            The number of guilds the bot (or current shard) is in.
         shard_count: int
             (Optional) The total number of shards.
         shard_no: int
             (Optional) The index of the current shard. DBL uses `0 based indexing`_ for shards.
         """
+        await self.http.post_server_count(self.bot_id, self.guild_count(), shard_count, shard_no)
 
-        await self.http.post_server_count(id, token, guild_count, shard_count, shard_no)
-
-    async def get_server_count(self, id: int):
+    async def get_server_count(self, bot_id: int=None):
         """This function is a coroutine.
 
         Gets a server count from discordbots.org
@@ -84,39 +101,23 @@ class Client:
         Parameters
         ==========
 
-        id: int
-            The id of the bot you want to lookup.
+        bot_id: int[Optional]
+            The bot_id of the bot you want to lookup.
+            Defaults to the Bot provided in Client init
 
         Returns
         =======
 
-        count: int
-            The number of servers the bot is on.
+        bot info: dict
+            https://discordbots.org/api/docs#bots
+            The date object is returned in a datetime.datetime object
 
         """
-        return await self.http.get_server_count(id)
+        if bot_id is None:
+            bot_id = self.bot_id
+        return await self.http.get_server_count(bot_id)
 
-    async def get_upvote_count(self, id: int):
-        """This function is a coroutine.
-
-        Gets the upvote count of a bot from discordbots.org
-
-        Parameters
-        ==========
-
-        id: int
-            The id of the bot you want to lookup.
-
-        Returns
-        =======
-
-        votes: int
-            The number of upvotes the bot has received.
-        """
-
-        return await self.http.get_upvote_count(id)
-
-    async def get_upvote_info(self, id: int, token: str, onlyids: bool = False):
+    async def get_upvote_info(self, **kwargs):
         """This function is a coroutine.
 
         Gets information about who upvoted a bot from discordbots.org
@@ -125,25 +126,26 @@ class Client:
 
         Parameters
         ==========
-
-        id: int
-            The id of the bot you want to lookup.
-        token: str
-            The DBL token. Visit https://discordbots.org/api to generate one.
-        onlyids: bool
-            If true, will return only the ids of who upvoted your bot.
+        **onlyids: bool[Optional]
+            Whether to return an array of simple user objects or an array of ids
+            Defaults to False
+        **days: int[Optional]
+            Limits the votes to ones done within the amount of days you specify.
+            Defaults to 31
 
         Returns
         =======
-
         votes: json
             Info about who upvoted your bot.
 
         """
+        bot_id = kwargs.get('bot_id', self.bot_id)
+        onlyids = kwargs.get('onlyids', False)
+        days = kwargs.get('days', 31)
 
-        return await self.http.get_upvote_info(id, token, onlyids)
+        return await self.http.get_upvote_info(bot_id, onlyids, days)
 
-    async def get_bot_info(self, id: int):
+    async def get_bot_info(self, bot_id: int = None):
         """This function is a coroutine.
 
         Gets information about a bot from discordbots.org
@@ -151,16 +153,16 @@ class Client:
         Parameters
         ==========
 
-        id: int
-            The id of the bot you want to lookup.
+        bot_id: int[Optional]
+            The bot_id of the bot you want to lookup.
 
         Returns
         =======
 
         defAvatar: str
-            The id of the default avatar of the bot.
+            The bot_id of the default avatar of the bot.
         avatar: str
-            The id of the bots avatar. Use `https://discordapp.com/assets/{:avatar}.png`
+            The bot_id of the bots avatar. Use `https://discordapp.com/assets/{:avatar}.png`
         invite: str
             The instant invite URL.
         github: str
@@ -176,9 +178,9 @@ class Client:
         lib: str
             The library wrapper the bot was written in.
         clientid: int
-            The Client ID of the bot. Used in the instant invite URL.
-        id: int
-            The ID of the bot.
+            The Client bot_id of the bot. Used in the instant invite URL.
+        bot_id: int
+            The bot_id of the bot.
         username: str
             The name of the bot.
         discrim: int
@@ -204,10 +206,12 @@ class Client:
         tags: json
             JSON object containing a list of tags.
         legacy: bool
-            Is the bot using the old profile format? True if the bot hasn't been edited since 2017-12-31.
+            Is the bot using the old profile format?
+            True if the bot hasn't been edited since 2017-12-31.
         """
-
-        return await self.http.get_bot_info(id)
+        if bot_id is None:
+            bot_id = self.bot_id
+        return await self.http.get_bot_info(bot_id)
 
     async def get_bots(self, limit: int = 50, offset: int = 0):
         """This function is a coroutine.
@@ -229,7 +233,6 @@ class Client:
             Returns info on the bots on DBL.
 
         """
-
         return await self.http.get_bots(limit, offset)
     #
     # async def search_bots(self, limit: int = 50, offset: int = 0, **kwargs):
@@ -262,9 +265,9 @@ class Client:
     #     if 'library' in kwargs:
     #         query = f'library:{library}'
 
-        return await self.http.search_bots(limit, offset, query=query)
+    #   return await self.http.search_bots(limit, offset, query=query)
 
-    async def get_user(self, id: int):
+    async def get_user_info(self, user_id: int):
         """This function is a coroutine.
 
         Gets information about a user on discordbots.org
@@ -272,8 +275,8 @@ class Client:
         Parameters
         ==========
 
-        id: int
-            The id of the user you wish to lookup.
+        user_id: int
+            The user_id of the user you wish to lookup.
 
         Returns
         =======
@@ -281,10 +284,19 @@ class Client:
         user_data: json
             Info about the user.
         """
+        return await self.http.get_user_info(user_id)
 
-        return await self.http.get_user(id)
-
-    async def generate_widget_large(self, id: int, top: str = '2C2F33', mid: str = '23272A', user: str = 'FFFFFF', cert: str = 'FFFFFF', data: str = 'FFFFFF', label: str = '99AAB5', highlight: str = '2C2F33'):
+    async def generate_widget_large(
+            self,
+            bot_id: int = None,
+            top: str = '2C2F33',
+            mid: str = '23272A',
+            user: str = 'FFFFFF',
+            cert: str = 'FFFFFF',
+            data: str = 'FFFFFF',
+            label: str = '99AAB5',
+            highlight: str = '2C2F33'
+        ):
         """This function is a coroutine.
 
         Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
@@ -292,8 +304,8 @@ class Client:
         Parameters
         ==========
 
-        id: int
-            The id of the bot you wish to make a widget for.
+        bot_id: int
+            The bot_id of the bot you wish to make a widget for.
         top: str
             The hex color code of the top bar.
         mid: str
@@ -303,7 +315,7 @@ class Client:
         cert: str
             The hex color code of the certified text (if applicable).
         data: str
-            The hex color code of the statistics (numbers only e.g. 44) of the bot .
+            The hex color code of the statistics (numbers only e.g. 44) of the bot.
         label: str
             The hex color code of the description (text e.g. server count) of the statistics.
         highlight: str
@@ -314,12 +326,13 @@ class Client:
 
         URL with the widget.
         """
-
+        if bot_id is None:
+            bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'.format(
-            id, top, mid, user, cert, data, label, highlight)
+            bot_id, top, mid, user, cert, data, label, highlight)
         return url
 
-    async def get_widget_large(self, id: int):
+    async def get_widget_large(self, bot_id: int = None):
         """This function is a coroutine.
 
         Generates the default large widget.
@@ -327,18 +340,28 @@ class Client:
         Parameters
         ==========
 
-        id: int
-            The id of the bot you wish to make a widget for.
+        bot_id: int
+            The bot_id of the bot you wish to make a widget for.
 
         Returns
         =======
 
         URL with the widget.
         """
-        url = 'https://discordbots.org/api/widget/{0}.png'.format(id)
+        if bot_id is None:
+            bot_id = self.bot_id
+        url = 'https://discordbots.org/api/widget/{0}.png'.format(bot_id)
         return url
 
-    async def generate_widget_small(self, id: int, avabg: str = '2C2F33', lcol: str = '23272A', rcol: str = '2C2F33', ltxt: str = 'FFFFFF', rtxt: str = 'FFFFFF'):
+    async def generate_widget_small(
+            self,
+            bot_id: int = None,
+            avabg: str = '2C2F33',
+            lcol: str = '23272A',
+            rcol: str = '2C2F33',
+            ltxt: str = 'FFFFFF',
+            rtxt: str = 'FFFFFF'
+        ):
         """This function is a coroutine.
 
         Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
@@ -346,8 +369,8 @@ class Client:
         Parameters
         ==========
 
-        id: int
-            The id of the bot you wish to make a widget for.
+        bot_id: int
+            The bot_id of the bot you wish to make a widget for.
         avabg: str
             The hex color code of the background of the avatar (if the avatar has transparency).
         lcol: str
@@ -364,13 +387,14 @@ class Client:
 
         URL with the widget.
         """
-
+        if bot_id is None:
+            bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'.format(
-            id, avabg, ltxt, rtxt, lcol, rcol)
+            bot_id, avabg, ltxt, rtxt, lcol, rcol)
 
         return url
 
-    async def get_widget_small(self, id: int):
+    async def get_widget_small(self, bot_id: int = None):
         """This function is a coroutine.
 
         Generates the default small widget.
@@ -378,16 +402,17 @@ class Client:
         Parameters
         ==========
 
-        id: int
-            The id of the bot you wish to make a widget for.
+        bot_id: int
+            The bot_id of the bot you wish to make a widget for.
 
         Returns
         =======
 
         URL with the widget.
         """
-
-        url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(id)
+        if bot_id is None:
+            bot_id = self.bot_id
+        url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(bot_id)
         return url
 
     async def close(self):
@@ -398,8 +423,3 @@ class Client:
         else:
             await self.http.close()
             self._is_closed = True
-
-    @property
-    def is_closed(self):
-        """bool: Indicates if the websocket connection is closed."""
-        return self._closed.is_set()

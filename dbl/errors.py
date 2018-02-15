@@ -32,7 +32,6 @@ class DBLException(Exception):
     """
     pass
 
-
 class ClientException(DBLException):
     """Exception that's thrown when an operation in the :class:`Client` fails.
 
@@ -58,14 +57,14 @@ class HTTPException(DBLException):
 
     def __init__(self, response, message):
         self.response = response
-        if type(message) is dict:
+        if isinstance(message, dict):
             self.text = message.get('message', '')
             self.code = message.get('code', 0)
         else:
             self.text = message
 
         fmt = '{0.reason} (status code: {0.status})'
-        if len(self.text):
+        if self.text:
             fmt = fmt + ': {1}'
 
         super().__init__(fmt.format(self.response, self.text))
@@ -78,6 +77,12 @@ class Unauthorized(HTTPException):
     """
     pass
 
+class Unauthorized_Detected(DBLException):
+    """Exception that's thrown when no API Token is provided
+
+    Subclass of :exc:`DBLException`
+    """
+    pass
 
 class Forbidden(HTTPException):
     """Exception that's thrown for when status code 403 occurs.
@@ -95,7 +100,7 @@ class NotFound(HTTPException):
     pass
 
 
-class Ratelimited(HTTPException):
+class RateLimited(HTTPException):
     """Exception that's thrown for when status code 429 occurs.
 
     Subclass of :exc:`HTTPException`
