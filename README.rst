@@ -1,4 +1,4 @@
-    DBL Python Library
+DBL Python Library
 ==================
 .. image:: https://img.shields.io/pypi/v/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
