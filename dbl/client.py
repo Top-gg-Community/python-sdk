@@ -30,8 +30,6 @@ from . import __version__ as library_version
 from .errors import *
 from .http import HTTPClient
 
-BASE = 'https://discordbots.org/api'
-
 
 class Client:
     """Represents a client connection that connects to discordbots.org.
@@ -39,18 +37,20 @@ class Client:
 
     .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
+
     Parameters
-    ----------
+    ==========
+
     token :
-    An API Token
+        An API Token
 
     bot :
-    An instance of a discord.py Bot or Client object
-
+        An instance of a discord.py Bot or Client object
     **loop : Optional[event loop].
         The `event loop`_ to use for asynchronous operations.
         Defaults to ``bot.loop``.
-    **session : Optional 
+    **session : Optional
+        The aiohttp session to use for requests to the API.
     """
 
     def __init__(self, bot, token, **kwargs):
@@ -60,7 +60,7 @@ class Client:
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get('session'))
         self._is_closed = False
         self.loop.create_task(self.__ainit__())
-        #print(self.loop.run_until_complete(bot.application_info()).id)
+        # print(self.loop.run_until_complete(bot.application_info()).id)
 
     async def __ainit__(self):
         await self.bot.wait_until_ready()
@@ -73,10 +73,10 @@ class Client:
             return len(self.bot.servers)
 
     async def post_server_count(
-            self,
-            shard_count: int = None,
-            shard_no: int = None
-        ):
+        self,
+        shard_count: int = None,
+        shard_no: int = None
+    ):
         """This function is a coroutine.
 
         Posts the server count to discordbots.org
@@ -86,10 +86,10 @@ class Client:
         Parameters
         ==========
 
-        shard_count: int
-            (Optional) The total number of shards.
-        shard_no: int
-            (Optional) The index of the current shard. DBL uses `0 based indexing`_ for shards.
+        shard_count: int[Optional]
+            The total number of shards.
+        shard_no: int[Optional]
+            The index of the current shard. DBL uses `0 based indexing`_ for shards.
         """
         await self.http.post_server_count(self.bot_id, self.guild_count(), shard_count, shard_no)
 
@@ -108,8 +108,8 @@ class Client:
         Returns
         =======
 
-        bot info: dict
-            https://discordbots.org/api/docs#bots
+        stats: dict
+            The server count and shards of a bot.
             The date object is returned in a datetime.datetime object
 
         """
@@ -122,12 +122,15 @@ class Client:
 
         Gets information about who upvoted a bot from discordbots.org
 
-        **Available to the owner of the bot only.**
+        .. note::
+
+            This API endpoint is available to the owner of the bot only.
 
         Parameters
         ==========
+
         **onlyids: bool[Optional]
-            Whether to return an array of simple user objects or an array of ids
+            Whether to return an array of simple user objects or an array of user ids.
             Defaults to False
         **days: int[Optional]
             Limits the votes to ones done within the amount of days you specify.
@@ -135,7 +138,8 @@ class Client:
 
         Returns
         =======
-        votes: json
+
+        votes: dict
             Info about who upvoted your bot.
 
         """
@@ -159,55 +163,9 @@ class Client:
         Returns
         =======
 
-        defAvatar: str
-            The bot_id of the default avatar of the bot.
-        avatar: str
-            The bot_id of the bots avatar. Use `https://discordapp.com/assets/{:avatar}.png`
-        invite: str
-            The instant invite URL.
-        github: str
-            The URL of the Github repository.
-        website: str
-            The website of the bot.
-        intdesc: str
-            The raw contents of the bots int description.
-        shortdesc: str
-            The bots short description.
-        prefix: str
-            The prefix of the bot.
-        lib: str
-            The library wrapper the bot was written in.
-        clientid: int
-            The Client bot_id of the bot. Used in the instant invite URL.
-        bot_id: int
-            The bot_id of the bot.
-        username: str
-            The name of the bot.
-        discrim: int
-            The discriminator of the bot.
-        date: datetime
-            The datetime object of when the bot was added to DBL.
-        server_count: int
-            The server count of the bot.
-        shard_count: int
-            The shard count of the bot.
-        vanity: str
-            The DBL vanity URL of the bot (partnered bots only).
-        support: str
-            The invite code for the bots support server.
-        shards: json
-            JSON object containing information about individual shards and their server count.
-        points: int
-            The number of upvotes the bot has.
-        certifiedBot: bool
-            Whether the bot is certified.
-        owners: json
-            JSON object containing a list of the bot owners.
-        tags: json
-            JSON object containing a list of tags.
-        legacy: bool
-            Is the bot using the old profile format?
-            True if the bot hasn't been edited since 2017-12-31.
+        bot info: dict
+            Information on the bot you looked up.
+            https://discordbots.org/api/docs#bots
         """
         if bot_id is None:
             bot_id = self.bot_id
@@ -221,17 +179,17 @@ class Client:
         Parameters
         ==========
 
-        limit: int
-            (Optional) The number of results you wish to lookup. Defaults to 50.
-        offset: int
-            (Optional) The page number to search. Defaults to 0.
+        limit: int[Optional]
+            The number of results you wish to lookup. Defaults to 50.
+        offset: int[Optional]
+            The page number to search. Defaults to 0.
 
         Returns
         =======
 
-        bots: json
+        bots: dict
             Returns info on the bots on DBL.
-
+            https://discordbots.org/api/docs#bots
         """
         return await self.http.get_bots(limit, offset)
     #
@@ -281,22 +239,23 @@ class Client:
         Returns
         =======
 
-        user_data: json
+        user_data: dict
             Info about the user.
+            https://discordbots.org/api/docs#users
         """
         return await self.http.get_user_info(user_id)
 
     async def generate_widget_large(
-            self,
-            bot_id: int = None,
-            top: str = '2C2F33',
-            mid: str = '23272A',
-            user: str = 'FFFFFF',
-            cert: str = 'FFFFFF',
-            data: str = 'FFFFFF',
-            label: str = '99AAB5',
-            highlight: str = '2C2F33'
-        ):
+        self,
+        bot_id: int = None,
+        top: str = '2C2F33',
+        mid: str = '23272A',
+        user: str = 'FFFFFF',
+        cert: str = 'FFFFFF',
+        data: str = 'FFFFFF',
+        label: str = '99AAB5',
+        highlight: str = '2C2F33'
+    ):
         """This function is a coroutine.
 
         Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
@@ -324,7 +283,7 @@ class Client:
         Returns
         =======
 
-        URL with the widget.
+        URL of the widget: str
         """
         if bot_id is None:
             bot_id = self.bot_id
@@ -346,7 +305,7 @@ class Client:
         Returns
         =======
 
-        URL with the widget.
+        URL of the widget: str
         """
         if bot_id is None:
             bot_id = self.bot_id
@@ -354,14 +313,14 @@ class Client:
         return url
 
     async def generate_widget_small(
-            self,
-            bot_id: int = None,
-            avabg: str = '2C2F33',
-            lcol: str = '23272A',
-            rcol: str = '2C2F33',
-            ltxt: str = 'FFFFFF',
-            rtxt: str = 'FFFFFF'
-        ):
+        self,
+        bot_id: int = None,
+        avabg: str = '2C2F33',
+        lcol: str = '23272A',
+        rcol: str = '2C2F33',
+        ltxt: str = 'FFFFFF',
+        rtxt: str = 'FFFFFF'
+    ):
         """This function is a coroutine.
 
         Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
@@ -385,7 +344,7 @@ class Client:
         Returns
         =======
 
-        URL with the widget.
+        URL of the widget: str
         """
         if bot_id is None:
             bot_id = self.bot_id
@@ -408,7 +367,7 @@ class Client:
         Returns
         =======
 
-        URL with the widget.
+        URL of the widget: str
         """
         if bot_id is None:
             bot_id = self.bot_id

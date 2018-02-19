@@ -41,6 +41,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: DBLException
 
+.. autoexception:: Unauthorized_Detected
+
 .. autoexception:: ClientException
 
 .. autoexception:: HTTPException
@@ -52,7 +54,6 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: NotFound
 
-.. autoexception:: Ratelimited
 
 .. autoexception:: InvalidArgument
 

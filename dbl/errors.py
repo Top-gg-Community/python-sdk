@@ -32,6 +32,7 @@ class DBLException(Exception):
     """
     pass
 
+
 class ClientException(DBLException):
     """Exception that's thrown when an operation in the :class:`Client` fails.
 
@@ -77,12 +78,14 @@ class Unauthorized(HTTPException):
     """
     pass
 
+
 class Unauthorized_Detected(DBLException):
     """Exception that's thrown when no API Token is provided
 
     Subclass of :exc:`DBLException`
     """
     pass
+
 
 class Forbidden(HTTPException):
     """Exception that's thrown for when status code 403 occurs.
@@ -94,14 +97,6 @@ class Forbidden(HTTPException):
 
 class NotFound(HTTPException):
     """Exception that's thrown for when status code 404 occurs.
-
-    Subclass of :exc:`HTTPException`
-    """
-    pass
-
-
-class RateLimited(HTTPException):
-    """Exception that's thrown for when status code 429 occurs.
 
     Subclass of :exc:`HTTPException`
     """

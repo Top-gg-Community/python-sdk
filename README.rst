@@ -1,13 +1,13 @@
-DBL Python Library
+    DBL Python Library
 ==================
 .. image:: https://img.shields.io/pypi/v/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v0.1.3
-.. image:: https://readthedocs.org/projects/dblpy/badge/?version=v0.1.3
-   :target: http://dblpy.readthedocs.io/en/latest/?badge=v0.1.3
+   :alt: v0.1.4
+.. image:: https://readthedocs.org/projects/dblpy/badge/?version=v0.1.4
+   :target: http://dblpy.readthedocs.io/en/latest/?badge=v0.1.4
    :alt: Documentation Status
 
 A simple API wrapper for `discordbots.org`_ written in Python
@@ -25,9 +25,7 @@ Install from source
 
 .. code:: bash
 
-    git clone https://github.com/DiscordBotList/DBL-Python-Library
-    cd DBL-Python-Library
-    pip install -R requirements.txt
+    pip install git+https://github.com/DiscordBotList/DBL-Python-Library
 
 Documentation
 -------------
@@ -53,28 +51,44 @@ Example
 
 .. code:: py
 
-    import dblpy
-    from dblpy import Client
-    import asyncio
+    import dbl
+    import discord
+    from discord.ext import commands
+
     import aiohttp
-    import json
+    import asyncio
+    import logging
 
-    dbl = dblpy.Client()
 
-    botid = 264811613708746752  # your bots user id (client id on newer bots)
-    token = 'abcxyz'            # DBL Bot Token. Obtainable from https://discordbots.org/api
+    class DiscordBotsOrgAPI:
+        """Handles interactions with the discordbots.org API"""
 
-    class Example:
-        def __init__(bot):
-            bot = bot
-            session = aiohttp.ClientSession(loop=bot.loop)
+        def __init__(self, bot):
+            self.bot = bot
+            self.token = 'dbl_token'  #  set this to your DBL token
+            self.dblpy = dbl.Client(self.bot, self.token)
+            self.bot.loop.create_task(self.update_stats())
 
-        async def poststats():
-            await dblpy.post_server_count(botid, dbltoken, 65)
+        async def update_stats(self):
+            """This function runs every 30 minutes to automatically update your server count"""
 
-        async def getstats():
-            resp = await dblpy.get_server_count(botid)
-            print(json.dumps(resp))
+            while True:
+                logger.info('attempting to post server count')
+                try:
+                    await self.dblpy.post_server_count()
+                    logger.info('posted server count ({})'.format(len(self.bot.guilds)))
+                except Exception as e:
+                    logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+                await asyncio.sleep(1800)
+
+        def __unload(self):
+            self.bot.loop.create_task(self.session.close())
+
+
+    def setup(bot):
+        global logger
+        logger = logging.getLogger('bot')
+        bot.add_cog(DiscordBotsOrgAPI(bot))
 
 
 .. _discordbots.org: https://discordbots.org/
