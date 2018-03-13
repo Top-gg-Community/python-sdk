@@ -79,7 +79,7 @@ class Unauthorized(HTTPException):
     pass
 
 
-class Unauthorized_Detected(DBLException):
+class UnauthorizedDetected(DBLException):
     """Exception that's thrown when no API Token is provided
 
     Subclass of :exc:`DBLException`

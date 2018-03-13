@@ -5,9 +5,9 @@ DBL Python Library
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v0.1.4
-.. image:: https://readthedocs.org/projects/dblpy/badge/?version=v0.1.4
-   :target: http://dblpy.readthedocs.io/en/latest/?badge=v0.1.4
+   :alt: v0.1.6
+.. image:: https://readthedocs.org/projects/dblpy/badge/?version=v0.1.6
+   :target: http://dblpy.readthedocs.io/en/latest/?badge=v0.1.6
    :alt: Documentation Status
 
 A simple API wrapper for `discordbots.org`_ written in Python
@@ -66,24 +66,20 @@ Example
         def __init__(self, bot):
             self.bot = bot
             self.token = 'dbl_token'  #  set this to your DBL token
-            self.dblpy = dbl.Client(self.bot, self.token)
-            self.bot.loop.create_task(self.update_stats())
+            self.dblpy = dbl.Client(self.bot, self.token, loop=bot.loop)
+            self.updating = bot.loop.create_task(self.update_stats())
 
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
-
-            while True:
-                logger.info('attempting to post server count')
+           await self.bot.is_ready()
+            while not bot.is_closed:
+                logger.info('Attempting to post server count')
                 try:
                     await self.dblpy.post_server_count()
-                    logger.info('posted server count ({})'.format(len(self.bot.guilds)))
+                    logger.info('Posted server count ({})'.format(len(self.bot.guilds)))
                 except Exception as e:
                     logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
                 await asyncio.sleep(1800)
-
-        def __unload(self):
-            self.bot.loop.create_task(self.session.close())
-
 
     def setup(bot):
         global logger

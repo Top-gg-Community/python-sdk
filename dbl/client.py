@@ -25,10 +25,15 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import asyncio
+#import string
+#import random
+import logging
 
 from . import __version__ as library_version
-from .errors import *
 from .http import HTTPClient
+#from .errors import InvalidArgument
+
+log = logging.getLogger(__name__)
 
 
 class Client:
@@ -67,15 +72,16 @@ class Client:
         self.bot_id = self.bot.user.id
 
     def guild_count(self):
+        """Gets the guild count from the bot object"""
         try:
             return len(self.bot.guilds)
         except AttributeError:
             return len(self.bot.servers)
 
     async def post_server_count(
-        self,
-        shard_count: int = None,
-        shard_no: int = None
+            self,
+            shard_count: int = None,
+            shard_no: int = None
     ):
         """This function is a coroutine.
 
@@ -246,15 +252,15 @@ class Client:
         return await self.http.get_user_info(user_id)
 
     async def generate_widget_large(
-        self,
-        bot_id: int = None,
-        top: str = '2C2F33',
-        mid: str = '23272A',
-        user: str = 'FFFFFF',
-        cert: str = 'FFFFFF',
-        data: str = 'FFFFFF',
-        label: str = '99AAB5',
-        highlight: str = '2C2F33'
+            self,
+            bot_id: int = None,
+            top: str = '2C2F33',
+            mid: str = '23272A',
+            user: str = 'FFFFFF',
+            cert: str = 'FFFFFF',
+            data: str = 'FFFFFF',
+            label: str = '99AAB5',
+            highlight: str = '2C2F33'
     ):
         """This function is a coroutine.
 
@@ -313,13 +319,13 @@ class Client:
         return url
 
     async def generate_widget_small(
-        self,
-        bot_id: int = None,
-        avabg: str = '2C2F33',
-        lcol: str = '23272A',
-        rcol: str = '2C2F33',
-        ltxt: str = 'FFFFFF',
-        rtxt: str = 'FFFFFF'
+            self,
+            bot_id: int = None,
+            avabg: str = '2C2F33',
+            lcol: str = '23272A',
+            rcol: str = '2C2F33',
+            ltxt: str = 'FFFFFF',
+            rtxt: str = 'FFFFFF'
     ):
         """This function is a coroutine.
 
@@ -373,6 +379,45 @@ class Client:
             bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(bot_id)
         return url
+
+    # async def start_vote_post(self, url: str = None, auth: str = None):
+    #     """This function is a coroutine.
+    #
+    #     Sets up webhooks for posting a message to a Discord channel whenever someone votes on your bot.
+    #
+    #     .. note::
+    #
+    #         This function will automatically start a webserver to listen to incoming requests. You should point the webhooks to the IP or domain of your host.
+    #
+    #     Parameters
+    #     ==========
+    #
+    #     auth: str[Optional]
+    #         The authorization token (password) that will be used to verify requests coming back from DBL. Generate a random token with ``auth_generator()``
+    #
+    #     Returns
+    #     =======
+    #
+    #     bot_id: int
+    #         ID of the bot that received a vote.
+    #     user_id: int        s.wfile.write('Hello!')
+    #         ID of the user who voted.
+    #     type: str
+    #         The type of vote. 'upvote' or 'none' (unvote)
+    #     query?: str
+    #         Query string params found on the `/bot/:ID/vote` page.
+    #     """
+    #     if auth is None:
+    #         log.warn(
+    #             'Webhook validation token is Null. Please set one, or generate one using `auth_generator()`.')
+    #
+    #     await self.http.initialize_webhooks(url, auth)
+
+    # async def auth_generator(self, size=32, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):
+    #     """This function is a coroutine
+    #
+    #     Generates a random auth token for webhook validation."""
+    #     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
 
     async def close(self):
         """This function is a coroutine.

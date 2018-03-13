@@ -8,7 +8,17 @@ What's New
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
-.. _vp0p1p3:
+.. _vp0p1p6:
+
+v0.1.6
+------
+
+* Bug fixes & improvements
+
+v0.1.4
+------
+
+* Initial ratelimit handling
 
 v0.1.3
 ------
