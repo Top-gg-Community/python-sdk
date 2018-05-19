@@ -71,15 +71,15 @@ Example
 
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
-           await self.bot.is_ready()
-            while not bot.is_closed:
+            while True:
                 logger.info('Attempting to post server count')
                 try:
                     await self.dblpy.post_server_count()
+                    await asyncio.sleep(1800)
                     logger.info('Posted server count ({})'.format(len(self.bot.guilds)))
                 except Exception as e:
                     logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
-                await asyncio.sleep(1800)
+            await asyncio.sleep(1800)
 
     def setup(bot):
         global logger
