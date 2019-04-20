@@ -60,7 +60,7 @@ Example
     import logging
 
 
-    class DiscordBotsOrgAPI:
+    class DiscordBotsOrgAPI(commands.Cog):
         """Handles interactions with the discordbots.org API"""
 
         def __init__(self, bot):
@@ -72,7 +72,7 @@ Example
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
             await self.bot.wait_until_ready()
-            while not bot.is_closed():
+            while not self.bot.is_closed():
                 logger.info('Attempting to post server count')
                 try:
                     await self.dblpy.post_guild_count()
