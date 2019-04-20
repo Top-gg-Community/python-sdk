@@ -41,8 +41,8 @@ Working
 * GET user info
 * GET widgets (large and small) including custom ones. See `discordbots.org/api/docs`_ for more info.
 
-Not Working /  Implemented
---------------------------
+Not Working / Implemented
+-------------------------
 
 * Searching for bots via the api
 
@@ -71,12 +71,12 @@ Example
 
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
-            await self.bot.is_ready()
+            await self.bot.wait_until_ready()
             while not bot.is_closed():
                 logger.info('Attempting to post server count')
                 try:
-                    await self.dblpy.post_server_count()
-                    logger.info('Posted server count ({})'.format(self.dblpy.guild_count())
+                    await self.dblpy.post_guild_count()
+                    logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
                 except Exception as e:
                     logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
                 await asyncio.sleep(1800)

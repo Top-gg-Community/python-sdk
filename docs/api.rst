@@ -17,7 +17,7 @@ There are two main ways to query version information about the library.
     Just like `sys.version_info`_ the valid values for ``releaselevel`` are
     'alpha', 'beta', 'candidate' and 'final'.
 
-    .. _sys.version_info: https://docs.python.org/3.5/library/sys.html#sys.version_info
+    .. _sys.version_info: https://docs.python.org/3.6/library/sys.html#sys.version_info
 
 .. data:: __version__
 
@@ -33,7 +33,6 @@ Client
 .. autoclass:: Client
     :members:
 
-
 Exceptions
 ----------
 
@@ -41,7 +40,7 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: DBLException
 
-.. autoexception:: Unauthorized_Detected
+.. autoexception:: UnauthorizedDetected
 
 .. autoexception:: ClientException
 
