@@ -189,7 +189,7 @@ class Client:
         limit: int[Optional]
             The number of results you wish to lookup. Defaults to 50. Max 500.
         offset: int[Optional]
-            The page number to search. Defaults to 0.
+            The amount of bots to skip. Defaults to 0.
 
         Returns
         =======
