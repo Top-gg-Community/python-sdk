@@ -3,7 +3,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2018 Francis Taylor
+Copyright (c) 2019 Francis Taylor
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -65,27 +65,42 @@ class Client:
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get('session'))
         self._is_closed = False
         self.loop.create_task(self.__ainit__())
-        # print(self.loop.run_until_complete(bot.application_info()).id)
+
+        self.get_server_count = self.get_guild_count
+        self.post_server_count = self.post_guild_count
 
     async def __ainit__(self):
         await self.bot.wait_until_ready()
         self.bot_id = self.bot.user.id
 
     def guild_count(self):
-        """Gets the guild count from the bot object"""
+        """Gets the guild count from the Client/Bot object"""
         try:
             return len(self.bot.guilds)
         except AttributeError:
             return len(self.bot.servers)
 
-    async def post_server_count(
+    async def get_weekend_status(self):
+        """This function is a coroutine.
+
+        Gets weekend status from discordbots.org
+
+        Returns
+        =======
+
+        weekend status: bool
+            The boolean value of weekend status.
+        """
+        return await self.http.get_weekend_status()
+
+    async def post_guild_count(
             self,
             shard_count: int = None,
             shard_no: int = None
     ):
         """This function is a coroutine.
 
-        Posts the server count to discordbots.org
+        Posts the guild count to discordbots.org
 
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
@@ -97,12 +112,12 @@ class Client:
         shard_no: int[Optional]
             The index of the current shard. DBL uses `0 based indexing`_ for shards.
         """
-        await self.http.post_server_count(self.bot_id, self.guild_count(), shard_count, shard_no)
+        await self.http.post_guild_count(self.bot_id, self.guild_count(), shard_count, shard_no)
 
-    async def get_server_count(self, bot_id: int=None):
+    async def get_guild_count(self, bot_id: int=None):
         """This function is a coroutine.
 
-        Gets a server count from discordbots.org
+        Gets a guild count from discordbots.org
 
         Parameters
         ==========
@@ -115,15 +130,15 @@ class Client:
         =======
 
         stats: dict
-            The server count and shards of a bot.
+            The guild count and shards of a bot.
             The date object is returned in a datetime.datetime object
 
         """
         if bot_id is None:
             bot_id = self.bot_id
-        return await self.http.get_server_count(bot_id)
+        return await self.http.get_guild_count(bot_id)
 
-    async def get_upvote_info(self, **kwargs):
+    async def get_upvote_info(self, bot_id):
         """This function is a coroutine.
 
         Gets information about who upvoted a bot from discordbots.org
@@ -132,16 +147,6 @@ class Client:
 
             This API endpoint is available to the owner of the bot only.
 
-        Parameters
-        ==========
-
-        **onlyids: bool[Optional]
-            Whether to return an array of simple user objects or an array of user ids.
-            Defaults to False
-        **days: int[Optional]
-            Limits the votes to ones done within the amount of days you specify.
-            Defaults to 31
-
         Returns
         =======
 
@@ -149,11 +154,7 @@ class Client:
             Info about who upvoted your bot.
 
         """
-        bot_id = kwargs.get('bot_id', self.bot_id)
-        onlyids = kwargs.get('onlyids', False)
-        days = kwargs.get('days', 31)
-
-        return await self.http.get_upvote_info(bot_id, onlyids, days)
+        return await self.http.get_upvote_info(bot_id)
 
     async def get_bot_info(self, bot_id: int = None):
         """This function is a coroutine.
@@ -169,7 +170,7 @@ class Client:
         Returns
         =======
 
-        bot info: dict
+        bot_info: dict
             Information on the bot you looked up.
             https://discordbots.org/api/docs#bots
         """
@@ -186,9 +187,9 @@ class Client:
         ==========
 
         limit: int[Optional]
-            The number of results you wish to lookup. Defaults to 50.
+            The number of results you wish to lookup. Defaults to 50. Max 500.
         offset: int[Optional]
-            The page number to search. Defaults to 0.
+            The amount of bots to skip. Defaults to 0.
 
         Returns
         =======
@@ -198,38 +199,6 @@ class Client:
             https://discordbots.org/api/docs#bots
         """
         return await self.http.get_bots(limit, offset)
-    #
-    # async def search_bots(self, limit: int = 50, offset: int = 0, **kwargs):
-    #     """This function is a coroutine.
-    #
-    #     Searches bots on discordbots.org via the API
-    #
-    #     Parameters
-    #     ==========
-    #
-    #     limit: int
-    #         (Optional) The number of results you wish to lookup. Defaults to 50.
-    #     offset: int
-    #         (Optional) The page number to search. Defaults to 0.
-    #     tag: str
-    #         Keyword argument that specifies the tag to search.
-    #     library: str
-    #         Keyword argument that specifies the library to search.
-    #
-    #
-    #     Returns
-    #     =======
-    #
-    #     bots: json
-    #         Returns bots matching your search results.
-    #     """
-    #     query = ''
-    #     if 'tag' in kwargs:
-    #         query = f'tag:{tag}'
-    #     if 'library' in kwargs:
-    #         query = f'library:{library}'
-
-    #   return await self.http.search_bots(limit, offset, query=query)
 
     async def get_user_info(self, user_id: int):
         """This function is a coroutine.
@@ -282,7 +251,7 @@ class Client:
         data: str
             The hex color code of the statistics (numbers only e.g. 44) of the bot.
         label: str
-            The hex color code of the description (text e.g. server count) of the statistics.
+            The hex color code of the description (text e.g. guild count) of the statistics.
         highlight: str
             The hex color code of the data boxes.
 
@@ -291,10 +260,10 @@ class Client:
 
         URL of the widget: str
         """
+        url = 'https://discordbots.org/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'
         if bot_id is None:
             bot_id = self.bot_id
-        url = 'https://discordbots.org/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'.format(
-            bot_id, top, mid, user, cert, data, label, highlight)
+        url = url.format(bot_id, top, mid, user, cert, data, label, highlight)
         return url
 
     async def get_widget_large(self, bot_id: int = None):
@@ -352,11 +321,10 @@ class Client:
 
         URL of the widget: str
         """
+        url = 'https://discordbots.org/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'
         if bot_id is None:
             bot_id = self.bot_id
-        url = 'https://discordbots.org/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'.format(
-            bot_id, avabg, ltxt, rtxt, lcol, rcol)
-
+        url = url.format(bot_id, avabg, ltxt, rtxt, lcol, rcol)
         return url
 
     async def get_widget_small(self, bot_id: int = None):
@@ -380,47 +348,9 @@ class Client:
         url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(bot_id)
         return url
 
-    # async def start_vote_post(self, url: str = None, auth: str = None):
-    #     """This function is a coroutine.
-    #
-    #     Sets up webhooks for posting a message to a Discord channel whenever someone votes on your bot.
-    #
-    #     .. note::
-    #
-    #         This function will automatically start a webserver to listen to incoming requests. You should point the webhooks to the IP or domain of your host.
-    #
-    #     Parameters
-    #     ==========
-    #
-    #     auth: str[Optional]
-    #         The authorization token (password) that will be used to verify requests coming back from DBL. Generate a random token with ``auth_generator()``
-    #
-    #     Returns
-    #     =======
-    #
-    #     bot_id: int
-    #         ID of the bot that received a vote.
-    #     user_id: int        s.wfile.write('Hello!')
-    #         ID of the user who voted.
-    #     type: str
-    #         The type of vote. 'upvote' or 'none' (unvote)
-    #     query?: str
-    #         Query string params found on the `/bot/:ID/vote` page.
-    #     """
-    #     if auth is None:
-    #         log.warn(
-    #             'Webhook validation token is Null. Please set one, or generate one using `auth_generator()`.')
-    #
-    #     await self.http.initialize_webhooks(url, auth)
-
-    # async def auth_generator(self, size=32, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):
-    #     """This function is a coroutine
-    #
-    #     Generates a random auth token for webhook validation."""
-    #     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))
-
     async def close(self):
         """This function is a coroutine.
+
         Closes all connections."""
         if self._is_closed:
             return

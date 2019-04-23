@@ -8,7 +8,19 @@ What's New
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
-.. _vp0p1p6:
+.. _vp0p2p0:
+
+v0.2
+------
+
+* Added ``post_guild_count``
+ * Made ``post_server_count`` an alias for ``post_guild_count``
+* Added ``get_guild_count``
+ * Made ``get_server_count`` an alias for ``get_guild_count``
+* Added `get_weekend_status`_
+* Removed all parameters from `get_upvote_info`_
+* Added limit to `get_bots`_
+* Fixed example in README
 
 v0.1.6
 ------
@@ -39,8 +51,11 @@ Initial release
     * GET specific user info
     * GET widgets (large and small) including custom ones. See `discordbots.org/api/docs`_ for more info.
 
-* Not Working /  Implemented
+* Not Working / Implemented
 
     * Searching for bots via the api
 
 .. _discordbots.org/api/docs: https://discordbots.org/api/docs
+.. _get_weekend_status: https://dbl-python-library.rtfd.io/en/latest/api.html#dbl.Client.get_weekend_status
+.. _get_bots: https://dbl-python-library.rtfd.io/en/latest/api.html#dbl.Client.get_bots
+.. _get_upvote_info: https://dbl-python-library.rtfd.io/en/latest/api.html#dbl.Client.get_upvote_info
