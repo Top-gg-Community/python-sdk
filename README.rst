@@ -40,9 +40,10 @@ Working
 * GET all bots
 * GET user info
 * GET widgets (large and small) including custom ones. See `discordbots.org/api/docs`_ for more info.
+* GET weekend status
 
-Not Working / Implemented
--------------------------
+Not Working /  Implemented
+--------------------------
 
 * Searching for bots via the api
 
@@ -66,13 +67,13 @@ Example
         def __init__(self, bot):
             self.bot = bot
             self.token = 'dbl_token'  #  set this to your DBL token
-            self.dblpy = dbl.Client(self.bot, self.token, loop=bot.loop)
-            self.updating = bot.loop.create_task(self.update_stats())
+            self.dblpy = dbl.Client(self.bot, self.token)
+            self.updating = self.bot.loop.create_task(self.update_stats())
 
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
             await self.bot.wait_until_ready()
-            while not self.bot.is_closed():
+            while self.bot.is_ready():
                 logger.info('Attempting to post server count')
                 try:
                     await self.dblpy.post_guild_count()
