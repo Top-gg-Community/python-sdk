@@ -24,14 +24,10 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-import asyncio
-#import string
-#import random
 import logging
+from aiohttp import web
 
-from . import __version__ as library_version
 from .http import HTTPClient
-#from .errors import InvalidArgument
 
 log = logging.getLogger(__name__)
 
@@ -56,18 +52,26 @@ class Client:
         Defaults to ``bot.loop``.
     **session : Optional
         The aiohttp session to use for requests to the API.
+    **webhook_auth: Optional
+        The string for Authorization you set on the site for verification.
+    **webhook_path: Optional
+        The path for the webhook request.
+    **webhook_port: Optional
+        The port to run the webhook on. Will activate webhook when set.
     """
 
     def __init__(self, bot, token, **kwargs):
         self.bot = bot
         self.bot_id = None
         self.loop = kwargs.get('loop') or bot.loop
+        self.webhook_port = kwargs.get('webhook_port')
+        self.webhook_auth = kwargs.get('webhook_auth') or ''
+        self.webhook_path = kwargs.get('webhook_path') or '/dblwebhook'
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get('session'))
         self._is_closed = False
-        self.loop.create_task(self.__ainit__())
-
-        self.get_server_count = self.get_guild_count
-        self.post_server_count = self.post_guild_count
+        self.task1 = self.loop.create_task(self.__ainit__())
+        if self.webhook_port:
+            self.task2 = self.loop.create_task(self.webhook())
 
     async def __ainit__(self):
         await self.bot.wait_until_ready()
@@ -75,10 +79,7 @@ class Client:
 
     def guild_count(self):
         """Gets the guild count from the Client/Bot object"""
-        try:
-            return len(self.bot.guilds)
-        except AttributeError:
-            return len(self.bot.servers)
+        return len(self.bot.guilds)
 
     async def get_weekend_status(self):
         """This function is a coroutine.
@@ -91,7 +92,8 @@ class Client:
         weekend status: bool
             The boolean value of weekend status.
         """
-        return await self.http.get_weekend_status()
+        data = await self.http.get_weekend_status()
+        return data['is_weekend']
 
     async def post_guild_count(
             self,
@@ -348,6 +350,23 @@ class Client:
         url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(bot_id)
         return url
 
+    async def webhook(self):
+        async def vote_handler(request):
+            req_auth = request.headers.get('Authorization')
+            if self.webhook_auth == req_auth:
+                data = await request.json()
+                self.bot.dispatch('dbl_vote', data)
+                return web.Response()
+            else:
+                return web.Response(status=401)
+
+        app = web.Application(loop=self.loop)
+        app.router.add_post(self.webhook_path, vote_handler)
+        runner = web.AppRunner(app)
+        await runner.setup()
+        self._webserver = web.TCPSite(runner, '0.0.0.0', self.webhook_port)
+        await self._webserver.start()
+
     async def close(self):
         """This function is a coroutine.
 
@@ -355,5 +374,8 @@ class Client:
         if self._is_closed:
             return
         else:
+            await self._webserver.stop()
             await self.http.close()
+            self.task1.cancel()
+            self.task2.cancel()
             self._is_closed = True

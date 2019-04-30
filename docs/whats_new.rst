@@ -8,10 +8,19 @@ What's New
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
-.. _vp0p2p0:
+.. _vp0p2p1:
+
+v0.2.1
+------
+
+* Added webhook
+* Removed support for discord.py versions lower than 1.0.0
+* Made `get_weekend_status`_ return a boolean value
+* Added webhook example in README
+* Removed ``post_server_count`` and ``get_server_count``
 
 v0.2
-------
+----
 
 * Added ``post_guild_count``
  * Made ``post_server_count`` an alias for ``post_guild_count``

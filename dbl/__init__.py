@@ -12,7 +12,7 @@ __title__ = 'dblpy'
 __author__ = 'Francis Taylor'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2019 Francis Taylor'
-__version__ = '0.2'
+__version__ = '0.2.1'
 
 from collections import namedtuple
 
@@ -22,4 +22,4 @@ from .http import HTTPClient
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
 
-version_info = VersionInfo(major=0, minor=2, micro=0, releaselevel='final', serial=0)
+version_info = VersionInfo(major=0, minor=2, micro=1, releaselevel='final', serial=0)

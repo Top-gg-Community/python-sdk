@@ -47,8 +47,8 @@ Not Working /  Implemented
 
 * Searching for bots via the api
 
-Example
--------
+Examples
+--------
 
 .. code:: py
 
@@ -56,7 +56,6 @@ Example
     import discord
     from discord.ext import commands
 
-    import aiohttp
     import asyncio
     import logging
 
@@ -66,13 +65,13 @@ Example
 
         def __init__(self, bot):
             self.bot = bot
-            self.token = 'dbl_token'  #  set this to your DBL token
+            self.token = 'dbl_token' # set this to your DBL token
             self.dblpy = dbl.Client(self.bot, self.token)
             self.updating = self.bot.loop.create_task(self.update_stats())
 
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
-            await self.bot.wait_until_ready()
+            await self.bot.wait_until_ready() # this is important, do not touch it
             while self.bot.is_ready():
                 logger.info('Attempting to post server count')
                 try:
@@ -87,6 +86,45 @@ Example
         logger = logging.getLogger('bot')
         bot.add_cog(DiscordBotsOrgAPI(bot))
 
+.. code_webhooks:: py
+
+    import dbl
+    import discord
+    from discord.ext import commands
+
+    import asyncio
+    import logging
+
+
+    class DiscordBotsOrgAPI(commands.Cog):
+        """Handles interactions with the discordbots.org API"""
+
+        def __init__(self, bot):
+            self.bot = bot
+            self.token = 'dbl_token'  #  set this to your DBL token
+            self.dblpy = dbl.Client(self.bot, self.token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
+            self.updating = self.bot.loop.create_task(self.update_stats())
+
+        async def update_stats(self):
+            """This function runs every 30 minutes to automatically update your server count"""
+            await self.bot.wait_until_ready() # this is important, do not touch it
+            while self.bot.is_ready():
+                logger.info('Attempting to post server count')
+                try:
+                    await self.dblpy.post_guild_count()
+                    logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
+                except Exception as e:
+                    logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+                await asyncio.sleep(1800)
+
+        @commands.Cog.listener()
+        async def on_dbl_vote(self, data):
+            print(data)
+
+    def setup(bot):
+        global logger
+        logger = logging.getLogger('bot')
+        bot.add_cog(DiscordBotsOrgAPI(bot))
 
 .. _discordbots.org: https://discordbots.org/
 .. _discordbots.org/api/docs: https://discordbots.org/api/docs

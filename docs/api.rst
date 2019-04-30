@@ -30,6 +30,12 @@ Client
 
     All of the following functions return their data as a JSON object (except widget generation)!
 
+.. warning::
+
+    `bot.wait_until_ready`_ method must be called before using this library!
+
+    .. _bot.wait_until_ready: https://discordpy.readthedocs.io/en/latest/api.html#discord.Client.wait_until_ready
+
 .. autoclass:: Client
     :members:
 
