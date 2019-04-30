@@ -92,7 +92,7 @@ Examples
         logger = logging.getLogger('bot')
         bot.add_cog(DiscordBotsOrgAPI(bot))
 
-.. code_webhooks:: py
+.. code:: py
 
     import dbl
     import discord
