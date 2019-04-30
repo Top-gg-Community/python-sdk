@@ -5,7 +5,7 @@ DBL Python Library
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v0.1.6
+   :alt: v0.2.1
 .. image:: https://readthedocs.org/projects/dblpy/badge/?version=v0.1.6
    :target: http://dblpy.readthedocs.io/en/latest/?badge=v0.1.6
    :alt: Documentation Status
@@ -41,11 +41,17 @@ Working
 * GET user info
 * GET widgets (large and small) including custom ones. See `discordbots.org/api/docs`_ for more info.
 * GET weekend status
+* Webhook
 
 Not Working /  Implemented
 --------------------------
 
 * Searching for bots via the api
+
+Additional information
+----------------------
+
+Before using the webhook provided by this library, make sure that you have port 5000 open.
 
 Examples
 --------
