@@ -51,10 +51,12 @@ Not Working /  Implemented
 Additional information
 ----------------------
 
-Before using the webhook provided by this library, make sure that you have port 5000 open.
+Before using the webhook provided by this library, make sure that you have specified port open. (5000 by default.)
 
 Examples
 --------
+
+Without webhook:
 
 .. code:: py
 
@@ -91,6 +93,8 @@ Examples
         global logger
         logger = logging.getLogger('bot')
         bot.add_cog(DiscordBotsOrgAPI(bot))
+
+With webhook:
 
 .. code:: py
 
