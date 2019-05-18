@@ -6,8 +6,8 @@ DBL Python Library
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
    :alt: v0.3.0
-.. image:: https://readthedocs.org/projects/dblpy/
-   :target: https://dblpy.readthedocs.io/en/latest/
+.. image:: https://readthedocs.org/projects/dblpy/badge/?version=latest
+   :target: https://dblpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
 A simple API wrapper for `discordbots.org`_ written in Python
