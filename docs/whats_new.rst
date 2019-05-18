@@ -14,9 +14,8 @@ v0.3.0
 ------
 * :class:`Client` now has ``autopost`` kwarg that will post server count automatically every 30 minutes
 * Fixed code 403 errors
-* Added ``on_dbl_vote``, an event that is emitted when you test your webhook
-* Added ``on_dbl_error``, an event that is emitted whenever an error in dblpy happens
----NEEDS FINISHING---
+* Added ``on_dbl_vote``, an event that is called when you test your webhook
+* Added ``on_dbl_test``, an event that is called when someone tests your webhook
 
 v0.2.1
 ------

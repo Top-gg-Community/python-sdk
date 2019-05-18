@@ -33,6 +33,49 @@ Client
 .. autoclass:: Client
     :members:
 
+Event reference
+---------------
+
+.. function:: on_dbl_vote(data)
+
+    Called when someone votes for your bot on discordbots.org
+
+    :param data: The data with vote info returned in dict object
+
+    Example: ::
+
+        @bot.event
+        async def on_dbl_vote(data):
+            print(data)
+
+        # Will output the following:
+        # {
+        # 'type': "upvote",
+        # 'user': "247741991310327810",
+        # 'bot': "264811613708746752",
+        # 'isWeekend': False
+        # }
+
+.. function:: on_dbl_test(data)
+
+    Called when someone tests webhook system for your bot on discordbots.org
+
+    :param data: The data with test info returned in dict object
+
+    Example: ::
+
+        @bot.event
+        async def on_dbl_test(data):
+            print(data)
+
+        # Will output the following:
+        # {
+        # 'type': "type",
+        # 'user': "247741991310327810",
+        # 'bot': "264811613708746752",
+        # 'isWeekend': True
+        # }
+
 Exceptions
 ----------
 
@@ -41,6 +84,8 @@ The following exceptions are thrown by the library.
 .. autoexception:: DBLException
 
 .. autoexception:: UnauthorizedDetected
+
+.. autoexception:: InvalidAuthorization
 
 .. autoexception:: ClientException
 
