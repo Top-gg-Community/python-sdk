@@ -60,8 +60,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'dblpy'
-copyright = '2018, Francis Taylor'
-author = 'Francis Taylor'
+copyright = '2019, Assanali Mukhanov'
+author = 'Assanali Mukhanov'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -209,7 +209,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'dblpy.tex', 'dblpy Documentation',
-     'Francis Taylor', 'manual'),
+     'Assanali Mukhanov', 'manual'),
 ]
 
 

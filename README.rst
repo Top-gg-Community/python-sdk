@@ -5,9 +5,9 @@ DBL Python Library
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v0.2.1
-.. image:: https://readthedocs.org/projects/dblpy/badge/?version=v0.1.6
-   :target: http://dblpy.readthedocs.io/en/latest/?badge=v0.1.6
+   :alt: v0.3.0
+.. image:: https://readthedocs.org/projects/dblpy/
+   :target: https://dblpy.readthedocs.io/en/latest/
    :alt: Documentation Status
 
 A simple API wrapper for `discordbots.org`_ written in Python
@@ -42,11 +42,12 @@ Working
 * GET widgets (large and small) including custom ones. See `discordbots.org/api/docs`_ for more info.
 * GET weekend status
 * Webhook
+* Autopost
 
 Not Working /  Implemented
 --------------------------
 
-* Searching for bots via the api
+* Searching for bots via the API
 
 Additional information
 ----------------------
@@ -79,8 +80,7 @@ Without webhook:
 
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
-            await self.bot.wait_until_ready() # this is important, do not touch it
-            while self.bot.is_ready():
+            while not self.bot.is_closed():
                 logger.info('Attempting to post server count')
                 try:
                     await self.dblpy.post_guild_count()
@@ -117,8 +117,7 @@ With webhook:
 
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
-            await self.bot.wait_until_ready() # this is important, do not touch it
-            while self.bot.is_ready():
+            while not self.bot.is_closed():
                 logger.info('Attempting to post server count')
                 try:
                     await self.dblpy.post_guild_count()
@@ -136,6 +135,35 @@ With webhook:
         logger = logging.getLogger('bot')
         bot.add_cog(DiscordBotsOrgAPI(bot))
 
+With autopost:
+
+.. code:: py
+
+    import dbl
+    import discord
+    from discord.ext import commands
+
+    import asyncio
+    import logging
+
+
+    class DiscordBotsOrgAPI(commands.Cog):
+        """Handles interactions with the discordbots.org API"""
+
+        def __init__(self, bot):
+            self.bot = bot
+            self.token = 'dbl_token'  #  set this to your DBL token
+            self.dblpy = dbl.Client(self.bot, self.token, autopost=True)
+
+        @commands.Cog.listener()
+        async def on_dbl_vote(self, data):
+            print(data)
+
+    def setup(bot):
+        global logger
+        logger = logging.getLogger('bot')
+        bot.add_cog(DiscordBotsOrgAPI(bot))
+
 .. _discordbots.org: https://discordbots.org/
 .. _discordbots.org/api/docs: https://discordbots.org/api/docs
-.. _here: http://dblpy.rtfd.io
+.. _here: https://dblpy.rtfd.io

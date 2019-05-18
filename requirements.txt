@@ -1,2 +1,2 @@
-aiohttp>=2.3.9
+aiohttp>=3.3.0,<3.6.0
 ratelimiter>=1.2.0.post0

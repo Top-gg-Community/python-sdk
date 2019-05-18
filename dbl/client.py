@@ -24,6 +24,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
+import asyncio
 import logging
 from aiohttp import web
 
@@ -63,19 +64,28 @@ class Client:
     def __init__(self, bot, token, **kwargs):
         self.bot = bot
         self.bot_id = None
-        self.loop = kwargs.get('loop') or bot.loop
+        self.loop = kwargs.get('loop', bot.loop)
+        self.autopost = kwargs.get('autopost')
         self.webhook_port = kwargs.get('webhook_port')
-        self.webhook_auth = kwargs.get('webhook_auth') or ''
-        self.webhook_path = kwargs.get('webhook_path') or '/dblwebhook'
+        self.webhook_auth = kwargs.get('webhook_auth', '')
+        self.webhook_path = kwargs.get('webhook_path', '/dblwebhook')
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get('session'))
         self._is_closed = False
-        self.task1 = self.loop.create_task(self.__ainit__())
         if self.webhook_port:
             self.task2 = self.loop.create_task(self.webhook())
+        if self.autopost:
+            self.autopost_task = self.loop.create_task(self._auto_post())
 
-    async def __ainit__(self):
+    async def _ensure_bot_user(self):
         await self.bot.wait_until_ready()
-        self.bot_id = self.bot.user.id
+        if self.bot_id is None:
+            self.bot_id = self.bot.user.id
+
+    async def _auto_post(self):
+        await self._ensure_bot_user()
+        while not self.bot.is_closed():
+            await self.post_guild_count()
+            await asyncio.sleep(1800)
 
     def guild_count(self):
         """Gets the guild count from the Client/Bot object"""
@@ -92,6 +102,7 @@ class Client:
         weekend status: bool
             The boolean value of weekend status.
         """
+        await self._ensure_bot_user()
         data = await self.http.get_weekend_status()
         return data['is_weekend']
 
@@ -114,9 +125,10 @@ class Client:
         shard_no: int[Optional]
             The index of the current shard. DBL uses `0 based indexing`_ for shards.
         """
+        await self._ensure_bot_user()
         await self.http.post_guild_count(self.bot_id, self.guild_count(), shard_count, shard_no)
 
-    async def get_guild_count(self, bot_id: int=None):
+    async def get_guild_count(self, bot_id: int = None):
         """This function is a coroutine.
 
         Gets a guild count from discordbots.org
@@ -136,6 +148,7 @@ class Client:
             The date object is returned in a datetime.datetime object
 
         """
+        await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
         return await self.http.get_guild_count(bot_id)
@@ -156,6 +169,7 @@ class Client:
             Info about who upvoted your bot.
 
         """
+        await self._ensure_bot_user()
         return await self.http.get_upvote_info(bot_id)
 
     async def get_bot_info(self, bot_id: int = None):
@@ -176,6 +190,7 @@ class Client:
             Information on the bot you looked up.
             https://discordbots.org/api/docs#bots
         """
+        await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
         return await self.http.get_bot_info(bot_id)
@@ -200,6 +215,7 @@ class Client:
             Returns info on the bots on DBL.
             https://discordbots.org/api/docs#bots
         """
+        await self._ensure_bot_user()
         return await self.http.get_bots(limit, offset)
 
     async def get_user_info(self, user_id: int):
@@ -220,6 +236,7 @@ class Client:
             Info about the user.
             https://discordbots.org/api/docs#users
         """
+        await self._ensure_bot_user()
         return await self.http.get_user_info(user_id)
 
     async def generate_widget_large(
@@ -262,6 +279,7 @@ class Client:
 
         URL of the widget: str
         """
+        await self._ensure_bot_user()
         url = 'https://discordbots.org/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'
         if bot_id is None:
             bot_id = self.bot_id
@@ -284,6 +302,7 @@ class Client:
 
         URL of the widget: str
         """
+        await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/{0}.png'.format(bot_id)
@@ -323,6 +342,7 @@ class Client:
 
         URL of the widget: str
         """
+        await self._ensure_bot_user()
         url = 'https://discordbots.org/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'
         if bot_id is None:
             bot_id = self.bot_id
@@ -345,6 +365,7 @@ class Client:
 
         URL of the widget: str
         """
+        await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
         url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(bot_id)
@@ -355,7 +376,11 @@ class Client:
             req_auth = request.headers.get('Authorization')
             if self.webhook_auth == req_auth:
                 data = await request.json()
-                self.bot.dispatch('dbl_vote', data)
+                if data.get('type') == 'upvote':
+                    event_name = 'dbl_vote'
+                elif data.get('type') == 'test':
+                    event_name = 'dbl_test'
+                self.bot.dispatch(event_name, data)
                 return web.Response()
             else:
                 return web.Response(status=401)
@@ -376,6 +401,6 @@ class Client:
         else:
             await self._webserver.stop()
             await self.http.close()
-            self.task1.cancel()
             self.task2.cancel()
+            self.autopost_task.cancel()
             self._is_closed = True

@@ -8,14 +8,22 @@ What's New
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
-.. _vp0p2p1:
+.. _changelog:
+
+v0.3.0
+------
+* :class:`Client` now has ``autopost`` kwarg that will post server count automatically every 30 minutes
+* Fixed code 403 errors
+* Added ``on_dbl_vote``, an event that is emitted when you test your webhook
+* Added ``on_dbl_error``, an event that is emitted whenever an error in dblpy happens
+---NEEDS FINISHING---
 
 v0.2.1
 ------
 
 * Added webhook
 * Removed support for discord.py versions lower than 1.0.0
-* Made `get_weekend_status`_ return a boolean value
+* Made :meth:`Client.get_weekend_status` return a boolean value
 * Added webhook example in README
 * Removed ``post_server_count`` and ``get_server_count``
 
@@ -26,9 +34,9 @@ v0.2
  * Made ``post_server_count`` an alias for ``post_guild_count``
 * Added ``get_guild_count``
  * Made ``get_server_count`` an alias for ``get_guild_count``
-* Added `get_weekend_status`_
-* Removed all parameters from `get_upvote_info`_
-* Added limit to `get_bots`_
+* Added :meth:`Client.get_weekend_status`
+* Removed all parameters from :meth:`Client.get_upvote_info`
+* Added limit to :meth:`Client.get_bots`
 * Fixed example in README
 
 v0.1.6
@@ -65,6 +73,3 @@ Initial release
     * Searching for bots via the api
 
 .. _discordbots.org/api/docs: https://discordbots.org/api/docs
-.. _get_weekend_status: https://dbl-python-library.rtfd.io/en/latest/api.html#dbl.Client.get_weekend_status
-.. _get_bots: https://dbl-python-library.rtfd.io/en/latest/api.html#dbl.Client.get_bots
-.. _get_upvote_info: https://dbl-python-library.rtfd.io/en/latest/api.html#dbl.Client.get_upvote_info
