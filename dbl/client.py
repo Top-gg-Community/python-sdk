@@ -52,7 +52,7 @@ class Client:
         The `event loop`_ to use for asynchronous operations.
         Defaults to ``bot.loop``.
     **session : Optional
-        The aiohttp session to use for requests to the API.
+        The `aiohttp session`_ to use for requests to the API.
     **webhook_auth: Optional
         The string for Authorization you set on the site for verification.
     **webhook_path: Optional
