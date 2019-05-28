@@ -3,7 +3,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2019 Francis Taylor
+Copyright (c) 2019 Assanali Mukhanov
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -85,6 +85,7 @@ class Client:
         await self._ensure_bot_user()
         while not self.bot.is_closed():
             await self.post_guild_count()
+            self.bot.dispatch('guild_post')
             await asyncio.sleep(1800)
 
     def guild_count(self):
@@ -113,7 +114,7 @@ class Client:
     ):
         """This function is a coroutine.
 
-        Posts the guild count to discordbots.org
+        Posts your bot's guild count to discordbots.org
 
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
@@ -137,26 +138,25 @@ class Client:
         ==========
 
         bot_id: int[Optional]
-            The bot_id of the bot you want to lookup.
-            Defaults to the Bot provided in Client init
+            ID of the bot you want to lookup.
+            Defaults to the discord.py Bot/Client provided in Client init.
 
         Returns
         =======
 
         stats: dict
             The guild count and shards of a bot.
-            The date object is returned in a datetime.datetime object
-
+            The date object is returned in a datetime.datetime object.
         """
         await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
         return await self.http.get_guild_count(bot_id)
 
-    async def get_upvote_info(self, bot_id):
+    async def get_bot_upvotes(self):
         """This function is a coroutine.
 
-        Gets information about who upvoted a bot from discordbots.org
+        Gets information about last 1000 votes for your bot on discordbots.org
 
         .. note::
 
@@ -165,14 +165,14 @@ class Client:
         Returns
         =======
 
-        votes: dict
-            Info about who upvoted your bot.
+        users: list
+            Users who upvoted your bot.
 
         """
         await self._ensure_bot_user()
-        return await self.http.get_upvote_info(bot_id)
+        return await self.http.get_bot_upvotes(self.bot_id)
 
-    async def get_bot_info(self, bot_id: int = None):
+    async def get_bot_info(self):
         """This function is a coroutine.
 
         Gets information about a bot from discordbots.org
@@ -181,7 +181,7 @@ class Client:
         ==========
 
         bot_id: int[Optional]
-            The bot_id of the bot you want to lookup.
+            ID of the bot you want to lookup.
 
         Returns
         =======
@@ -191,9 +191,7 @@ class Client:
             https://discordbots.org/api/docs#bots
         """
         await self._ensure_bot_user()
-        if bot_id is None:
-            bot_id = self.bot_id
-        return await self.http.get_bot_info(bot_id)
+        return await self.http.get_bot_info(self.bot_id)
 
     async def get_bots(self, limit: int = 50, offset: int = 0):
         """This function is a coroutine.
@@ -204,7 +202,7 @@ class Client:
         ==========
 
         limit: int[Optional]
-            The number of results you wish to lookup. Defaults to 50. Max 500.
+            The number of results you want to lookup. Defaults to 50. Max 500.
         offset: int[Optional]
             The amount of bots to skip. Defaults to 0.
 
@@ -227,7 +225,7 @@ class Client:
         ==========
 
         user_id: int
-            The user_id of the user you wish to lookup.
+            ID of the user you wish to lookup.
 
         Returns
         =======
@@ -238,6 +236,27 @@ class Client:
         """
         await self._ensure_bot_user()
         return await self.http.get_user_info(user_id)
+
+    async def get_user_vote(self, user_id: int):
+        """This function is a coroutine.
+
+        Gets information about the user's upvote for your bot on discordbots.org
+
+        Parameters
+        ==========
+
+        user_id: int
+            ID of the user you wish to lookup.
+
+        Returns
+        =======
+
+        vote status: bool
+            Info about the user's upvote.
+        """
+        await self._ensure_bot_user()
+        data = await self.http.get_user_vote(self.bot_id, user_id)
+        return bool(data['voted'])
 
     async def generate_widget_large(
             self,
@@ -258,7 +277,7 @@ class Client:
         ==========
 
         bot_id: int
-            The bot_id of the bot you wish to make a widget for.
+            ID of the bot you wish to make a widget for.
         top: str
             The hex color code of the top bar.
         mid: str
@@ -295,7 +314,7 @@ class Client:
         ==========
 
         bot_id: int
-            The bot_id of the bot you wish to make a widget for.
+            ID of the bot you wish to make a widget for.
 
         Returns
         =======
@@ -325,7 +344,7 @@ class Client:
         ==========
 
         bot_id: int
-            The bot_id of the bot you wish to make a widget for.
+            ID of the bot you wish to make a widget for.
         avabg: str
             The hex color code of the background of the avatar (if the avatar has transparency).
         lcol: str
@@ -358,7 +377,7 @@ class Client:
         ==========
 
         bot_id: int
-            The bot_id of the bot you wish to make a widget for.
+            ID of the bot you wish to make a widget for.
 
         Returns
         =======
@@ -401,6 +420,8 @@ class Client:
         else:
             await self._webserver.stop()
             await self.http.close()
-            self.task2.cancel()
-            self.autopost_task.cancel()
+            if self.webhook_port:
+                self.task2.cancel()
+            if self.autopost:
+                self.autopost_task.cancel()
             self._is_closed = True

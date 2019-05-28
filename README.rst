@@ -5,7 +5,7 @@ DBL Python Library
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v0.3.0
+   :alt: v0.3.1
 .. image:: https://readthedocs.org/projects/dblpy/badge/?version=latest
    :target: https://dblpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
@@ -52,7 +52,7 @@ Not Working /  Implemented
 Additional information
 ----------------------
 
-Before using the webhook provided by this library, make sure that you have specified port open. (5000 by default.)
+* Before using the webhook provided by this library, make sure that you have specified port open.
 
 Examples
 --------
@@ -111,7 +111,7 @@ With webhook:
 
         def __init__(self, bot):
             self.bot = bot
-            self.token = 'dbl_token'  #  set this to your DBL token
+            self.token = 'dbl_token' # set this to your DBL token
             self.dblpy = dbl.Client(self.bot, self.token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
             self.updating = self.bot.loop.create_task(self.update_stats())
 
@@ -128,6 +128,7 @@ With webhook:
 
         @commands.Cog.listener()
         async def on_dbl_vote(self, data):
+            logger.info('Received an upvote')
             print(data)
 
     def setup(bot):
@@ -143,25 +144,17 @@ With autopost:
     import discord
     from discord.ext import commands
 
-    import asyncio
-    import logging
-
 
     class DiscordBotsOrgAPI(commands.Cog):
         """Handles interactions with the discordbots.org API"""
 
         def __init__(self, bot):
             self.bot = bot
-            self.token = 'dbl_token'  #  set this to your DBL token
+            self.token = 'dbl_token' # set this to your DBL token
             self.dblpy = dbl.Client(self.bot, self.token, autopost=True)
-
-        @commands.Cog.listener()
-        async def on_dbl_vote(self, data):
-            print(data)
+            # autopost will post your guild count every 30 minutes
 
     def setup(bot):
-        global logger
-        logger = logging.getLogger('bot')
         bot.add_cog(DiscordBotsOrgAPI(bot))
 
 .. _discordbots.org: https://discordbots.org/

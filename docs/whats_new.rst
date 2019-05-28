@@ -3,12 +3,18 @@
 
 
 What's New
-============
+==========
 
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 .. _changelog:
+
+v0.3.1
+------
+* Added ``on_guild_post``, an event that is called when autoposter successfully posts guild count
+* Renamed ``get_upvote_info`` to ``get_bot_upvotes``
+* Added ``get_user_vote``
 
 v0.3.0
 ------

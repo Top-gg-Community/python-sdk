@@ -26,15 +26,15 @@ There are two main ways to query version information about the library.
 Client
 ------
 
-.. note::
-
-    All of the following functions return their data as a JSON object (except widget generation)!
-
 .. autoclass:: Client
     :members:
 
 Event reference
 ---------------
+
+.. function:: on_guild_post()
+
+    Called when guild count is posted on discordbots.org
 
 .. function:: on_dbl_vote(data)
 
@@ -70,7 +70,7 @@ Event reference
 
         # Will output the following:
         # {
-        # 'type': "type",
+        # 'type': "test",
         # 'user': "247741991310327810",
         # 'bot': "264811613708746752",
         # 'isWeekend': True

@@ -3,7 +3,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2019 Francis Taylor
+Copyright (c) 2019 Assanali Mukhanov
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -87,14 +87,14 @@ class HTTPClient:
 
             headers = {
                 'User-Agent': self.user_agent,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': self.token
             }
 
             if 'json' in kwargs:
                 kwargs['data'] = to_json(kwargs.pop('json'))
 
             kwargs['headers'] = headers
-            headers['Authorization'] = self.token
 
 
             for tries in range(5):
@@ -154,6 +154,7 @@ class HTTPClient:
         self.session = aiohttp.ClientSession(loop=self.session.loop)
 
     async def post_guild_count(self, bot_id, guild_count, shard_count, shard_no):
+        """Posts bot's guild count and shards info on DBL"""
         if shard_count:
             payload = {
                 'server_count': guild_count,
@@ -167,15 +168,15 @@ class HTTPClient:
         await self.request('POST', '{}/bots/{}/stats'.format(self.BASE, bot_id), json=payload)
 
     async def get_weekend_status(self):
-        '''Gets the weekend status from DBL'''
+        """Gets the weekend status from DBL"""
         return await self.request('GET', '{}/weekend'.format(self.BASE))
 
     async def get_guild_count(self, bot_id):
-        '''Gets the guild count of the given Bot ID'''
+        """Gets the guild count of the given Bot ID"""
         return await self.request('GET', '{}/bots/{}/stats'.format(self.BASE, bot_id))
 
     async def get_bot_info(self, bot_id):
-        '''Gets the information of the given Bot ID'''
+        """Gets the information of the given Bot ID"""
         resp = await self.request('GET', '{}/bots/{}'.format(self.BASE, bot_id))
         resp['date'] = datetime.strptime(resp['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         for k in resp:
@@ -183,19 +184,23 @@ class HTTPClient:
                 resp[k] = None
         return resp
 
-    async def get_upvote_info(self, bot_id):
-        '''Gets the last 1000 votes of the given Bot ID'''
+    async def get_bot_upvotes(self, bot_id):
+        """Gets your bot's last 1000 votes on DBL"""
         return await self.request('GET', '{}/bots/{}/votes'.format(self.BASE, bot_id))
 
     async def get_bots(self, limit, offset):
-        '''Gets an object of bots on DBL'''
+        """Gets an object of bots on DBL"""
         if limit > 500:
             limit = 50
         return await self.request('GET', '{}/bots?limit={}&offset={}'.format(self.BASE, limit, offset))
 
     async def get_user_info(self, user_id):
-        '''Gets an object of the user on DBL'''
+        """Gets an object of the user on DBL"""
         return await self.request('GET', '{}/users/{}'.format(self.BASE, user_id))
+
+    async def get_user_vote(self, bot_id, user_id):
+        """Gets an info whether the user has upvoted your bot"""
+        return await self.request('GET', '{}/bots/{}/check?userId={}'.format(self.BASE, bot_id, user_id))
 
 async def limited(until):
     """Handles the message shown when we are ratelimited"""
