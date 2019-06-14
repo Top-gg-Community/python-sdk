@@ -77,13 +77,14 @@ class HTTPClient:
 
     async def request(self, method, url, **kwargs):
         """Handles requests to the API"""
+        url = "{0}{1}".format(url)
         rate_limiter = RateLimiter(max_calls=59, period=60, callback=limited)
         # handles ratelimits. max_calls is set to 59 because current implementation will retry in 60s after 60 calls is reached. DBL has a 1h block so obviously this doesn't work well, as it will get a 429 when 60 is reached.
 
         async with rate_limiter:  # this works but doesn't 'save' over restart. need a better implementation.
 
             if not self.token:
-                raise UnauthorizedDetected('UnauthorizedDetected (status code: 401): No TOKEN provided')
+                raise UnauthorizedDetected("DBL token not provided")
 
             headers = {
                 'User-Agent': self.user_agent,
@@ -165,19 +166,19 @@ class HTTPClient:
             payload = {
                 'server_count': guild_count
             }
-        await self.request('POST', '{}/bots/{}/stats'.format(self.BASE, bot_id), json=payload)
+        await self.request('POST', '/bots/{}/stats'.format(bot_id), json=payload)
 
     async def get_weekend_status(self):
         """Gets the weekend status from DBL"""
-        return await self.request('GET', '{}/weekend'.format(self.BASE))
+        return await self.request('GET', '/weekend')
 
     async def get_guild_count(self, bot_id):
         """Gets the guild count of the given Bot ID"""
-        return await self.request('GET', '{}/bots/{}/stats'.format(self.BASE, bot_id))
+        return await self.request('GET', '/bots/{}/stats'.format(bot_id))
 
     async def get_bot_info(self, bot_id):
         """Gets the information of the given Bot ID"""
-        resp = await self.request('GET', '{}/bots/{}'.format(self.BASE, bot_id))
+        resp = await self.request('GET', '/bots/{}'.format(bot_id))
         resp['date'] = datetime.strptime(resp['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         for k in resp:
             if resp[k] == '':
@@ -186,25 +187,26 @@ class HTTPClient:
 
     async def get_bot_upvotes(self, bot_id):
         """Gets your bot's last 1000 votes on DBL"""
-        return await self.request('GET', '{}/bots/{}/votes'.format(self.BASE, bot_id))
+        return await self.request('GET', '/bots/{}/votes'.format(bot_id))
 
-    async def get_bots(self, limit, offset):
+    async def get_bots(self, limit = 50, offset = 0):
         """Gets an object of bots on DBL"""
         if limit > 500:
             limit = 50
-        return await self.request('GET', '{}/bots?limit={}&offset={}'.format(self.BASE, limit, offset))
+
+        return await self.request('GET', '/bots'.format(self.BASE), params={'limit': limit, 'offset': offset, 'search': search, 'fields': fields})
 
     async def get_user_info(self, user_id):
         """Gets an object of the user on DBL"""
-        return await self.request('GET', '{}/users/{}'.format(self.BASE, user_id))
+        return await self.request('GET', '/users/{}'.format(user_id))
 
     async def get_user_vote(self, bot_id, user_id):
         """Gets an info whether the user has upvoted your bot"""
-        return await self.request('GET', '{}/bots/{}/check?userId={}'.format(self.BASE, bot_id, user_id))
+        return await self.request('GET', '/bots/{}/check'.format(bot_id), params={'userId': user_id})
 
 async def limited(until):
     """Handles the message shown when we are ratelimited"""
-    duration = int(round(until - time.time()))
+    duration = round(until - datetime.datetime.now().timestamp())
     mins = duration / 60
     fmt = 'We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes).'
     log.warn(fmt, duration, mins)
