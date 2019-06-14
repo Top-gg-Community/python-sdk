@@ -32,21 +32,17 @@ Documentation
 
 Documentation can be found `here`_
 
-Working
+Features
 -------
 
 * POST server count
-* GET bot info, server count, upvote count, upvote info
+* GET bot info, server count, upvote info
 * GET all bots
 * GET user info
 * GET widgets (large and small) including custom ones. See `discordbots.org/api/docs`_ for more info.
 * GET weekend status
 * Webhook
 * Autopost
-
-Not Working /  Implemented
---------------------------
-
 * Searching for bots via the API
 
 Additional information

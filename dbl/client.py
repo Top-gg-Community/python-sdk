@@ -217,7 +217,7 @@ class Client:
 
         bots: dict
             Returns info on the bots on DBL.
-            https://discordbots.org/api/docs#bots
+            https://discordbots.org/api/docs#get_bots
         """
         await self._ensure_bot_user()
         return await self.http.get_bots(limit, offset, sort, search, fields)
@@ -236,7 +236,7 @@ class Client:
         Returns
         =======
 
-        user_data: dict
+        user data: dict
             Info about the user.
             https://discordbots.org/api/docs#users
         """
