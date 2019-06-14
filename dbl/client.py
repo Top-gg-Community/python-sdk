@@ -186,14 +186,14 @@ class Client:
         Returns
         =======
 
-        bot_info: dict
+        bot info: dict
             Information on the bot you looked up.
             https://discordbots.org/api/docs#bots
         """
         await self._ensure_bot_user()
         return await self.http.get_bot_info(self.bot_id)
 
-    async def get_bots(self, limit: int = 50, offset: int = 0):
+    async def get_bots(self, limit: int = 50, offset: int = 0, sort = "", search = {}, fields = []):
         """This function is a coroutine.
 
         Gets information about listed bots on discordbots.org
@@ -205,6 +205,12 @@ class Client:
             The number of results you want to lookup. Defaults to 50. Max 500.
         offset: int[Optional]
             The amount of bots to skip. Defaults to 0.
+        sort: str[Optional]
+            The field to sort by. Prefix with ``-`` to reverse the order.
+        search: dict[Optional]
+            The search data.
+        fields: list[Optional]
+            Fields to output.
 
         Returns
         =======
@@ -214,7 +220,7 @@ class Client:
             https://discordbots.org/api/docs#bots
         """
         await self._ensure_bot_user()
-        return await self.http.get_bots(limit, offset)
+        return await self.http.get_bots(limit, offset, sort, search, fields)
 
     async def get_user_info(self, user_id: int):
         """This function is a coroutine.

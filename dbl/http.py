@@ -77,7 +77,7 @@ class HTTPClient:
 
     async def request(self, method, url, **kwargs):
         """Handles requests to the API"""
-        url = "{0}{1}".format(url)
+        url = "{0}{1}".format(self.BASE, url)
         rate_limiter = RateLimiter(max_calls=59, period=60, callback=limited)
         # handles ratelimits. max_calls is set to 59 because current implementation will retry in 60s after 60 calls is reached. DBL has a 1h block so obviously this doesn't work well, as it will get a 429 when 60 is reached.
 
@@ -189,12 +189,14 @@ class HTTPClient:
         """Gets your bot's last 1000 votes on DBL"""
         return await self.request('GET', '/bots/{}/votes'.format(bot_id))
 
-    async def get_bots(self, limit = 50, offset = 0):
+    async def get_bots(self, limit, offset, sort, search, fields):
         """Gets an object of bots on DBL"""
         if limit > 500:
             limit = 50
+        fields = ', '.join(fields)
+        search = ' '.join(['{}: {}'.format(field, value) for field, value in search.items()])
 
-        return await self.request('GET', '/bots'.format(self.BASE), params={'limit': limit, 'offset': offset, 'search': search, 'fields': fields})
+        return await self.request('GET', '/bots', params={'limit': limit, 'offset': offset, 'sort': sort, 'search': search, 'fields': fields})
 
     async def get_user_info(self, user_id):
         """Gets an object of the user on DBL"""
