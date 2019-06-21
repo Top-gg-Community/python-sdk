@@ -172,7 +172,7 @@ class Client:
         await self._ensure_bot_user()
         return await self.http.get_bot_upvotes(self.bot_id)
 
-    async def get_bot_info(self):
+    async def get_bot_info(self, bot_id: int):
         """This function is a coroutine.
 
         Gets information about a bot from discordbots.org
@@ -191,9 +191,9 @@ class Client:
             https://discordbots.org/api/docs#bots
         """
         await self._ensure_bot_user()
-        return await self.http.get_bot_info(self.bot_id)
+        return await self.http.get_bot_info(bot_id)
 
-    async def get_bots(self, limit: int = 50, offset: int = 0, sort = "", search = {}, fields = []):
+    async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None, fields: list = None):
         """This function is a coroutine.
 
         Gets information about listed bots on discordbots.org
@@ -217,8 +217,11 @@ class Client:
 
         bots: dict
             Returns info on the bots on DBL.
-            https://discordbots.org/api/docs#get_bots
+            https://discordbots.org/api/docs#bots
         """
+        sort = sort or "" # weird but works
+        search = search or {}
+        fields = fields or []
         await self._ensure_bot_user()
         return await self.http.get_bots(limit, offset, sort, search, fields)
 
