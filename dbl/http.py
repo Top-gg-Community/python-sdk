@@ -35,7 +35,7 @@ from ratelimiter import RateLimiter
 import aiohttp
 
 from . import __version__
-from .errors import *
+import errors
 
 log = logging.getLogger(__name__)
 
@@ -136,17 +136,17 @@ class HTTPClient:
 
 
                     if resp.status == 400:
-                        raise HTTPException(resp, data)
+                        raise errors.HTTPException(resp, data)
                     elif resp.status == 401:
-                        raise Unauthorized(resp, data)
+                        raise errors.Unauthorized(resp, data)
                     elif resp.status == 403:
-                        raise Forbidden(resp, data)
+                        raise errors.Forbidden(resp, data)
                     elif resp.status == 404:
-                        raise NotFound(resp, data)
+                        raise errors.NotFound(resp, data)
                     else:
-                        raise HTTPException(resp, data)
+                        raise errors.HTTPException(resp, data)
             # We've run out of retries, raise.
-            raise HTTPException(resp, data)
+            raise errors.HTTPException(resp, data)
 
     async def close(self):
         await self.session.close()
