@@ -26,7 +26,7 @@ There are two main ways to query version information about the library.
 Client
 ------
 
-.. autoclass:: Client
+.. autoclass:: DBLClient
     :members:
 
 Event reference

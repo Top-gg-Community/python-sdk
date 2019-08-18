@@ -33,7 +33,7 @@ from .http import HTTPClient
 log = logging.getLogger(__name__)
 
 
-class Client:
+class DBLClient:
     """Represents a client connection that connects to discordbots.org.
     This class is used to interact with the DBL API.
 
