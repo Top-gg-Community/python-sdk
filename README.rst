@@ -72,7 +72,7 @@ Without webhook:
         def __init__(self, bot):
             self.bot = bot
             self.token = 'dbl_token' # set this to your DBL token
-            self.dblpy = dbl.Client(self.bot, self.token)
+            self.dblpy = dbl.DBLClient(self.bot, self.token)
 
         # The decorator below will work only on discord.py 1.1.0+
         # In case your discord.py version is below that, you can use self.bot.loop.create_task(self.update_stats())
@@ -89,6 +89,7 @@ Without webhook:
 
             # if you are not using the tasks extension, put the line below
 
+            await asyncio.sleep(1800)
 
     def setup(bot):
         global logger
@@ -101,7 +102,7 @@ With webhook:
 
     import dbl
     import discord
-    from discord.ext import commands
+    from discord.ext import commands, tasks
 
     import asyncio
     import logging
@@ -113,19 +114,24 @@ With webhook:
         def __init__(self, bot):
             self.bot = bot
             self.token = 'dbl_token' # set this to your DBL token
-            self.dblpy = dbl.Client(self.bot, self.token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
-            self.updating = self.bot.loop.create_task(self.update_stats())
+            self.dblpy = dbl.DBLClient(self.bot, self.token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
 
+        # The decorator below will work only on discord.py 1.1.0+
+        # In case your discord.py version is below that, you can use self.bot.loop.create_task(self.update_stats())
+
+        @tasks.loop(minutes=30.0)
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
-            while not self.bot.is_closed():
-                logger.info('Attempting to post server count')
-                try:
-                    await self.dblpy.post_guild_count()
-                    logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
-                except Exception as e:
-                    logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
-                await asyncio.sleep(1800)
+            logger.info('Attempting to post server count')
+            try:
+                await self.dblpy.post_guild_count()
+                logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
+            except Exception as e:
+                logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+
+            # if you are not using the tasks extension, put the line below
+
+            await asyncio.sleep(1800)
 
         @commands.Cog.listener()
         async def on_dbl_vote(self, data):
@@ -152,7 +158,7 @@ With autopost:
         def __init__(self, bot):
             self.bot = bot
             self.token = 'dbl_token' # set this to your DBL token
-            self.dblpy = dbl.Client(self.bot, self.token, autopost=True) # Autopost will post your guild count every 30 minutes
+            self.dblpy = dbl.DBLClient(self.bot, self.token, autopost=True) # Autopost will post your guild count every 30 minutes
 
         async def on_guild_post():
             print("Server count posted successfully")
