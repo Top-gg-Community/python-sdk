@@ -18,7 +18,7 @@ v0.3.1
 
 v0.3.0
 ------
-* :class:`Client` now has ``autopost`` kwarg that will post server count automatically every 30 minutes
+* :class:`DBLClient` now has ``autopost`` kwarg that will post server count automatically every 30 minutes
 * Fixed code 403 errors
 * Added ``on_dbl_vote``, an event that is called when you test your webhook
 * Added ``on_dbl_test``, an event that is called when someone tests your webhook
@@ -28,7 +28,7 @@ v0.2.1
 
 * Added webhook
 * Removed support for discord.py versions lower than 1.0.0
-* Made :meth:`Client.get_weekend_status` return a boolean value
+* Made :meth:`DBLClient.get_weekend_status` return a boolean value
 * Added webhook example in README
 * Removed ``post_server_count`` and ``get_server_count``
 
@@ -39,9 +39,9 @@ v0.2
  * Made ``post_server_count`` an alias for ``post_guild_count``
 * Added ``get_guild_count``
  * Made ``get_server_count`` an alias for ``get_guild_count``
-* Added :meth:`Client.get_weekend_status`
-* Removed all parameters from :meth:`Client.get_upvote_info`
-* Added limit to :meth:`Client.get_bots`
+* Added :meth:`DBLClient.get_weekend_status`
+* Removed all parameters from :meth:`DBLClient.get_upvote_info`
+* Added limit to :meth:`DBLClient.get_bots`
 * Fixed example in README
 
 v0.1.6
