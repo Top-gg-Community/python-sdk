@@ -48,13 +48,9 @@ Event reference
         async def on_dbl_vote(data):
             print(data)
 
-        # Will output the following:
-        # {
-        # 'type': "upvote",
-        # 'user': "247741991310327810",
-        # 'bot': "264811613708746752",
-        # 'isWeekend': False
-        # }
+        The data returned can be found `here`_
+
+        .. _here: https://discordbots.org/api/docs#webhooks
 
 .. function:: on_dbl_test(data)
 
@@ -68,13 +64,9 @@ Event reference
         async def on_dbl_test(data):
             print(data)
 
-        # Will output the following:
-        # {
-        # 'type': "test",
-        # 'user': "247741991310327810",
-        # 'bot': "264811613708746752",
-        # 'isWeekend': True
-        # }
+        The data returned can be found `here`_
+
+        .. _here: https://discordbots.org/api/docs#webhooks
 
 Exceptions
 ----------
