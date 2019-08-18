@@ -49,6 +49,7 @@ Additional information
 ----------------------
 
 * Before using the webhook provided by this library, make sure that you have specified port open.
+* ``webhook_port`` must be greater between 1024 and 49151.
 
 Examples
 --------
@@ -59,36 +60,40 @@ Without webhook:
 
     import dbl
     import discord
-    from discord.ext import commands
+    from discord.ext import commands, tasks
 
     import asyncio
     import logging
 
 
-    class DiscordBotsOrgAPI(commands.Cog):
+    class DBLAPI(commands.Cog):
         """Handles interactions with the discordbots.org API"""
 
         def __init__(self, bot):
             self.bot = bot
             self.token = 'dbl_token' # set this to your DBL token
             self.dblpy = dbl.Client(self.bot, self.token)
-            self.updating = self.bot.loop.create_task(self.update_stats())
 
+        # The decorator below will work only on discord.py 1.1.0+
+        # In case your discord.py version is below that, you can use self.bot.loop.create_task(self.update_stats())
+
+        @tasks.loop(minutes=30.0)
         async def update_stats(self):
             """This function runs every 30 minutes to automatically update your server count"""
-            while not self.bot.is_closed():
-                logger.info('Attempting to post server count')
-                try:
-                    await self.dblpy.post_guild_count()
-                    logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
-                except Exception as e:
-                    logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
-                await asyncio.sleep(1800)
+            logger.info('Attempting to post server count')
+            try:
+                await self.dblpy.post_guild_count()
+                logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
+            except Exception as e:
+                logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+
+            # if you are not using the tasks extension, put the line below
+
 
     def setup(bot):
         global logger
         logger = logging.getLogger('bot')
-        bot.add_cog(DiscordBotsOrgAPI(bot))
+        bot.add_cog(DBLAPI(bot))
 
 With webhook:
 
@@ -102,7 +107,7 @@ With webhook:
     import logging
 
 
-    class DiscordBotsOrgAPI(commands.Cog):
+    class DBLAPI(commands.Cog):
         """Handles interactions with the discordbots.org API"""
 
         def __init__(self, bot):
@@ -130,7 +135,7 @@ With webhook:
     def setup(bot):
         global logger
         logger = logging.getLogger('bot')
-        bot.add_cog(DiscordBotsOrgAPI(bot))
+        bot.add_cog(DBLAPI(bot))
 
 With autopost:
 
@@ -141,20 +146,19 @@ With autopost:
     from discord.ext import commands
 
 
-    class DiscordBotsOrgAPI(commands.Cog):
+    class DBLAPI(commands.Cog):
         """Handles interactions with the discordbots.org API"""
 
         def __init__(self, bot):
             self.bot = bot
             self.token = 'dbl_token' # set this to your DBL token
-            self.dblpy = dbl.Client(self.bot, self.token, autopost=True)
-            # autopost will post your guild count every 30 minutes
+            self.dblpy = dbl.Client(self.bot, self.token, autopost=True) # Autopost will post your guild count every 30 minutes
 
         async def on_guild_post():
             print("Server count posted successfully")
 
     def setup(bot):
-        bot.add_cog(DiscordBotsOrgAPI(bot))
+        bot.add_cog(DBLAPI(bot))
 
 .. _discordbots.org: https://discordbots.org/
 .. _discordbots.org/api/docs: https://discordbots.org/api/docs
