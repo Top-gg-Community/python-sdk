@@ -41,8 +41,8 @@ Features
 * GET user info
 * GET widgets (large and small) including custom ones. See `discordbots.org/api/docs`_ for more info.
 * GET weekend status
-* Webhook
-* Autopost
+* Built-in webhook to help you handle DBL upvotes
+* Automated server count posting
 * Searching for bots via the API
 
 Additional information
