@@ -16,7 +16,7 @@ __version__ = '0.3.1'
 
 from collections import namedtuple
 
-from .client import Client
+from .client import DBLClient
 from .errors import *
 from .http import HTTPClient
 

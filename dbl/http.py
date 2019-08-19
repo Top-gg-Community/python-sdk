@@ -35,7 +35,7 @@ from ratelimiter import RateLimiter
 import aiohttp
 
 from . import __version__
-import errors
+from . import errors
 
 log = logging.getLogger(__name__)
 

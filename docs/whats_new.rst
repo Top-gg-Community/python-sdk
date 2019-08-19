@@ -36,9 +36,13 @@ v0.2
 ----
 
 * Added ``post_guild_count``
+
  * Made ``post_server_count`` an alias for ``post_guild_count``
+
 * Added ``get_guild_count``
+
  * Made ``get_server_count`` an alias for ``get_guild_count``
+
 * Added :meth:`DBLClient.get_weekend_status`
 * Removed all parameters from :meth:`DBLClient.get_upvote_info`
 * Added limit to :meth:`DBLClient.get_bots`
