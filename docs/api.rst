@@ -48,9 +48,9 @@ Event reference
         async def on_dbl_vote(data):
             print(data)
 
-        The data returned can be found `here`_
+    The data returned can be found `here`_
 
-        .. _here: https://discordbots.org/api/docs#webhooks
+    .. _here: https://discordbots.org/api/docs#webhooks
 
 .. function:: on_dbl_test(data)
 
@@ -64,9 +64,9 @@ Event reference
         async def on_dbl_test(data):
             print(data)
 
-        The data returned can be found `here`_
+    The data returned can be found `here`_
 
-        .. _here: https://discordbots.org/api/docs#webhooks
+    .. _here: https://discordbots.org/api/docs#webhooks
 
 Exceptions
 ----------
