@@ -5,7 +5,7 @@ DBL Python Library
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v0.3.1
+   :alt: v0.3.2
 .. image:: https://readthedocs.org/projects/dblpy/badge/?version=latest
    :target: https://dblpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
@@ -33,7 +33,7 @@ Documentation
 Documentation can be found `here`_
 
 Features
--------
+--------
 
 * POST server count
 * GET bot info, server count, upvote info
