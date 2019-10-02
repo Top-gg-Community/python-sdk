@@ -62,7 +62,7 @@ class HTTPClient:
     """
 
     def __init__(self, token, **kwargs):
-        self.BASE = 'https://discordbots.org/api'
+        self.BASE = 'https://top.gg/api'
         self.token = token
         self.loop = asyncio.get_event_loop() if kwargs.get('loop') is None else kwargs.get('loop')
         self.session = kwargs.get('session') or aiohttp.ClientSession(loop=kwargs.get('loop'))

@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 
 
 class DBLClient:
-    """Represents a client connection that connects to discordbots.org.
+    """Represents a client connection that connects to top.gg.
     This class is used to interact with the DBL API.
 
     .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
@@ -95,7 +95,7 @@ class DBLClient:
     async def get_weekend_status(self):
         """This function is a coroutine.
 
-        Gets weekend status from discordbots.org
+        Gets weekend status from top.gg
 
         Returns
         =======
@@ -114,7 +114,7 @@ class DBLClient:
     ):
         """This function is a coroutine.
 
-        Posts your bot's guild count to discordbots.org
+        Posts your bot's guild count to top.gg
 
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
@@ -132,7 +132,7 @@ class DBLClient:
     async def get_guild_count(self, bot_id: int = None):
         """This function is a coroutine.
 
-        Gets a guild count from discordbots.org
+        Gets a guild count from top.gg
 
         Parameters
         ==========
@@ -156,7 +156,7 @@ class DBLClient:
     async def get_bot_upvotes(self):
         """This function is a coroutine.
 
-        Gets information about last 1000 votes for your bot on discordbots.org
+        Gets information about last 1000 votes for your bot on top.gg
 
         .. note::
 
@@ -175,7 +175,7 @@ class DBLClient:
     async def get_bot_info(self, bot_id: int = None):
         """This function is a coroutine.
 
-        Gets information about a bot from discordbots.org
+        Gets information about a bot from top.gg
 
         Parameters
         ==========
@@ -188,7 +188,7 @@ class DBLClient:
 
         bot info: dict
             Information on the bot you looked up.
-            https://discordbots.org/api/docs#bots
+            https://top.gg/api/docs#bots
         """
         await self._ensure_bot_user()
         if bot_id is None:
@@ -198,7 +198,7 @@ class DBLClient:
     async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None, fields: list = None):
         """This function is a coroutine.
 
-        Gets information about listed bots on discordbots.org
+        Gets information about listed bots on top.gg
 
         Parameters
         ==========
@@ -219,7 +219,7 @@ class DBLClient:
 
         bots: dict
             Returns info on the bots on DBL.
-            https://discordbots.org/api/docs#bots
+            https://top.gg/api/docs#bots
         """
         sort = sort or "" # weird but works
         search = search or {}
@@ -230,7 +230,7 @@ class DBLClient:
     async def get_user_info(self, user_id: int):
         """This function is a coroutine.
 
-        Gets information about a user on discordbots.org
+        Gets information about a user on top.gg
 
         Parameters
         ==========
@@ -243,7 +243,7 @@ class DBLClient:
 
         user data: dict
             Info about the user.
-            https://discordbots.org/api/docs#users
+            https://top.gg/api/docs#users
         """
         await self._ensure_bot_user()
         return await self.http.get_user_info(user_id)
@@ -251,7 +251,7 @@ class DBLClient:
     async def get_user_vote(self, user_id: int):
         """This function is a coroutine.
 
-        Gets information about the user's upvote for your bot on discordbots.org
+        Gets information about the user's upvote for your bot on top.gg
 
         Parameters
         ==========
@@ -310,7 +310,7 @@ class DBLClient:
         URL of the widget: str
         """
         await self._ensure_bot_user()
-        url = 'https://discordbots.org/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'
+        url = 'https://top.gg/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'
         if bot_id is None:
             bot_id = self.bot_id
         url = url.format(bot_id, top, mid, user, cert, data, label, highlight)
@@ -335,7 +335,7 @@ class DBLClient:
         await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
-        url = 'https://discordbots.org/api/widget/{0}.png'.format(bot_id)
+        url = 'https://top.gg/api/widget/{0}.png'.format(bot_id)
         return url
 
     async def generate_widget_small(
@@ -373,7 +373,7 @@ class DBLClient:
         URL of the widget: str
         """
         await self._ensure_bot_user()
-        url = 'https://discordbots.org/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'
+        url = 'https://top.gg/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'
         if bot_id is None:
             bot_id = self.bot_id
         url = url.format(bot_id, avabg, ltxt, rtxt, lcol, rcol)
@@ -398,7 +398,7 @@ class DBLClient:
         await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
-        url = 'https://discordbots.org/api/widget/lib/{0}.png'.format(bot_id)
+        url = 'https://top.gg/api/widget/lib/{0}.png'.format(bot_id)
         return url
 
     async def webhook(self):

@@ -34,11 +34,11 @@ Event reference
 
 .. function:: on_guild_post()
 
-    Called when guild count is posted on discordbots.org
+    Called when guild count is posted on top.gg
 
 .. function:: on_dbl_vote(data)
 
-    Called when someone votes for your bot on discordbots.org
+    Called when someone votes for your bot on top.gg
 
     :param data: The data with vote info returned in dict object
 
@@ -50,11 +50,11 @@ Event reference
 
     The data returned can be found `here`_.
 
-    .. _here: https://discordbots.org/api/docs#webhooks
+    .. _here: https://top.gg/api/docs#webhooks
 
 .. function:: on_dbl_test(data)
 
-    Called when someone tests webhook system for your bot on discordbots.org
+    Called when someone tests webhook system for your bot on top.gg
 
     :param data: The data with test info returned in dict object
 
@@ -66,7 +66,7 @@ Event reference
 
     The data returned can be found `here`_.
 
-    .. _here: https://discordbots.org/api/docs#webhooks
+    .. _here: https://top.gg/api/docs#webhooks
 
 Exceptions
 ----------

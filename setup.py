@@ -21,13 +21,13 @@ with open('README.rst') as f:
     readme = f.read()
 
 setup(name='dblpy',
-      author='Assanali Mukhanov, discordbots.org',
+      author='Assanali Mukhanov, top.gg',
       author_email='shivaco.osu@gmail.com',
       url='https://github.com/DiscordBotList/DBL-Python-Library',
       version=version,
       packages=find_packages(),
       license='MIT',
-      description='A simple API wrapper for discordbots.org written in Python',
+      description='A simple API wrapper for top.gg written in Python',
       long_description=readme,
       include_package_data=True,
       python_requires='>= 3.5.3',
