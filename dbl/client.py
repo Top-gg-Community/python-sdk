@@ -429,10 +429,10 @@ class DBLClient:
         if self._is_closed:
             return
         else:
-            await self._webserver.stop()
-            await self.http.close()
             if self.webhook_port:
+                await self._webserver.stop()
                 self.task2.cancel()
+            await self.http.close()
             if self.autopost:
                 self.autopost_task.cancel()
             self._is_closed = True
