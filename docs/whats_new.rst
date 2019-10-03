@@ -10,6 +10,11 @@ in specific versions.
 
 .. _changelog:
 
+v0.3.3
+------
+* Internal changes regarding support of top.gg migration
+* Fixed errors raised when using :meth:`DBLClient.close` without built-in webhook
+
 v0.3.2
 ------
 * **BREAKING CHANGE**: ``Client`` class has been renamed to ``DBLClient``
