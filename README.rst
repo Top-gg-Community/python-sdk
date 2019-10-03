@@ -10,7 +10,7 @@ DBL Python Library
    :target: https://dblpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-A simple API wrapper for `discordbots.org`_ written in Python
+A simple API wrapper for `top.gg`_ written in Python
 
 Installation
 ------------
@@ -39,7 +39,7 @@ Features
 * GET bot info, server count, upvote info
 * GET all bots
 * GET user info
-* GET widgets (large and small) including custom ones. See `discordbots.org/api/docs`_ for more info.
+* GET widgets (large and small) including custom ones. See `top.gg/api/docs`_ for more info.
 * GET weekend status
 * Built-in webhook to help you handle DBL upvotes
 * Automated server count posting
@@ -67,7 +67,7 @@ Without webhook:
 
 
     class DBLAPI(commands.Cog):
-        """Handles interactions with the discordbots.org API"""
+        """Handles interactions with the top.gg API"""
 
         def __init__(self, bot):
             self.bot = bot
@@ -109,7 +109,7 @@ With webhook:
 
 
     class DBLAPI(commands.Cog):
-        """Handles interactions with the discordbots.org API"""
+        """Handles interactions with the top.gg API"""
 
         def __init__(self, bot):
             self.bot = bot
@@ -153,7 +153,7 @@ With autopost:
 
 
     class DBLAPI(commands.Cog):
-        """Handles interactions with the discordbots.org API"""
+        """Handles interactions with the top.gg API"""
 
         def __init__(self, bot):
             self.bot = bot
@@ -166,6 +166,6 @@ With autopost:
     def setup(bot):
         bot.add_cog(DBLAPI(bot))
 
-.. _discordbots.org: https://discordbots.org/
-.. _discordbots.org/api/docs: https://discordbots.org/api/docs
+.. _top.gg: https://top.gg/
+.. _top.gg/api/docs: https://top.gg/api/docs
 .. _here: https://dblpy.rtfd.io

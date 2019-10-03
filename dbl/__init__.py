@@ -3,8 +3,8 @@
 """
 DBL Python API Wrapper
 ~~~~~~~~~~~~~~~~~~~~~~
-A basic wrapper for the discordbots.org API.
-:copyright: (c) 2019 Assanali Mukhanov & discordbots.org
+A basic wrapper for the top.gg API.
+:copyright: (c) 2019 Assanali Mukhanov & top.gg
 :license: MIT, see LICENSE for more details.
 """
 
