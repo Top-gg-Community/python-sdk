@@ -5,7 +5,7 @@ DBL Python Library
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v0.3.2
+   :alt: v0.3.3
 .. image:: https://readthedocs.org/projects/dblpy/badge/?version=latest
    :target: https://dblpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
@@ -66,7 +66,7 @@ Without webhook:
     import logging
 
 
-    class DBLAPI(commands.Cog):
+    class TopGG(commands.Cog):
         """Handles interactions with the top.gg API"""
 
         def __init__(self, bot):
@@ -94,7 +94,7 @@ Without webhook:
     def setup(bot):
         global logger
         logger = logging.getLogger('bot')
-        bot.add_cog(DBLAPI(bot))
+        bot.add_cog(TopGG(bot))
 
 With webhook:
 
@@ -108,7 +108,7 @@ With webhook:
     import logging
 
 
-    class DBLAPI(commands.Cog):
+    class TopGG(commands.Cog):
         """Handles interactions with the top.gg API"""
 
         def __init__(self, bot):
@@ -141,7 +141,7 @@ With webhook:
     def setup(bot):
         global logger
         logger = logging.getLogger('bot')
-        bot.add_cog(DBLAPI(bot))
+        bot.add_cog(TopGG(bot))
 
 With autopost:
 
@@ -152,7 +152,7 @@ With autopost:
     from discord.ext import commands
 
 
-    class DBLAPI(commands.Cog):
+    class TopGG(commands.Cog):
         """Handles interactions with the top.gg API"""
 
         def __init__(self, bot):
@@ -164,7 +164,7 @@ With autopost:
             print("Server count posted successfully")
 
     def setup(bot):
-        bot.add_cog(DBLAPI(bot))
+        bot.add_cog(TopGG(bot))
 
 .. _top.gg: https://top.gg/
 .. _top.gg/api/docs: https://top.gg/api/docs
