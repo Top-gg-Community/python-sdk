@@ -84,7 +84,7 @@ class HTTPClient:
         async with rate_limiter:  # this works but doesn't 'save' over restart. need a better implementation.
 
             if not self.token:
-                raise UnauthorizedDetected("DBL token not provided")
+                raise errors.UnauthorizedDetected("DBL token not provided")
 
             headers = {
                 'User-Agent': self.user_agent,
