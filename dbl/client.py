@@ -46,18 +46,21 @@ class DBLClient:
     token :
         An API Token
 
-    bot :
+    bot:
         An instance of a discord.py Bot or Client object
-    **loop : Optional[event loop].
+    **loop: Optional[event loop].
         The `event loop`_ to use for asynchronous operations.
         Defaults to ``bot.loop``.
-    **session : Optional
+    **session: Optional
         The `aiohttp session`_ to use for requests to the API.
+    **autopost: Optional[bool]
+        Whether to automatically post bot's guild count every 30 minutes.
+        This will dispatch :meth:`on_guild_post`.
     **webhook_auth: Optional
         The string for Authorization you set on the site for verification.
     **webhook_path: Optional
         The path for the webhook request.
-    **webhook_port: Optional
+    **webhook_port: Optional[int]
         The port to run the webhook on. Will activate webhook when set.
     """
 
