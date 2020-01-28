@@ -26,6 +26,7 @@ DEALINGS IN THE SOFTWARE.
 
 import asyncio
 import logging
+
 from aiohttp import web
 
 from .http import HTTPClient
@@ -70,12 +71,20 @@ class DBLClient:
         self.loop = kwargs.get('loop', bot.loop)
         self.autopost = kwargs.get('autopost')
         self.webhook_port = kwargs.get('webhook_port')
-        self.webhook_auth = kwargs.get('webhook_auth', '')
-        self.webhook_path = kwargs.get('webhook_path', '/dblwebhook')
-        self.http = HTTPClient(token, loop=self.loop, session=kwargs.get('session'))
+        self.webhook_auth = kwargs.get('webhook_auth')
+        self.webhook_path = kwargs.get('webhook_path')
+        self.http = HTTPClient(token, loop = self.loop, session = kwargs.get('session'))
         self._is_closed = False
+
+        if not self.webhook_path:
+            self.webhook_path = '/dblwebhook'
+
+        if not self.webhook_auth:
+            self.webhook_auth = ''
+
         if self.webhook_port:
             self.task2 = self.loop.create_task(self.webhook())
+
         if self.autopost:
             self.autopost_task = self.loop.create_task(self._auto_post())
 
@@ -114,7 +123,7 @@ class DBLClient:
             self,
             shard_count: int = None,
             shard_no: int = None
-    ):
+            ):
         """This function is a coroutine.
 
         Posts your bot's guild count to top.gg
@@ -198,7 +207,8 @@ class DBLClient:
             bot_id = self.bot_id
         return await self.http.get_bot_info(bot_id)
 
-    async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None, fields: list = None):
+    async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None,
+                       fields: list = None):
         """This function is a coroutine.
 
         Gets information about listed bots on top.gg
@@ -224,7 +234,7 @@ class DBLClient:
             Returns info on the bots on DBL.
             https://top.gg/api/docs#bots
         """
-        sort = sort or "" # weird but works
+        sort = sort or ""  # weird but works
         search = search or {}
         fields = fields or []
         await self._ensure_bot_user()
@@ -282,7 +292,7 @@ class DBLClient:
             data: str = 'FFFFFF',
             label: str = '99AAB5',
             highlight: str = '2C2F33'
-    ):
+            ):
         """This function is a coroutine.
 
         Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
@@ -349,7 +359,7 @@ class DBLClient:
             rcol: str = '2C2F33',
             ltxt: str = 'FFFFFF',
             rtxt: str = 'FFFFFF'
-    ):
+            ):
         """This function is a coroutine.
 
         Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
@@ -416,9 +426,9 @@ class DBLClient:
                 self.bot.dispatch(event_name, data)
                 return web.Response()
             else:
-                return web.Response(status=401)
+                return web.Response(status = 401)
 
-        app = web.Application(loop=self.loop)
+        app = web.Application(loop = self.loop)
         app.router.add_post(self.webhook_path, vote_handler)
         runner = web.AppRunner(app)
         await runner.setup()

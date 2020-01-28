@@ -7,3 +7,4 @@ dist/
 /docs/_static/
 /docs/_templates
 .vscode
+/.idea/
