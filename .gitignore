@@ -1,6 +1,5 @@
 dblpy.egg-info/
 dbl/__pycache__/
-dbl/webhookserverhandler.py
 build/
 dist/
 /docs/_build
