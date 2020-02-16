@@ -4,14 +4,14 @@
 DBL Python API Wrapper
 ~~~~~~~~~~~~~~~~~~~~~~
 A basic wrapper for the top.gg API.
-:copyright: (c) 2019 Assanali Mukhanov & top.gg
+:copyright: (c) 2020 Assanali Mukhanov & top.gg
 :license: MIT, see LICENSE for more details.
 """
 
 __title__ = 'dblpy'
 __author__ = 'Francis Taylor'
 __license__ = 'MIT'
-__copyright__ = 'Copyright 2019 Assanali Mukhanov'
+__copyright__ = 'Copyright 2020 Assanali Mukhanov'
 __version__ = '0.3.4'
 
 from collections import namedtuple
