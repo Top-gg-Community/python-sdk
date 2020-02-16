@@ -60,7 +60,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'dblpy'
-copyright = '2019, Assanali Mukhanov'
+copyright = '2020, Assanali Mukhanov'
 author = 'Assanali Mukhanov'
 
 # The version info for the project you're documenting, acts as replacement for
