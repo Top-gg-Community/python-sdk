@@ -49,7 +49,7 @@ Additional information
 ----------------------
 
 * Before using the webhook provided by this library, make sure that you have specified port open.
-* ``webhook_port`` must be greater between 1024 and 49151.
+* ``webhook_port`` must be between 1024 and 49151.
 
 Examples
 --------
