@@ -55,7 +55,7 @@ class HTTPClient:
     Parameters
     ----------
     token :
-        A DBL API Token
+        A top.gg API Token
     **session : Optional[aiohttp session]
         The session used to request to the API
     **loop
