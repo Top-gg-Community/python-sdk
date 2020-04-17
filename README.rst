@@ -73,6 +73,10 @@ Without webhook:
             self.bot = bot
             self.token = 'dbl_token' # set this to your DBL token
             self.dblpy = dbl.DBLClient(self.bot, self.token)
+            self.update_stats.start() # Your linter may say this is wrong, but your linter is wrong
+            
+        def cog_unload(self):
+            self.update_stats.cancel() # Your linter may say this is wrong too, but again your linter is wrong
 
         # The decorator below will work only on discord.py 1.1.0+
         # In case your discord.py version is below that, you can use self.bot.loop.create_task(self.update_stats())
@@ -86,10 +90,6 @@ Without webhook:
                 logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
             except Exception as e:
                 logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
-
-            # if you are not using the tasks extension, put the line below
-
-            await asyncio.sleep(1800)
 
     def setup(bot):
         global logger
@@ -115,6 +115,10 @@ With webhook:
             self.bot = bot
             self.token = 'dbl_token' # set this to your DBL token
             self.dblpy = dbl.DBLClient(self.bot, self.token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
+            self.update_stats.start() # Your linter may say this is wrong, but your linter is wrong
+            
+        def cog_unload(self):
+            self.update_stats.cancel() # Your linter may say this is wrong too, but again your linter is wrong
 
         # The decorator below will work only on discord.py 1.1.0+
         # In case your discord.py version is below that, you can use self.bot.loop.create_task(self.update_stats())
@@ -128,10 +132,6 @@ With webhook:
                 logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
             except Exception as e:
                 logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
-
-            # if you are not using the tasks extension, put the line below
-
-            await asyncio.sleep(1800)
 
         @commands.Cog.listener()
         async def on_dbl_vote(self, data):
