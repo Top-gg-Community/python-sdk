@@ -26,7 +26,6 @@ DEALINGS IN THE SOFTWARE.
 
 import asyncio
 import logging
-
 from aiohttp import web
 
 from .http import HTTPClient
@@ -323,7 +322,8 @@ class DBLClient:
         URL of the widget: str
         """
         await self._ensure_bot_user()
-        url = 'https://top.gg/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'
+        url = 'https://top.gg/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}' \
+              '&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'
         if bot_id is None:
             bot_id = self.bot_id
         url = url.format(bot_id, top, mid, user, cert, data, label, highlight)
@@ -386,7 +386,8 @@ class DBLClient:
         URL of the widget: str
         """
         await self._ensure_bot_user()
-        url = 'https://top.gg/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}&righttextcolor={3}&leftcolor={4}&rightcolor={5}'
+        url = 'https://top.gg/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}' \
+              '&righttextcolor={3}&leftcolor={4}&rightcolor={5}'
         if bot_id is None:
             bot_id = self.bot_id
         url = url.format(bot_id, avabg, ltxt, rtxt, lcol, rcol)
@@ -426,9 +427,9 @@ class DBLClient:
                 self.bot.dispatch(event_name, data)
                 return web.Response()
             else:
-                return web.Response(status = 401)
+                return web.Response(status=401)
 
-        app = web.Application(loop = self.loop)
+        app = web.Application(loop=self.loop)
         app.router.add_post(self.webhook_path, vote_handler)
         runner = web.AppRunner(app)
         await runner.setup()
