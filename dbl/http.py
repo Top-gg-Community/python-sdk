@@ -29,7 +29,7 @@ import os
 import json
 import logging
 import sys
-from datetime import datetime  # , timedelta
+from datetime import datetime
 from ratelimiter import RateLimiter
 
 import aiohttp
