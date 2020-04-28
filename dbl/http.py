@@ -24,15 +24,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
+import aiohttp
 import asyncio
-import os
 import json
 import logging
+import os
 import sys
 from datetime import datetime
 from ratelimiter import RateLimiter
-
-import aiohttp
 
 from . import __version__
 from . import errors
@@ -72,14 +71,17 @@ class HTTPClient:
         user_agent = 'DBL-Python-Library (https://github.com/DiscordBotList/DBL-Python-Library {0}) Python/{1[0]}.{1[1]} aiohttp/{2}'
         self.user_agent = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
 
-# TODO: better implementation of ratelimits
-# NOTE: current implementation doesn't maintain state over restart
+    # TODO: better implementation of rate limits
+    # NOTE: current implementation doesn't maintain state over restart
 
     async def request(self, method, url, **kwargs):
         """Handles requests to the API"""
         url = "{0}{1}".format(self.BASE, url)
         rate_limiter = RateLimiter(max_calls=59, period=60, callback=limited)
-        # handles ratelimits. max_calls is set to 59 because current implementation will retry in 60s after 60 calls is reached. DBL has a 1h block so obviously this doesn't work well, as it will get a 429 when 60 is reached.
+        # handles rate limits.
+        # max_calls is set to 59 because current implementation will retry in 60s
+        # after 60 calls is reached. DBL has a 1h block so obviously this doesn't work well,
+        # as it will get a 429 when 60 is reached.
 
         async with rate_limiter:  # this works but doesn't 'save' over restart. need a better implementation.
 
@@ -97,18 +99,15 @@ class HTTPClient:
 
             kwargs['headers'] = headers
 
-
-            for tries in range(5):
+            for _ in range(5):
                 async with self.session.request(method, url, **kwargs) as resp:
                     log.debug('%s %s with %s has returned %s', method,
                               url, kwargs.get('data'), resp.status)
 
                     data = await json_or_text(resp)
 
-
                     if 300 > resp.status >= 200:
                         return data
-
 
                     if resp.status == 429:  # we are being ratelimited
                         fmt = 'We are being rate limited. Retrying in %.2f seconds (%.3f minutes).'
@@ -131,9 +130,7 @@ class HTTPClient:
                         if is_global:
                             self._global_over.set()
                             log.debug('Global rate limit is now over.')
-
                         continue
-
 
                     if resp.status == 400:
                         raise errors.HTTPException(resp, data)
