@@ -120,6 +120,7 @@ class DBLClient:
 
     async def post_guild_count(
             self,
+            guild_count: int = None,
             shard_count: int = None,
             shard_no: int = None
             ):
@@ -132,13 +133,16 @@ class DBLClient:
         Parameters
         ==========
 
+        guild_count: int[Optional]
+            The total number of guilds.
         shard_count: int[Optional]
             The total number of shards.
         shard_no: int[Optional]
             The index of the current shard. DBL uses `0 based indexing`_ for shards.
         """
+        if guild_count is None: guild_count = self.guild_count()
         await self._ensure_bot_user()
-        await self.http.post_guild_count(self.bot_id, self.guild_count(), shard_count, shard_no)
+        await self.http.post_guild_count(self.bot_id, guild_count, shard_count, shard_no)
 
     async def get_guild_count(self, bot_id: int = None):
         """This function is a coroutine.
