@@ -26,7 +26,13 @@ DEALINGS IN THE SOFTWARE.
 
 import asyncio
 import logging
+from asyncio.tasks import Task
+from typing import Any, Optional
+
+import discord
 from aiohttp import web
+from aiohttp.web_runner import TCPSite
+from discord import Client
 
 from .http import HTTPClient
 
@@ -59,30 +65,39 @@ class DBLClient:
     **webhook_auth: Optional
         The string for Authorization you set on the site for verification.
     **webhook_path: Optional
-        The path for the webhook request.
+        The path for the _webhook request.
     **webhook_port: Optional[int]
-        The port to run the webhook on. Will activate webhook when set.
+        The port to run the _webhook on. Will activate _webhook when set.
     """
 
-    def __init__(self, bot, token, **kwargs):
+    _webserver: Optional[TCPSite]
+    bot: Client
+    bot_id: Optional[int]
+    loop: asyncio.AbstractEventLoop
+    autopost: Optional[bool]
+    webhook_port: Optional[int]
+    webhook_auth: str
+    webhook_path: str
+    _is_closed: bool
+    http: HTTPClient
+    task2: Task[Any]
+    autopost_task: Task[Any]
+
+    def __init__(self, bot: discord.Client, token: str, autopost: bool = None, webhook_port: Optional[int] = None,
+                 webhook_auth: str = "", webhook_path: str = "/dblwebhook", **kwargs) -> None:
+        self._webserver = None
         self.bot = bot
         self.bot_id = None
-        self.loop = kwargs.get('loop', bot.loop)
-        self.autopost = kwargs.get('autopost')
-        self.webhook_port = kwargs.get('webhook_port')
-        self.webhook_auth = kwargs.get('webhook_auth')
-        self.webhook_path = kwargs.get('webhook_path')
-        self.http = HTTPClient(token, loop = self.loop, session = kwargs.get('session'))
+        self.loop = kwargs.get("loop", bot.loop)
+        self.autopost = autopost
+        self.webhook_port = webhook_port
+        self.webhook_auth = webhook_auth
+        self.webhook_path = webhook_path
+        self.http = HTTPClient(token, loop=self.loop, session=kwargs.get("session"))
         self._is_closed = False
 
-        if not self.webhook_path:
-            self.webhook_path = '/dblwebhook'
-
-        if not self.webhook_auth:
-            self.webhook_auth = ''
-
         if self.webhook_port:
-            self.task2 = self.loop.create_task(self.webhook())
+            self.task2 = self.loop.create_task(self._webhook())
 
         if self.autopost:
             self.autopost_task = self.loop.create_task(self._auto_post())
@@ -119,10 +134,10 @@ class DBLClient:
         return data['is_weekend']
 
     async def post_guild_count(
-            self,
-            shard_count: int = None,
-            shard_no: int = None
-            ):
+        self,
+        shard_count: int = None,
+        shard_no: int = None
+    ):
         """This function is a coroutine.
 
         Posts your bot's guild count to top.gg
@@ -282,16 +297,16 @@ class DBLClient:
         return bool(data['voted'])
 
     async def generate_widget_large(
-            self,
-            bot_id: int = None,
-            top: str = '2C2F33',
-            mid: str = '23272A',
-            user: str = 'FFFFFF',
-            cert: str = 'FFFFFF',
-            data: str = 'FFFFFF',
-            label: str = '99AAB5',
-            highlight: str = '2C2F33'
-            ):
+        self,
+        bot_id: int = None,
+        top: str = '2C2F33',
+        mid: str = '23272A',
+        user: str = 'FFFFFF',
+        cert: str = 'FFFFFF',
+        data: str = 'FFFFFF',
+        label: str = '99AAB5',
+        highlight: str = '2C2F33'
+    ):
         """This function is a coroutine.
 
         Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
@@ -352,17 +367,17 @@ class DBLClient:
         return url
 
     async def generate_widget_small(
-            self,
-            bot_id: int = None,
-            avabg: str = '2C2F33',
-            lcol: str = '23272A',
-            rcol: str = '2C2F33',
-            ltxt: str = 'FFFFFF',
-            rtxt: str = 'FFFFFF'
-            ):
+        self,
+        bot_id: int = None,
+        avabg: str = '2C2F33',
+        lcol: str = '23272A',
+        rcol: str = '2C2F33',
+        ltxt: str = 'FFFFFF',
+        rtxt: str = 'FFFFFF'
+    ):
         """This function is a coroutine.
 
-        Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
+        Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF should be FF00FF).
 
         Parameters
         ==========
@@ -415,7 +430,7 @@ class DBLClient:
         url = 'https://top.gg/api/widget/lib/{0}.png'.format(bot_id)
         return url
 
-    async def webhook(self):
+    async def _webhook(self):
         async def vote_handler(request):
             req_auth = request.headers.get('Authorization')
             if self.webhook_auth == req_auth:
@@ -424,6 +439,8 @@ class DBLClient:
                     event_name = 'dbl_vote'
                 elif data.get('type') == 'test':
                     event_name = 'dbl_test'
+                else:
+                    return
                 self.bot.dispatch(event_name, data)
                 return web.Response()
             else:
