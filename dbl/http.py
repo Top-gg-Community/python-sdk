@@ -79,7 +79,6 @@ class HTTPClient:
                      '1]} aiohttp/{2}'
         self.user_agent = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
 
-    # TODO: better implementation of rate limits
     # NOTE: current implementation doesn't maintain state over restart
 
     async def request(self, method, url, **kwargs) -> Union[dict, str]:
@@ -118,26 +117,26 @@ class HTTPClient:
                         return data
 
                     if resp.status == 429:  # we are being ratelimited
-                        fmt = 'We are being rate limited. Retrying in %.2f seconds (%.3f minutes).'
+                        fmt = 'We are being ratelimited. Retrying in %.2f seconds (%.3f minutes).'
 
                         # sleep a bit
                         retry_after = json.loads(resp.headers.get('Retry-After'))
                         mins = retry_after / 60
                         log.warning(fmt, retry_after, mins)
 
-                        # check if it's a global rate limit (True as only 1 ratelimit atm - /api/bots)
+                        # check if it's a global ratelimit (True as only 1 ratelimit atm - /api/bots)
                         is_global = True  # is_global = data.get('global', False)
                         if is_global:
                             self._global_over.clear()
 
                         await asyncio.sleep(retry_after, loop=self.loop)
-                        log.debug('Done sleeping for the rate limit. Retrying...')
+                        log.debug('Done sleeping for the ratelimit. Retrying...')
 
                         # release the global lock now that the
-                        # global rate limit has passed
+                        # global ratelimit has passed
                         if is_global:
                             self._global_over.set()
-                            log.debug('Global rate limit is now over.')
+                            log.debug('Global ratelimit is now over.')
                         continue
 
                     if resp.status == 400:
