@@ -24,22 +24,29 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-import aiohttp
 import asyncio
 import json
 import logging
-import os
 import sys
 from datetime import datetime
+from typing import Union
+
+import aiohttp
+from aiohttp import ClientResponse
 from ratelimiter import RateLimiter
 
-from . import __version__
-from . import errors
+from . import __version__, errors
 
 log = logging.getLogger(__name__)
 
-async def json_or_text(response):
-    """Turns response into a properly formatted json or text object"""
+
+async def _json_or_text(response: ClientResponse) -> Union[dict, str]:
+    """Turns response into a properly formatted json or text object
+    :param response: The received aiohttp response object
+    :type response: ClientResponse
+    :return: Response body in either JSON or string
+    :rtype: Union[dict, str]
+    """
     text = await response.text()
     if response.headers['Content-Type'] == 'application/json; charset=utf-8':
         return json.loads(text)
@@ -68,16 +75,17 @@ class HTTPClient:
         self._global_over = asyncio.Event(loop=self.loop)
         self._global_over.set()
 
-        user_agent = 'DBL-Python-Library (https://github.com/DiscordBotList/DBL-Python-Library {0}) Python/{1[0]}.{1[1]} aiohttp/{2}'
+        user_agent = 'DBL-Python-Library (https://github.com/DiscordBotList/DBL-Python-Library {0}) Python/{1[0]}.{1[' \
+                     '1]} aiohttp/{2}'
         self.user_agent = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
 
     # TODO: better implementation of rate limits
     # NOTE: current implementation doesn't maintain state over restart
 
-    async def request(self, method, url, **kwargs):
+    async def request(self, method, url, **kwargs) -> Union[dict, str]:
         """Handles requests to the API"""
         url = "{0}{1}".format(self.BASE, url)
-        rate_limiter = RateLimiter(max_calls=59, period=60, callback=limited)
+        rate_limiter = RateLimiter(max_calls=59, period=60, callback=_ratelimit_handler)
         # handles rate limits.
         # max_calls is set to 59 because current implementation will retry in 60s
         # after 60 calls is reached. DBL has a 1h block so obviously this doesn't work well,
@@ -89,8 +97,8 @@ class HTTPClient:
                 raise errors.UnauthorizedDetected("DBL token not provided")
 
             headers = {
-                'User-Agent': self.user_agent,
-                'Content-Type': 'application/json',
+                'User-Agent'   : self.user_agent,
+                'Content-Type' : 'application/json',
                 'Authorization': self.token
             }
 
@@ -104,7 +112,7 @@ class HTTPClient:
                     log.debug('%s %s with %s has returned %s', method,
                               url, kwargs.get('data'), resp.status)
 
-                    data = await json_or_text(resp)
+                    data = await _json_or_text(resp)
 
                     if 300 > resp.status >= 200:
                         return data
@@ -148,16 +156,18 @@ class HTTPClient:
     async def close(self):
         await self.session.close()
 
-    async def recreate(self):
-        self.session = aiohttp.ClientSession(loop=self.session.loop)
+    # The method below is not used for anything.
+
+    # async def recreate(self):
+    #     self.session = aiohttp.ClientSession(loop=self.session.loop)
 
     async def post_guild_count(self, bot_id, guild_count, shard_count, shard_no):
         """Posts bot's guild count and shards info on DBL"""
         if shard_count:
             payload = {
                 'server_count': guild_count,
-                'shard_count': shard_count,
-                'shard_no': shard_no
+                'shard_count' : shard_count,
+                'shard_no'    : shard_no
             }
         else:
             payload = {
@@ -175,7 +185,7 @@ class HTTPClient:
 
     async def get_bot_info(self, bot_id):
         """Gets the information of the given Bot ID"""
-        resp = await self.request('GET', '/bots/{}'.format(bot_id))
+        resp: Union[dict, str] = await self.request('GET', '/bots/{}'.format(bot_id))
         resp['date'] = datetime.strptime(resp['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         for k in resp:
             if resp[k] == '':
@@ -193,7 +203,9 @@ class HTTPClient:
         fields = ', '.join(fields)
         search = ' '.join(['{}: {}'.format(field, value) for field, value in search.items()])
 
-        return await self.request('GET', '/bots', params={'limit': limit, 'offset': offset, 'sort': sort, 'search': search, 'fields': fields})
+        return await self.request('GET', '/bots', params={
+            'limit': limit, 'offset': offset, 'sort': sort, 'search': search, 'fields': fields
+        })
 
     async def get_user_info(self, user_id):
         """Gets an object of the user on DBL"""
@@ -203,12 +215,13 @@ class HTTPClient:
         """Gets an info whether the user has upvoted your bot"""
         return await self.request('GET', '/bots/{}/check'.format(bot_id), params={'userId': user_id})
 
-async def limited(until):
+
+async def _ratelimit_handler(until):
     """Handles the message shown when we are ratelimited"""
-    duration = round(until - datetime.datetime.now().timestamp())
+    duration = round(until - datetime.now().timestamp())
     mins = duration / 60
     fmt = 'We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes).'
-    log.warn(fmt, duration, mins)
+    log.warning(fmt, duration, mins)
 
 
 def to_json(obj):
