@@ -25,7 +25,7 @@ Install from source
 
 .. code:: bash
 
-    pip install git+https://github.com/DiscordBotList/DBL-Python-Library
+    pip install git+https://github.com/top-gg/DBL-Python-Library
 
 Documentation
 -------------
@@ -41,7 +41,7 @@ Features
 * GET user info
 * GET widgets (large and small) including custom ones. See `top.gg/api/docs`_ for more info.
 * GET weekend status
-* Built-in webhook to help you handle DBL upvotes
+* Built-in webhook to help you handle top.gg upvotes
 * Automated server count posting
 * Searching for bots via the API
 
@@ -50,106 +50,96 @@ Additional information
 
 * Before using the webhook provided by this library, make sure that you have specified port open.
 * ``webhook_port`` must be between 1024 and 49151.
+* Below examples are to be used as discord.py cogs. If you need help adding them to your bot, feel free to ask in the ``#development`` channel in our `Discord server`_.
 
 Examples
 --------
 
-Without webhook:
+Posting server count manually:
 
 .. code:: py
 
-    import dbl
-    import discord
     from discord.ext import commands, tasks
 
-    import asyncio
-    import logging
+    import dbl
 
 
     class TopGG(commands.Cog):
-        """Handles interactions with the top.gg API"""
+        """
+        Handles interactions with the top.gg API.
+
+        This example uses tasks provided by discord.ext to create a task that posts server count to top.gg every 30 minutes.
+        """
 
         def __init__(self, bot):
             self.bot = bot
-            self.token = 'dbl_token' # set this to your DBL token
+            self.token = 'dbl_token'  # set this to your DBL token
             self.dblpy = dbl.DBLClient(self.bot, self.token)
-            self.update_stats.start() # Your linter may say this is wrong, but your linter is wrong
-            
+            self.update_stats.start()
+
         def cog_unload(self):
-            self.update_stats.cancel() # Your linter may say this is wrong too, but again your linter is wrong
+            self.update_stats.cancel()
 
-        # The decorator below will work only on discord.py 1.1.0+
-        # In case your discord.py version is below that, you can use self.bot.loop.create_task(self.update_stats())
-
-        @tasks.loop(minutes=30.0)
+        @tasks.loop(minutes=30)
         async def update_stats(self):
-            """This function runs every 30 minutes to automatically update your server count"""
-            logger.info('Attempting to post server count')
+            """This function runs every 30 minutes to automatically update your server count."""
+            await self.bot.wait_until_ready()
             try:
-                await self.dblpy.post_guild_count()
-                logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
+                server_count = len(self.bot.guilds)
+                await self.dblpy.post_guild_count(server_count)
+                print('Posted server count ({})'.format(server_count))
             except Exception as e:
-                logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+                print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+
 
     def setup(bot):
-        global logger
-        logger = logging.getLogger('bot')
         bot.add_cog(TopGG(bot))
 
-With webhook:
+
+Using webhook:
 
 .. code:: py
 
-    import dbl
-    import discord
-    from discord.ext import commands, tasks
+    from discord.ext import commands
 
-    import asyncio
-    import logging
+    import dbl
 
 
     class TopGG(commands.Cog):
-        """Handles interactions with the top.gg API"""
+        """
+        Handles interactions with the top.gg API.
+
+        This example uses dblpy's webhook system.
+        In order to run the webhook, at least webhook_port must be specified (number between 1024 and 49151).
+        """
 
         def __init__(self, bot):
             self.bot = bot
-            self.token = 'dbl_token' # set this to your DBL token
+            self.token = 'dbl_token'  # set this to your DBL token
             self.dblpy = dbl.DBLClient(self.bot, self.token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
-            self.update_stats.start() # Your linter may say this is wrong, but your linter is wrong
-            
-        def cog_unload(self):
-            self.update_stats.cancel() # Your linter may say this is wrong too, but again your linter is wrong
-
-        # The decorator below will work only on discord.py 1.1.0+
-        # In case your discord.py version is below that, you can use self.bot.loop.create_task(self.update_stats())
-
-        @tasks.loop(minutes=30.0)
-        async def update_stats(self):
-            """This function runs every 30 minutes to automatically update your server count"""
-            logger.info('Attempting to post server count')
-            try:
-                await self.dblpy.post_guild_count()
-                logger.info('Posted server count ({})'.format(self.dblpy.guild_count()))
-            except Exception as e:
-                logger.exception('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
 
         @commands.Cog.listener()
         async def on_dbl_vote(self, data):
-            logger.info('Received an upvote')
-            print(data)
+            """An event that is called whenever someone votes for the bot on top.gg."""
+            print("Received an upvote:", "\n", data, sep="")
+
+        @commands.Cog.listener()
+        async def on_dbl_test(self, data):
+            """An event that is called whenever someone tests the webhook system for your bot on top.gg."""
+            print("Received a test upvote:", "\n", data, sep="")
+
 
     def setup(bot):
-        global logger
-        logger = logging.getLogger('bot')
         bot.add_cog(TopGG(bot))
+
 
 With autopost:
 
 .. code:: py
 
-    import dbl
-    import discord
     from discord.ext import commands
+
+    import dbl
 
 
     class TopGG(commands.Cog):
@@ -157,16 +147,19 @@ With autopost:
 
         def __init__(self, bot):
             self.bot = bot
-            self.token = 'dbl_token' # set this to your DBL token
-            self.dblpy = dbl.DBLClient(self.bot, self.token, autopost=True) # Autopost will post your guild count every 30 minutes
+            self.token = 'dbl_token'  # set this to your DBL token
+            self.dblpy = dbl.DBLClient(self.bot, self.token, autopost=True)  # Autopost will post your guild count every 30 minutes
 
         @commands.Cog.listener()
         async def on_guild_post(self):
             print("Server count posted successfully")
 
+
     def setup(bot):
         bot.add_cog(TopGG(bot))
+
 
 .. _top.gg: https://top.gg/
 .. _top.gg/api/docs: https://top.gg/api/docs
 .. _here: https://dblpy.rtfd.io
+.. _Discord server: https://discord.gg/EYHTgJX
