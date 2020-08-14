@@ -133,27 +133,28 @@ class DBLClient:
         data = await self.http.get_weekend_status()
         return data['is_weekend']
 
-    async def post_guild_count(
-        self,
-        shard_count: int = None,
-        shard_no: int = None
-    ):
+    async def post_guild_count(self, guild_count: int = None, shard_count: int = None, shard_no: int = None):
         """This function is a coroutine.
 
-        Posts your bot's guild count to top.gg
+        Posts your bot's guild count and shards info to top.gg
 
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
         Parameters
         ==========
 
+        guild_count: int[Optional]
+            Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
+            If not specified, returned value from ``len(bot.guilds)`` will be posted.
         shard_count: int[Optional]
             The total number of shards.
         shard_no: int[Optional]
             The index of the current shard. DBL uses `0 based indexing`_ for shards.
         """
         await self._ensure_bot_user()
-        await self.http.post_guild_count(self.bot_id, self.guild_count(), shard_count, shard_no)
+        if guild_count is None:
+            guild_count = self.guild_count()
+        await self.http.post_guild_count(self.bot_id, guild_count, shard_count, shard_no)
 
     async def get_guild_count(self, bot_id: int = None):
         """This function is a coroutine.
