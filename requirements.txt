@@ -1,2 +1,3 @@
-aiohttp>=3.6.0,<3.7.0
-ratelimiter>=1.2.0.post0
+aiohttp
+ratelimiter
+discord.py
