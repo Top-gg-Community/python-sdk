@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 import asyncio
 import logging
 from asyncio.tasks import Task
-from typing import Any, Optional
+from typing import Optional
 
 import discord
 from aiohttp import web
@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)
 
 class DBLClient:
     """Represents a client connection that connects to top.gg.
-    This class is used to interact with the DBL API.
+    This class is used to interact with the top.gg API.
 
     .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
@@ -49,25 +49,25 @@ class DBLClient:
     Parameters
     ==========
 
-    token :
-        An API Token
+    token:
+        Your bot's top.gg API Token
 
     bot:
-        An instance of a discord.py Bot or Client object
-    **loop: Optional[event loop].
-        The `event loop`_ to use for asynchronous operations.
+        An instance of a discord.py Client object.
+    **loop: Optional[event loop]
+        An `event loop`_ to use for asynchronous operations.
         Defaults to ``bot.loop``.
     **session: Optional
-        The `aiohttp session`_ to use for requests to the API.
+        An `aiohttp session`_ to use for requests to the API.
     **autopost: Optional[bool]
         Whether to automatically post bot's guild count every 30 minutes.
         This will dispatch :meth:`on_guild_post`.
     **webhook_auth: Optional
         The string for Authorization you set on the site for verification.
     **webhook_path: Optional
-        The path for the _webhook request.
+        The path for the webhook request.
     **webhook_port: Optional[int]
-        The port to run the _webhook on. Will activate _webhook when set.
+        The port to run the webhook on. Will activate webhook if set to a number.
     """
 
     _webserver: Optional[TCPSite]
@@ -80,8 +80,8 @@ class DBLClient:
     webhook_path: str
     _is_closed: bool
     http: HTTPClient
-    task2: Task[Any]
-    autopost_task: Task[Any]
+    task2: Task
+    autopost_task: Task
 
     def __init__(self, bot: discord.Client, token: str, autopost: bool = None, webhook_port: Optional[int] = None,
                  webhook_auth: str = "", webhook_path: str = "/dblwebhook", **kwargs) -> None:
@@ -115,13 +115,13 @@ class DBLClient:
             await asyncio.sleep(1800)
 
     def guild_count(self):
-        """Gets the guild count from the Client/Bot object"""
+        """Gets the guild count from the provided Client/Bot object."""
         return len(self.bot.guilds)
 
     async def get_weekend_status(self):
         """This function is a coroutine.
 
-        Gets weekend status from top.gg
+        Gets weekend status from top.gg.
 
         Returns
         =======
@@ -136,7 +136,7 @@ class DBLClient:
     async def post_guild_count(self, guild_count: int = None, shard_count: int = None, shard_no: int = None):
         """This function is a coroutine.
 
-        Posts your bot's guild count and shards info to top.gg
+        Posts your bot's guild count and shards info to top.gg.
 
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
@@ -145,11 +145,11 @@ class DBLClient:
 
         guild_count: int[Optional]
             Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
-            If not specified, returned value from ``len(bot.guilds)`` will be posted.
+            If not specified, length of provided client's property `.guilds` will be posted.
         shard_count: int[Optional]
             The total number of shards.
         shard_no: int[Optional]
-            The index of the current shard. DBL uses `0 based indexing`_ for shards.
+            The index of the current shard. top.gg uses `0 based indexing`_ for shards.
         """
         await self._ensure_bot_user()
         if guild_count is None:
@@ -159,20 +159,20 @@ class DBLClient:
     async def get_guild_count(self, bot_id: int = None):
         """This function is a coroutine.
 
-        Gets a guild count from top.gg
+        Gets a bot's guild count and shard info from top.gg.
 
         Parameters
         ==========
 
         bot_id: int[Optional]
-            ID of the bot you want to lookup.
-            Defaults to the discord.py Bot/Client provided in Client init.
+            ID of the bot you want to look up.
+            Defaults to the discord.py provided bot/client.
 
         Returns
         =======
 
         stats: dict
-            The guild count and shards of a bot.
+            The guild count and shards of a bot on top.gg.
             The date object is returned in a datetime.datetime object.
         """
         await self._ensure_bot_user()
@@ -183,17 +183,17 @@ class DBLClient:
     async def get_bot_upvotes(self):
         """This function is a coroutine.
 
-        Gets information about last 1000 votes for your bot on top.gg
+        Gets information about last 1000 upvotes for your bot on top.gg.
 
         .. note::
 
-            This API endpoint is available to the owner of the bot only.
+            This API endpoint is only available to the bot's owner.
 
         Returns
         =======
 
         users: list
-            Users who upvoted your bot.
+            Users who voted for your bot.
 
         """
         await self._ensure_bot_user()
@@ -202,13 +202,13 @@ class DBLClient:
     async def get_bot_info(self, bot_id: int = None):
         """This function is a coroutine.
 
-        Gets information about a bot from top.gg
+        Gets information about a bot from top.gg.
 
         Parameters
         ==========
 
         bot_id: int[Optional]
-            ID of the bot you want to lookup.
+            ID of the bot you want to look up. Will search the if not specified.
 
         Returns
         =======
@@ -222,11 +222,10 @@ class DBLClient:
             bot_id = self.bot_id
         return await self.http.get_bot_info(bot_id)
 
-    async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None,
-                       fields: list = None):
+    async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None, fields: list = None):
         """This function is a coroutine.
 
-        Gets information about listed bots on top.gg
+        Gets information about listed bots on top.gg.
 
         Parameters
         ==========
@@ -246,7 +245,7 @@ class DBLClient:
         =======
 
         bots: dict
-            Returns info on the bots on DBL.
+            Returns info on the bots on top.gg.
             https://top.gg/api/docs#bots
         """
         sort = sort or ""  # weird but works
@@ -258,7 +257,7 @@ class DBLClient:
     async def get_user_info(self, user_id: int):
         """This function is a coroutine.
 
-        Gets information about a user on top.gg
+        Gets information about a user on top.gg.
 
         Parameters
         ==========
@@ -279,7 +278,7 @@ class DBLClient:
     async def get_user_vote(self, user_id: int):
         """This function is a coroutine.
 
-        Gets information about the user's upvote for your bot on top.gg
+        Gets information about the user's upvote for your bot on top.gg.
 
         Parameters
         ==========
@@ -443,7 +442,7 @@ class DBLClient:
                 else:
                     return
                 self.bot.dispatch(event_name, data)
-                return web.Response()
+                return web.Response(status=200)
             else:
                 return web.Response(status=401)
 
@@ -457,7 +456,8 @@ class DBLClient:
     async def close(self):
         """This function is a coroutine.
 
-        Closes all connections."""
+        Closes all connections.
+        """
         if self._is_closed:
             return
         else:
