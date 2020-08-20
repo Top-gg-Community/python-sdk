@@ -77,8 +77,6 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: UnauthorizedDetected
 
-.. autoexception:: InvalidAuthorization
-
 .. autoexception:: ClientException
 
 .. autoexception:: HTTPException
