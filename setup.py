@@ -1,13 +1,11 @@
-import re
-import sys
 import os
+import re
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 
 on_rtd = os.getenv('READTHEDOCS') == 'True'
 
-requirements = []
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
@@ -23,11 +21,11 @@ with open('README.rst') as f:
 setup(name='dblpy',
       author='Assanali Mukhanov, top.gg',
       author_email='shivaco.osu@gmail.com',
-      url='https://github.com/DiscordBotList/DBL-Python-Library',
+      url='https://github.com/top-gg/DBL-Python-Library',
       version=version,
       packages=find_packages(),
       license='MIT',
-      description='A simple API wrapper for top.gg written in Python',
+      description='A simple API wrapper for top.gg written in Python.',
       long_description=readme,
       include_package_data=True,
       python_requires='>= 3.5.3',
@@ -43,6 +41,7 @@ setup(name='dblpy',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
           'Topic :: Internet',
           'Topic :: Software Development :: Libraries',
           'Topic :: Software Development :: Libraries :: Python Modules',
