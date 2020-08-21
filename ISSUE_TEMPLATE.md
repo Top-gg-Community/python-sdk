@@ -1,35 +1,38 @@
-Issue tracker is **ONLY** used for reporting bugs with __dblpy__. NO NEW FEATURES ACCEPTED! Use [stackoverflow](https://stackoverflow.com) for supporting general issues.
+This issue tracker is **ONLY** used for reporting bugs with __dblpy__. Feel free to share your suggestions in the #api channel in our [Discord server](https://discord.gg/EYHTgJX)!
 
-<!--- Provide a general summary of the issue in the Title above -->
+For help with general Python issues, use [StackOverflow](https://stackoverflow.com), our [#development channel](https://discord.gg/EYHTgJX), or the [Python Discord server](https://discord.gg/python).
+
+
+<!--- Provide a general summary of the issue in the title above. -->
 
 ## Expected Behavior
-<!--- Tell us what should happen -->
+<!--- Tell us what should happen. -->
 
 ## Current Behavior
-<!--- Tell us what happens instead of the expected behavior -->
+<!--- Tell us what happens instead of the expected behavior. -->
 
-## Development Environemt
-<!--- What is your python version, module (dblpy) version, and OS? -->
+## Development Environment
+<!--- What is your Python version, module (dblpy) version, and OS? -->
 
 ## Steps to Reproduce
-<!--- Provide a link to a live example, or an unambiguous set of steps to -->
-<!--- reproduce this bug. Include code to reproduce, if relevant -->
+<!--- Provide a live example or an unambiguous set of steps to reproduce this bug. -->
+<!--- Include code to reproduce, if relevant. -->
 1.
 2.
 3.
 4.
 
+<!--- OPTIONAL STUFF BELOW -->
+
 ## Context
 <!--- How has this issue affected you? What are you trying to accomplish? -->
 <!--- Providing context helps us come up with a solution that is most useful in the real world -->
 
-<!--- Optional Stuff -->
-
 ## Possible Solution
-<!--- Not obligatory, but suggest a fix/reason for the bug, -->
+<!--- Suggest a fix/reason for the bug (if applicable). -->
 
 ## Detailed Description
-<!--- Provide a detailed description of the change or addition you are proposing -->
+<!--- Provide a detailed description of the change or addition you are proposing. -->
 
 ## Possible Implementation
-<!--- Not obligatory, but suggest an idea for implementing addition or change -->
+<!--- Provide details on how your addition or change could be implemented -->
