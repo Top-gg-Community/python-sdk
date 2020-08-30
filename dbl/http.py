@@ -160,19 +160,17 @@ class HTTPClient:
     # async def recreate(self):
     #     self.session = aiohttp.ClientSession(loop=self.session.loop)
 
-    async def post_guild_count(self, bot_id, guild_count, shard_count, shard_no):
+    async def post_guild_count(self, guild_count, shard_count, shard_id):
         """Posts bot's guild count and shards info on top.gg."""
+        payload = {
+            'server_count': guild_count
+        }
         if shard_count:
-            payload = {
-                'server_count': guild_count,
-                'shard_count' : shard_count,
-                'shard_no'    : shard_no
-            }
-        else:
-            payload = {
-                'server_count': guild_count
-            }
-        await self.request('POST', '/bots/{}/stats'.format(bot_id), json=payload)
+            payload["shard_count"] = shard_count
+        if shard_id:
+            payload["shard_id"] = shard_id
+
+        await self.request('POST', '/bots/stats', json=payload)
 
     async def get_weekend_status(self):
         """Gets the weekend status from top.gg."""
