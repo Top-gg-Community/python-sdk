@@ -14,8 +14,9 @@ if on_rtd:
 
 with open('dbl/__init__.py') as f:
     # version = re.search(r"__version__\s*=\s*((\"|\')(\w).+\2)", f.read())
-    author = re.search(r"^__author__\s*=\s*[\'\"]([^\'\"]*)[\'\"]", f.read(), re.MULTILINE).group(1)
-    version = re.search(r'^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]', f.read(), re.MULTILINE).group(1)
+    init_file = f.read()
+    author = re.search(r"^__author__\s*=\s*[\'\"]([^\'\"]*)[\'\"]", init_file, re.MULTILINE).group(1)
+    version = re.search(r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]", init_file, re.MULTILINE).group(1)
 
 with open('README.rst') as f:
     readme = f.read()
