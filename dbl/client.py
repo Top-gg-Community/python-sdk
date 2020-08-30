@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 import asyncio
 import logging
 from asyncio.tasks import Task
-from typing import Optional
+from typing import List, Optional, Union
 
 import discord
 from aiohttp import web
@@ -54,20 +54,20 @@ class DBLClient:
 
     bot:
         An instance of a discord.py Client object.
+    **session: Optional
+        An `aiohttp session`_ to use for requests to the API.
+    autopost: Optional[bool]
+        Whether to automatically post bot's guild count every 30 minutes.
+        This will dispatch :meth:`on_guild_post`.
+    webhook_auth: str
+        The string for Authorization you set on the site for verification.
+    webhook_path: str
+        The path for the webhook request.
+    webhook_port: Optional[int]
+        The port to run the webhook on. Will activate webhook if set to a number.
     **loop: Optional[event loop]
         An `event loop`_ to use for asynchronous operations.
         Defaults to ``bot.loop``.
-    **session: Optional
-        An `aiohttp session`_ to use for requests to the API.
-    **autopost: Optional[bool]
-        Whether to automatically post bot's guild count every 30 minutes.
-        This will dispatch :meth:`on_guild_post`.
-    **webhook_auth: Optional
-        The string for Authorization you set on the site for verification.
-    **webhook_path: Optional
-        The path for the webhook request.
-    **webhook_port: Optional[int]
-        The port to run the webhook on. Will activate webhook if set to a number.
     """
 
     _webserver: Optional[TCPSite]
@@ -115,7 +115,7 @@ class DBLClient:
             await asyncio.sleep(1800)
 
     def guild_count(self):
-        """Gets the guild count from the provided Client/Bot object."""
+        """Gets the guild count from the provided Client object."""
         return len(self.bot.guilds)
 
     async def get_weekend_status(self):
@@ -133,7 +133,7 @@ class DBLClient:
         data = await self.http.get_weekend_status()
         return data['is_weekend']
 
-    async def post_guild_count(self, guild_count: int = None, shard_count: int = None, shard_no: int = None):
+    async def post_guild_count(self, guild_count: Union[int, List[int]] = None, shard_count: int = None, shard_id: int = None):
         """This function is a coroutine.
 
         Posts your bot's guild count and shards info to top.gg.
@@ -143,18 +143,18 @@ class DBLClient:
         Parameters
         ==========
 
-        guild_count: int[Optional]
+        guild_count: Union[int, List[int]]
             Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
             If not specified, length of provided client's property `.guilds` will be posted.
         shard_count: int[Optional]
             The total number of shards.
-        shard_no: int[Optional]
+        shard_id: int[Optional]
             The index of the current shard. top.gg uses `0 based indexing`_ for shards.
         """
         await self._ensure_bot_user()
         if guild_count is None:
             guild_count = self.guild_count()
-        await self.http.post_guild_count(self.bot_id, guild_count, shard_count, shard_no)
+        await self.http.post_guild_count(guild_count, shard_count, shard_id)
 
     async def get_guild_count(self, bot_id: int = None):
         """This function is a coroutine.
@@ -166,7 +166,7 @@ class DBLClient:
 
         bot_id: int[Optional]
             ID of the bot you want to look up.
-            Defaults to the discord.py provided bot/client.
+            Defaults to the provided discord.py bot/client.
 
         Returns
         =======
