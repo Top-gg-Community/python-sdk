@@ -13,13 +13,15 @@ if on_rtd:
     requirements.append('sphinxcontrib-napoleon')
 
 with open('dbl/__init__.py') as f:
+    # version = re.search(r"__version__\s*=\s*((\"|\')(\w).+\2)", f.read())
+    author = re.search(r"__author__\s*=\s*((\"|\')(\w).+\2)", f.read(), re.MULTILINE)
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 with open('README.rst') as f:
     readme = f.read()
 
 setup(name='dblpy',
-      author='Assanali Mukhanov, top.gg',
+      author='{author}, top.gg'.format(author=author),
       author_email='shivaco.osu@gmail.com',
       url='https://github.com/top-gg/DBL-Python-Library',
       version=version,
