@@ -9,9 +9,8 @@ A basic wrapper for the top.gg API.
 """
 
 __title__ = 'dblpy'
-__author__ = 'Francis Taylor'
+__author__ = 'Assanali Mukhanov'
 __license__ = 'MIT'
-__copyright__ = 'Copyright 2020 Assanali Mukhanov'
 __version__ = '0.4.0'
 
 from collections import namedtuple
