@@ -14,8 +14,8 @@ if on_rtd:
 
 with open('dbl/__init__.py') as f:
     # version = re.search(r"__version__\s*=\s*((\"|\')(\w).+\2)", f.read())
-    author = re.search(r"__author__\s*=\s*((\"|\')(\w).+\2)", f.read(), re.MULTILINE)
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+    author = re.search(r"^__author__\s*=\s*[\'\"]([^\'\"]*)[\'\"]", f.read(), re.MULTILINE).group(1)
+    version = re.search(r'^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]', f.read(), re.MULTILINE).group(1)
 
 with open('README.rst') as f:
     readme = f.read()
@@ -32,7 +32,7 @@ setup(name='dblpy',
       include_package_data=True,
       python_requires='>= 3.5.3',
       install_requires=requirements,
-      keywords='discord bot list discordbots botlist',
+      keywords='discord bot list discordbots botlist topgg top.gg',
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'License :: OSI Approved :: MIT License',
