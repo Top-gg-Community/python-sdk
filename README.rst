@@ -66,9 +66,7 @@ Posting server count manually:
 
     class TopGG(commands.Cog):
         """
-        Handles interactions with the top.gg API.
-
-        This example uses tasks provided by discord.ext to create a task that posts server count to top.gg every 30 minutes.
+        This example uses tasks provided by discord.ext to create a task that posts guild count to top.gg every 30 minutes.
         """
 
         def __init__(self, bot):
@@ -107,8 +105,6 @@ Using webhook:
 
     class TopGG(commands.Cog):
         """
-        Handles interactions with the top.gg API.
-
         This example uses dblpy's webhook system.
         In order to run the webhook, at least webhook_port must be specified (number between 1024 and 49151).
         """
@@ -143,7 +139,9 @@ With autopost:
 
 
     class TopGG(commands.Cog):
-        """Handles interactions with the top.gg API"""
+        """
+        This example uses dblpy's autopost feature to post guild count to top.gg every 30 minutes.
+        """
 
         def __init__(self, bot):
             self.bot = bot
