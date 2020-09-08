@@ -35,6 +35,7 @@ from aiohttp.web_runner import TCPSite
 from discord import Client
 
 from .http import HTTPClient
+from . import errors
 
 log = logging.getLogger(__name__)
 
@@ -98,7 +99,6 @@ class DBLClient:
 
         if self.webhook_port:
             self.task2 = self.loop.create_task(self._webhook())
-
         if self.autopost:
             self.autopost_task = self.loop.create_task(self._auto_post())
 
@@ -110,8 +110,11 @@ class DBLClient:
     async def _auto_post(self):
         await self._ensure_bot_user()
         while not self.bot.is_closed():
-            await self.post_guild_count()
-            self.bot.dispatch('guild_post')
+            try:
+                await self.post_guild_count()
+                self.bot.dispatch('guild_post')
+            except errors.HTTPException:
+                pass
             await asyncio.sleep(1800)
 
     def guild_count(self):
