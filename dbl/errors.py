@@ -103,32 +103,10 @@ class NotFound(HTTPException):
     pass
 
 
-class InvalidArgument(ClientException):
-    """Exception that's thrown when an argument to a function
-    is invalid some way (e.g. wrong value or wrong type).
+class ServerError(HTTPException):
+    """Exception that's thrown when top.gg returns "Server Error" responses
+    (status codes such as 500 and 503).
 
-    This could be considered the analogous of ``ValueError`` and
-    ``TypeError`` except derived from :exc:`ClientException` and thus
-    :exc:`DBLException`.
+    Subclass of :exc:`HTTPException`
     """
     pass
-
-
-class ConnectionClosed(ClientException):
-    """Exception that's thrown when the gateway connection is
-    closed for reasons that could not be handled internally.
-
-    Attributes
-    -----------
-    code : int
-        The close code of the websocket.
-    reason : str
-        The reason provided for the closure.
-    """
-
-    def __init__(self, original):
-        # This exception is just the same exception except
-        # reconfigured to subclass ClientException for users
-        self.code = original.code
-        self.reason = original.reason
-        super().__init__(str(original))
