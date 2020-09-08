@@ -108,19 +108,18 @@ class HTTPClient:
 
             for _ in range(5):
                 async with self.session.request(method, url, **kwargs) as resp:
-                    log.debug('%s %s with %s has returned %s', method,
-                              url, kwargs.get('data'), resp.status)
+                    log.debug('%s %s with %s has returned %s', method, url, kwargs.get('data'), resp.status)
 
                     data = await _json_or_text(resp)
 
                     if 300 > resp.status >= 200:
                         return data
 
-                    if resp.status == 429:  # we are being ratelimited
+                    elif resp.status == 429:  # we are being ratelimited
                         fmt = 'We are being ratelimited. Retrying in %.2f seconds (%.3f minutes).'
 
                         # sleep a bit
-                        retry_after = json.loads(resp.headers.get('Retry-After'))
+                        retry_after = float(resp.headers.get('Retry-After'))
                         mins = retry_after / 60
                         log.warning(fmt, retry_after, mins)
 
@@ -139,7 +138,7 @@ class HTTPClient:
                             log.debug('Global ratelimit is now over.')
                         continue
 
-                    if resp.status == 400:
+                    elif resp.status == 400:
                         raise errors.HTTPException(resp, data)
                     elif resp.status == 401:
                         raise errors.Unauthorized(resp, data)
@@ -148,17 +147,13 @@ class HTTPClient:
                     elif resp.status == 404:
                         raise errors.NotFound(resp, data)
                     else:
-                        raise errors.HTTPException(resp, data)
+                        raise errors.ServerError(resp, data)
+                        # raise errors.HTTPException(resp, data)
             # We've run out of retries, raise.
             raise errors.HTTPException(resp, data)
 
     async def close(self):
         await self.session.close()
-
-    # The method below is not used for anything.
-
-    # async def recreate(self):
-    #     self.session = aiohttp.ClientSession(loop=self.session.loop)
 
     async def post_guild_count(self, guild_count, shard_count, shard_id):
         """Posts bot's guild count and shards info on top.gg."""
