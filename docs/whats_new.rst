@@ -14,7 +14,7 @@ v0.4.0
 * :meth:`DBLClient.post_guild_count` now supports a custom ``guild_count`` argument, which accepts either an integer or list of integers
 * Reworked how shard info is posted
 * Removed ``InvalidArgument`` and ``ConnectionClosed`` exceptions
-* Added :exception:``ServerError`` exception
+* Added :exception:`ServerError` exception
 
 v0.3.3
 ------
