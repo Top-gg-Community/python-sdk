@@ -70,9 +70,10 @@ class HTTPClient:
     def __init__(self, token, **kwargs):
         self.BASE = 'https://top.gg/api'
         self.token = token
-        self.loop = asyncio.get_event_loop() if kwargs.get('loop') is None else kwargs.get('loop')
-        self.session = kwargs.get('session') or aiohttp.ClientSession(loop=kwargs.get('loop'))
-        self._global_over = asyncio.Event(loop=self.loop)
+        self.loop = loop = kwargs.get('loop', None) or asyncio.get_event_loop()
+        self.session = kwargs.get('session') or aiohttp.ClientSession(loop=loop)
+
+        self._global_over = asyncio.Event(loop=loop)
         self._global_over.set()
 
         user_agent = 'DBL-Python-Library (https://github.com/top-gg/DBL-Python-Library {0}) Python/{1[0]}.{1[' \
