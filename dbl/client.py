@@ -30,12 +30,10 @@ from asyncio.tasks import Task
 from typing import List, Optional, Union
 
 import discord
-from aiohttp import web
 from aiohttp.web_runner import TCPSite
-from discord import Client
 
-from .http import HTTPClient
 from . import errors
+from .http import HTTPClient
 
 log = logging.getLogger(__name__)
 
@@ -53,10 +51,8 @@ class DBLClient:
     token:
         Your bot's top.gg API Token
 
-    bot:
+    bot: discord.Client
         An instance of a discord.py Client object.
-    **session: Optional
-        An `aiohttp session`_ to use for requests to the API.
     autopost: Optional[bool]
         Whether to automatically post bot's guild count every 30 minutes.
         This will dispatch :meth:`on_guild_post`.
@@ -65,14 +61,15 @@ class DBLClient:
     webhook_path: str
         The path for the webhook request.
     webhook_port: Optional[int]
-        The port to run the webhook on. Will activate webhook if set to a number.
+        The port to run the webhook on. Will activate webhook if set. Must be of int type.
+    **session: Optional
+        An `aiohttp session`_ to use for requests to the API.
     **loop: Optional[event loop]
         An `event loop`_ to use for asynchronous operations.
         Defaults to ``bot.loop``.
     """
 
-    _webserver: Optional[TCPSite]
-    bot: Client
+    bot: discord.Client
     bot_id: Optional[int]
     loop: asyncio.AbstractEventLoop
     autopost: Optional[bool]
@@ -81,24 +78,16 @@ class DBLClient:
     webhook_path: str
     _is_closed: bool
     http: HTTPClient
-    task2: Task
     autopost_task: Task
 
-    def __init__(self, bot: discord.Client, token: str, autopost: bool = None, webhook_port: Optional[int] = None,
-                 webhook_auth: str = "", webhook_path: str = "/dblwebhook", **kwargs) -> None:
-        self._webserver = None
+    def __init__(self, bot: discord.Client, token: str, autopost: bool = False, **kwargs) -> None:
         self.bot = bot
         self.bot_id = None
         self.loop = kwargs.get("loop", bot.loop)
         self.autopost = autopost
-        self.webhook_port = webhook_port
-        self.webhook_auth = webhook_auth
-        self.webhook_path = webhook_path
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get("session"))
         self._is_closed = False
 
-        if self.webhook_port:
-            self.task2 = self.loop.create_task(self._webhook())
         if self.autopost:
             self.autopost_task = self.loop.create_task(self._auto_post())
 
@@ -136,7 +125,8 @@ class DBLClient:
         data = await self.http.get_weekend_status()
         return data['is_weekend']
 
-    async def post_guild_count(self, guild_count: Union[int, List[int]] = None, shard_count: int = None, shard_id: int = None):
+    async def post_guild_count(self, guild_count: Union[int, List[int]] = None, shard_count: int = None,
+                               shard_id: int = None):
         """This function is a coroutine.
 
         Posts your bot's guild count and shards info to top.gg.
@@ -225,7 +215,8 @@ class DBLClient:
             bot_id = self.bot_id
         return await self.http.get_bot_info(bot_id)
 
-    async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None, fields: list = None):
+    async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None,
+                       fields: list = None):
         """This function is a coroutine.
 
         Gets information about listed bots on top.gg.
@@ -433,29 +424,6 @@ class DBLClient:
         url = 'https://top.gg/api/widget/lib/{0}.png'.format(bot_id)
         return url
 
-    async def _webhook(self):
-        async def vote_handler(request):
-            req_auth = request.headers.get('Authorization')
-            if self.webhook_auth == req_auth:
-                data = await request.json()
-                if data.get('type') == 'upvote':
-                    event_name = 'dbl_vote'
-                elif data.get('type') == 'test':
-                    event_name = 'dbl_test'
-                else:
-                    return
-                self.bot.dispatch(event_name, data)
-                return web.Response(status=200)
-            else:
-                return web.Response(status=401)
-
-        app = web.Application(loop=self.loop)
-        app.router.add_post(self.webhook_path, vote_handler)
-        runner = web.AppRunner(app)
-        await runner.setup()
-        self._webserver = web.TCPSite(runner, '0.0.0.0', self.webhook_port)
-        await self._webserver.start()
-
     async def close(self):
         """This function is a coroutine.
 
@@ -464,9 +432,6 @@ class DBLClient:
         if self._is_closed:
             return
         else:
-            if self.webhook_port:
-                await self._webserver.stop()
-                self.task2.cancel()
             await self.http.close()
             if self.autopost:
                 self.autopost_task.cancel()
