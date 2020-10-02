@@ -18,6 +18,7 @@ from collections import namedtuple
 from .client import DBLClient
 from .errors import *
 from .http import HTTPClient
+from .webhook import WebhookManager
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
 
