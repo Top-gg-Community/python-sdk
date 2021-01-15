@@ -80,6 +80,7 @@ class HTTPClient:
         self.token = token
         self.loop = kwargs.get('loop') or asyncio.get_event_loop()
         self.session = kwargs.get('session') or aiohttp.ClientSession(loop=self.loop)
+        self.rate_limiter = AsyncRateLimiter(max_calls=59, period=60, callback=_ratelimit_handler)
 
         self._global_over = asyncio.Event()
         self._global_over.set()
@@ -93,29 +94,28 @@ class HTTPClient:
     async def request(self, method, url, **kwargs) -> Union[dict, str]:
         """Handles requests to the API."""
         url = "{0}{1}".format(self.BASE, url)
-        rate_limiter = AsyncRateLimiter(max_calls=59, period=60, callback=_ratelimit_handler)
+
         # handles rate limits.
         # max_calls is set to 59 because current implementation will retry in 60s
         # after 60 calls is reached. top.gg has a 1h block so obviously this doesn't work well,
         # as it will get a 429 when 60 is reached.
 
-        async with rate_limiter:  # this works but doesn't 'save' over restart.
+        if not self.token:
+            raise errors.UnauthorizedDetected("Top.gg API token not provided")
 
-            if not self.token:
-                raise errors.UnauthorizedDetected("Top.gg API token not provided")
+        headers = {
+            'User-Agent'   : self.user_agent,
+            'Content-Type' : 'application/json',
+            'Authorization': self.token
+        }
 
-            headers = {
-                'User-Agent'   : self.user_agent,
-                'Content-Type' : 'application/json',
-                'Authorization': self.token
-            }
+        if 'json' in kwargs:
+            kwargs['data'] = to_json(kwargs.pop('json'))
 
-            if 'json' in kwargs:
-                kwargs['data'] = to_json(kwargs.pop('json'))
+        kwargs['headers'] = headers
 
-            kwargs['headers'] = headers
-
-            for _ in range(5):
+        for _ in range(5):
+            async with self.rate_limiter:
                 async with self.session.request(method, url, **kwargs) as resp:
                     log.debug('%s %s with %s has returned %s', method, url, kwargs.get('data'), resp.status)
 
