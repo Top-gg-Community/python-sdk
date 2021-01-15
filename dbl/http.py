@@ -102,7 +102,7 @@ class HTTPClient:
         async with rate_limiter:  # this works but doesn't 'save' over restart.
 
             if not self.token:
-                raise errors.UnauthorizedDetected("Top.gg API token not provided.")
+                raise errors.UnauthorizedDetected("Top.gg API token not provided")
 
             headers = {
                 'User-Agent'   : self.user_agent,
@@ -221,7 +221,7 @@ async def _ratelimit_handler(until):
     """Handles the displayed message when we are ratelimited."""
     duration = round(until - datetime.now().timestamp())
     mins = duration / 60
-    fmt = 'We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes).'
+    fmt = "We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes)."
     log.warning(fmt, duration, mins)
 
 
