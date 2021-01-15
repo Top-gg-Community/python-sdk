@@ -1,4 +1,4 @@
-This issue tracker is **ONLY** used for reporting bugs with __dblpy__. Feel free to share your suggestions in the #api channel in our [Discord server](https://discord.gg/EYHTgJX)!
+This issue tracker is **ONLY** used for reporting bugs with __topggpy__. Feel free to share your suggestions in the #api channel in our [Discord server](https://discord.gg/EYHTgJX)!
 
 For help with general Python issues, use [StackOverflow](https://stackoverflow.com), our [#development channel](https://discord.gg/EYHTgJX), or the [Python Discord server](https://discord.gg/python).
 
@@ -12,7 +12,7 @@ For help with general Python issues, use [StackOverflow](https://stackoverflow.c
 <!--- Tell us what happens instead of the expected behavior. -->
 
 ## Development Environment
-<!--- What is your Python version, module (dblpy) version, and OS? -->
+<!--- What is your Python version, module (topggpy) version, and OS? -->
 
 ## Steps to Reproduce
 <!--- Provide a live example or an unambiguous set of steps to reproduce this bug. -->

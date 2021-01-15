@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# dblpy documentation build configuration file, created by
+# topggpy documentation build configuration file, created by
 # sphinx-quickstart on Thu Feb  8 18:32:44 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -43,7 +43,7 @@ else:
 autodoc_member_order = 'bysource'
 
 extlinks = {
-    'issue': ('https://github.com/DiscordBotList/DBL-Python-Library/issues/%s', 'issue '),
+    'issue': ('https://github.com/top-gg/python-sdk/issues/%s', 'issue '),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -59,7 +59,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'dblpy'
+project = 'topggpy'
 copyright = '2020, Assanali Mukhanov'
 author = 'Assanali Mukhanov'
 
@@ -69,7 +69,6 @@ author = 'Assanali Mukhanov'
 #
 # The short X.Y version.
 
-version = ''
 with open('../dbl/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 # The full version, including alpha/beta/rc tags.
@@ -181,7 +180,7 @@ html_show_copyright = True
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'dblpydoc'
+htmlhelp_basename = 'topggpydoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -206,13 +205,13 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [(master_doc, 'dblpy.tex', 'dblpy Documentation', 'Assanali Mukhanov', 'manual'), ]
+latex_documents = [(master_doc, 'topggpy.tex', 'topggpy Documentation', 'Assanali Mukhanov', 'manual'), ]
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, 'dblpy', 'dblpy Documentation', [author], 1)]
+man_pages = [(master_doc, 'topggpy', 'topggpy Documentation', [author], 1)]
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -220,4 +219,4 @@ man_pages = [(master_doc, 'dblpy', 'dblpy Documentation', [author], 1)]
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [(
-master_doc, 'dblpy', 'dblpy Documentation', author, 'dblpy', 'One line description of project.', 'Miscellaneous'), ]
+    master_doc, 'topggpy', 'topggpy Documentation', author, 'topggpy', 'One line description of project.', 'Miscellaneous'), ]

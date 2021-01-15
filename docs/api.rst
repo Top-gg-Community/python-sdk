@@ -3,7 +3,7 @@
 API Reference
 ===============
 
-The following section outlines the API of dblpy.
+The following section outlines the API of topggpy.
 
 Version Related Info
 ---------------------
@@ -28,6 +28,8 @@ Client
 
 .. autoclass:: DBLClient
     :members:
+
+
 
 Event reference
 ---------------

@@ -24,7 +24,7 @@ with open('README.rst') as f:
 setup(name='dblpy',
       author='{author}, top.gg'.format(author=author),
       author_email='shivaco.osu@gmail.com',
-      url='https://github.com/top-gg/DBL-Python-Library',
+      url='https://github.com/top-gg/python-sdk',
       version=version,
       packages=find_packages(),
       license='MIT',
