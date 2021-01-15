@@ -46,12 +46,10 @@ class HTTPException(TopGGException):
 
     .. _aiohttp.ClientResponse: http://aiohttp.readthedocs.org/en/stable/client_reference.html#aiohttp.ClientResponse
 
-
     Attributes
-    -----------
-    response
-        The response of the failed HTTP request. This is an
-        instance of `aiohttp.ClientResponse`_.
+    ----------
+    response: `aiohttp.ClientResponse`_
+        The response of the failed HTTP request.
     text: str
         The text of the error. Could be an empty string.
     """
@@ -80,7 +78,7 @@ class Unauthorized(HTTPException):
 
 
 class UnauthorizedDetected(TopGGException):
-    """Exception that's thrown when no API Token is provided
+    """Exception that's thrown when no API Token is provided.
 
     Subclass of :exc:`TopGGException`
     """
