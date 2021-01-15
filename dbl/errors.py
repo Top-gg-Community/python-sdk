@@ -25,15 +25,15 @@ DEALINGS IN THE SOFTWARE.
 """
 
 
-class DBLException(Exception):
-    """Base exception class for dblpy
+class TopGGException(Exception):
+    """Base exception class for topggpy
 
     Ideally speaking, this could be caught to handle any exceptions thrown from this library.
     """
     pass
 
 
-class ClientException(DBLException):
+class ClientException(TopGGException):
     """Exception that's thrown when an operation in the :class:`Client` fails.
 
     These are usually for exceptions that happened due to user input.
@@ -41,7 +41,7 @@ class ClientException(DBLException):
     pass
 
 
-class HTTPException(DBLException):
+class HTTPException(TopGGException):
     """Exception that's thrown when an HTTP request operation fails.
 
     .. _aiohttp.ClientResponse: http://aiohttp.readthedocs.org/en/stable/client_reference.html#aiohttp.ClientResponse
@@ -79,10 +79,10 @@ class Unauthorized(HTTPException):
     pass
 
 
-class UnauthorizedDetected(DBLException):
+class UnauthorizedDetected(TopGGException):
     """Exception that's thrown when no API Token is provided
 
-    Subclass of :exc:`DBLException`
+    Subclass of :exc:`TopGGException`
     """
     pass
 
