@@ -33,7 +33,7 @@ from typing import Union
 
 import aiohttp
 from aiohttp import ClientResponse
-from ratelimiter import RateLimiter
+from .ratelimiter import AsyncRateLimiter
 
 from . import __version__, errors
 
@@ -78,10 +78,10 @@ class HTTPClient:
     def __init__(self, token, **kwargs):
         self.BASE = 'https://top.gg/api'
         self.token = token
-        self.loop = loop = kwargs.get('loop', None) or asyncio.get_event_loop()
-        self.session = kwargs.get('session') or aiohttp.ClientSession(loop=loop)
+        self.loop = kwargs.get('loop') or asyncio.get_event_loop()
+        self.session = kwargs.get('session') or aiohttp.ClientSession(loop=self.loop)
 
-        self._global_over = asyncio.Event(loop=loop)
+        self._global_over = asyncio.Event()
         self._global_over.set()
 
         user_agent = 'topggpy (https://github.com/top-gg/python-sdk {0}) Python/{1[0]}.{1[' \
@@ -93,7 +93,7 @@ class HTTPClient:
     async def request(self, method, url, **kwargs) -> Union[dict, str]:
         """Handles requests to the API."""
         url = "{0}{1}".format(self.BASE, url)
-        rate_limiter = RateLimiter(max_calls=59, period=60, callback=_ratelimit_handler)
+        rate_limiter = AsyncRateLimiter(max_calls=59, period=60, callback=_ratelimit_handler)
         # handles rate limits.
         # max_calls is set to 59 because current implementation will retry in 60s
         # after 60 calls is reached. top.gg has a 1h block so obviously this doesn't work well,
