@@ -36,8 +36,9 @@ class AsyncRateLimiter:
     """
 
     def __init__(self, max_calls, period=1.0, callback=None):
-        """Initialize a RateLimiter object which enforces as much as max_calls
-        operations on period (eventually floating) number of seconds.
+        """
+        Initialize a RateLimiter object which enforces as much as max_calls operations on period (eventually floating)
+        number of seconds.
         """
         if period <= 0:
             raise ValueError("Rate limiting period should be > 0.")
