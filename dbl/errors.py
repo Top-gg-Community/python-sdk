@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 
 
 class TopGGException(Exception):
-    """Base exception class for topggpy
+    """Base exception class for topggpy.
 
     Ideally speaking, this could be caught to handle any exceptions thrown from this library.
     """
@@ -34,7 +34,7 @@ class TopGGException(Exception):
 
 
 class ClientException(TopGGException):
-    """Exception that's thrown when an operation in the :class:`Client` fails.
+    """Exception that's thrown when an operation in the :class:`DBLClient` fails.
 
     These are usually for exceptions that happened due to user input.
     """
