@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-DBL Python API Wrapper
+Top.gg Python API Wrapper
 ~~~~~~~~~~~~~~~~~~~~~~
 A basic wrapper for the top.gg API.
 :copyright: (c) 2020 Assanali Mukhanov & top.gg
