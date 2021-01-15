@@ -62,11 +62,11 @@ class HTTPException(TopGGException):
         else:
             self.text = message
 
-        fmt = '{0.reason} (status code: {0.status})'
+        fmt = f"{self.response.reason} (status code: {self.response.status})"
         if self.text:
-            fmt = fmt + ': {1}'
+            fmt = f"{fmt}: {self.text}"
 
-        super().__init__(fmt.format(self.response, self.text))
+        super().__init__(fmt)
 
 
 class Unauthorized(HTTPException):

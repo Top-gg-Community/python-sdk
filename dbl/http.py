@@ -33,9 +33,9 @@ from typing import Union
 
 import aiohttp
 from aiohttp import ClientResponse
-from .ratelimiter import AsyncRateLimiter
 
 from . import __version__, errors
+from .ratelimiter import AsyncRateLimiter
 
 log = logging.getLogger(__name__)
 
@@ -85,15 +85,12 @@ class HTTPClient:
         self._global_over = asyncio.Event()
         self._global_over.set()
 
-        user_agent = 'topggpy (https://github.com/top-gg/python-sdk {0}) Python/{1[0]}.{1[' \
-                     '1]} aiohttp/{2}'
-        self.user_agent = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
-
-    # NOTE: current implementation doesn't maintain state over restart
+        self.user_agent = f"topggpy (https://github.com/top-gg/python-sdk {__version__}) Python/" \
+                          f"{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
 
     async def request(self, method, url, **kwargs) -> Union[dict, str]:
         """Handles requests to the API."""
-        url = "{0}{1}".format(self.BASE, url)
+        url = f"{self.BASE}{url}"
 
         # handles rate limits.
         # max_calls is set to 59 because current implementation will retry in 60s
@@ -182,11 +179,11 @@ class HTTPClient:
 
     async def get_guild_count(self, bot_id):
         """Gets the guild count of the given Bot ID."""
-        return await self.request('GET', '/bots/{}/stats'.format(bot_id))
+        return await self.request('GET', f'/bots/{bot_id}/stats')
 
     async def get_bot_info(self, bot_id):
         """Gets the information of a bot under given bot ID on top.gg."""
-        resp: Union[dict, str] = await self.request('GET', '/bots/{}'.format(bot_id))
+        resp: Union[dict, str] = await self.request('GET', f'/bots/{bot_id}')
         resp['date'] = datetime.strptime(resp['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         for k in resp:
             if resp[k] == '':
@@ -195,14 +192,14 @@ class HTTPClient:
 
     async def get_bot_upvotes(self, bot_id):
         """Gets your bot's last 1000 votes on top.gg."""
-        return await self.request('GET', '/bots/{}/votes'.format(bot_id))
+        return await self.request('GET', f'/bots/{bot_id}/votes')
 
     async def get_bots(self, limit, offset, sort, search, fields):
         """Gets an object of bots on top.gg."""
         if limit > 500:
             limit = 50
         fields = ', '.join(fields)
-        search = ' '.join(['{}: {}'.format(field, value) for field, value in search.items()])
+        search = ' '.join([f'{field}: {value}' for field, value in search.items()])
 
         return await self.request('GET', '/bots', params={
             'limit': limit, 'offset': offset, 'sort': sort, 'search': search, 'fields': fields
@@ -210,11 +207,11 @@ class HTTPClient:
 
     async def get_user_info(self, user_id):
         """Gets an object of the user on top.gg."""
-        return await self.request('GET', '/users/{}'.format(user_id))
+        return await self.request('GET', f'/users/{user_id}')
 
     async def get_user_vote(self, bot_id, user_id):
         """Gets info whether the user has upvoted your bot."""
-        return await self.request('GET', '/bots/{}/check'.format(bot_id), params={'userId': user_id})
+        return await self.request('GET', f'/bots/{bot_id}/check', params={'userId': user_id})
 
 
 async def _ratelimit_handler(until):
