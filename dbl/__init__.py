@@ -8,7 +8,7 @@ A basic wrapper for the top.gg API.
 :license: MIT, see LICENSE for more details.
 """
 
-__title__ = 'dblpy'
+__title__ = 'topggpy'
 __author__ = 'Assanali Mukhanov'
 __license__ = 'MIT'
 __version__ = '0.4.0'
