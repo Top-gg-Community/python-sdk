@@ -41,11 +41,17 @@ log = logging.getLogger(__name__)
 
 
 async def _json_or_text(response: ClientResponse) -> Union[dict, str]:
-    """Turns response into a properly formatted json or text object
-    :param response: The received aiohttp response object
-    :type response: ClientResponse
-    :return: Response body in either JSON or string
-    :rtype: Union[dict, str]
+    """
+
+    Parameters
+    ----------
+    response: ClientResponse
+        The received aiohttp response object.
+
+    Returns
+    -------
+    body: Union[dict, str]
+        Response body in either JSON or string.
     """
     text = await response.text()
     if response.headers['Content-Type'] == 'application/json; charset=utf-8':
@@ -56,15 +62,17 @@ async def _json_or_text(response: ClientResponse) -> Union[dict, str]:
 class HTTPClient:
     """Represents an HTTP client sending HTTP requests to the top.gg API.
 
+    .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
 
     Parameters
     ----------
-    token :
-        A top.gg API Token
-    **session : Optional[aiohttp session]
-        The session used to request to the API
-    **loop
+    token:
+        A top.gg API Token.
+    **session: Optional[`aiohttp session`_]
+        The session used for requests to the API.
+    **loop: Optional[`event loop`_]
+        An `event loop`_ to use for asynchronous operations.
     """
 
     def __init__(self, token, **kwargs):
@@ -76,7 +84,7 @@ class HTTPClient:
         self._global_over = asyncio.Event(loop=loop)
         self._global_over.set()
 
-        user_agent = 'DBL-Python-Library (https://github.com/top-gg/DBL-Python-Library {0}) Python/{1[0]}.{1[' \
+        user_agent = 'topggpy (https://github.com/top-gg/python-sdk {0}) Python/{1[0]}.{1[' \
                      '1]} aiohttp/{2}'
         self.user_agent = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
 
@@ -94,7 +102,7 @@ class HTTPClient:
         async with rate_limiter:  # this works but doesn't 'save' over restart.
 
             if not self.token:
-                raise errors.UnauthorizedDetected("top.gg API token not provided")
+                raise errors.UnauthorizedDetected("Top.gg API token not provided.")
 
             headers = {
                 'User-Agent'   : self.user_agent,
