@@ -69,10 +69,10 @@ class HTTPClient:
     ----------
     token:
         A top.gg API Token.
-    **session: Optional[`aiohttp session`_]
-        The session used for requests to the API.
+    **session: Optional[aiohttp session]
+        The `aiohttp session`_ used for requests to the API.
     **loop: Optional[`event loop`_]
-        An `event loop`_ to use for asynchronous operations.
+        An `event loop`_ used for asynchronous operations.
     """
 
     def __init__(self, token, **kwargs):
