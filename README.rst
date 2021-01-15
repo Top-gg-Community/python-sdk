@@ -5,12 +5,12 @@ DBL Python Library
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v0.3.3
+   :alt: v0.4.0
 .. image:: https://readthedocs.org/projects/dblpy/badge/?version=latest
    :target: https://dblpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-A simple API wrapper for `top.gg`_ written in Python
+A simple API wrapper for `top.gg`_ written in Python, supporting discord.py.
 
 Installation
 ------------
@@ -19,13 +19,13 @@ Install via pip (recommended)
 
 .. code:: bash
 
-    pip install dblpy
+    pip3 install dblpy
 
 Install from source
 
 .. code:: bash
 
-    pip install git+https://github.com/top-gg/DBL-Python-Library
+    pip3 install git+https://github.com/top-gg/python-sdk/
 
 Documentation
 -------------
@@ -49,7 +49,7 @@ Additional information
 ----------------------
 
 * Before using the webhook provided by this library, make sure that you have specified port open.
-* ``webhook_port`` must be between 1024 and 49151.
+* ``webhook_port`` should be between 1024 and 49151.
 * Below examples are to be used as discord.py cogs. If you need help adding them to your bot, feel free to ask in the ``#development`` channel in our `Discord server`_.
 
 Examples
