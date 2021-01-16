@@ -24,16 +24,19 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
+import logging
 from typing import Callable, Dict, Union
 
 import aiohttp
 import discord
 from aiohttp import web
 
+log = logging.getLogger(__name__)
+
 
 class WebhookManager:
     """
-    This class is used as a manager for DBL and DSL webhooks.
+    This class is used as a manager for top.gg webhooks.
 
     Parameters
     ----------
@@ -53,32 +56,34 @@ class WebhookManager:
         self._is_closed = False
 
     def dbl_webhook(self, path: str, auth_key: str):
-        if not path:
-            path = "/dblwebhook"
         self._webhooks["dbl"] = {
-            "path": path,
-            "auth": auth_key,
+            "path": path or "/dbl",
+            "auth": auth_key or "",
             "func": self._bot_vote_handler
         }
 
     def dsl_webhook(self, path: str, auth_key: str):
-        if not path:
-            path = "/dslwebhook"
         self._webhooks["dsl"] = {
-            "path": path,
-            "auth": auth_key,
+            "path": path or "/dsl",
+            "auth": auth_key or "",
             "func": self._guild_vote_handler
         }
 
     async def _bot_vote_handler(self, request: aiohttp.web.Request):
         data = await request.json()
-        self.bot.dispatch("dbl_vote", data)
-        return web.Response(status=200)
+        auth = request.headers.get("Authorization", "")
+        if auth == self._webhooks["dbl"]["auth"]:
+            self.bot.dispatch("dbl_vote", data)
+            return web.Response(status=200, text="OK")
+        return web.Response(status=401, text="Unauthorized")
 
     async def _guild_vote_handler(self, request: aiohttp.web.Request):
         data = await request.json()
-        self.bot.dispatch("dsl_vote", data)
-        return web.Response(status=200)
+        auth = request.headers.get("Authorization", "")
+        if auth == self._webhooks["dsl"]["auth"]:
+            self.bot.dispatch("dsl_vote", data)
+            return web.Response(status=200, text="OK")
+        return web.Response(status=401, text="Unauthorized")
 
     async def run(self, port: int):
         for webhook in self._webhooks:
