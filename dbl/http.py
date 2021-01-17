@@ -190,7 +190,7 @@ class HTTPClient:
                 resp[k] = None
         return resp
 
-    async def get_bot_upvotes(self, bot_id):
+    async def get_bot_votes(self, bot_id):
         """Gets your bot's last 1000 votes on top.gg."""
         return await self.request('GET', f'/bots/{bot_id}/votes')
 
@@ -210,7 +210,7 @@ class HTTPClient:
         return await self.request('GET', f'/users/{user_id}')
 
     async def get_user_vote(self, bot_id, user_id):
-        """Gets info whether the user has upvoted your bot."""
+        """Gets info whether the user has voted for your bot."""
         return await self.request('GET', f'/bots/{bot_id}/check', params={'userId': user_id})
 
 
