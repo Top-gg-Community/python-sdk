@@ -11,7 +11,7 @@ A basic wrapper for the top.gg API.
 __title__ = 'topggpy'
 __author__ = 'Assanali Mukhanov'
 __license__ = 'MIT'
-__version__ = '0.4.0'
+__version__ = '1.0.0'
 
 from collections import namedtuple
 
