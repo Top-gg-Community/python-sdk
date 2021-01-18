@@ -30,7 +30,6 @@ Client
     :members:
 
 
-
 Event reference
 ---------------
 
@@ -50,32 +49,43 @@ Event reference
         async def on_dbl_vote(data):
             print(data)
 
-    The data returned can be found `here`_.
+    The returned data can be found `here`_.
 
     .. _here: https://top.gg/api/docs#webhooks
 
-.. function:: on_dbl_test(data)
+Widgets
+-------
 
-    Called when someone tests webhook system for your bot on top.gg
+.. note:: General information about top.gg widgets can be in `top.gg docs`_.
 
-    :param data: The data with test info returned in dict object
+In topggpy, :class:`DBLClient` has a :meth:`generate_widget` method that takes an ``options`` dictionary as a parameter.
 
-    Example: ::
+All available values for each key:
+    * ``bot_id``: ID of a bot to generate widget for. Must resolve to an ID of a valid bot when converted to a string;
+    * ``format``: must be either ``png`` and ``svg``. Defaults to ``png``;
+    * ``type``: used for short widgets (``). For large widget, must be an empty string;
+    * ``noavatar``: indicates whether to exclude bot avatar from short widgets. Must be of type ``bool``;
+    * ``colors``: a dictionary consisting of a parameter as a key and HEX color as value. ``color`` will be appended to the key in case ``key.endswith("color")`` returns False. All available fields are mentioned in `top.gg docs`_.
 
-        @bot.event
-        async def on_dbl_test(data):
-            print(data)
+Example: ::
 
-    The data returned can be found `here`_.
+    print(await self.topggpy.generate_widget(
+        {"id": 270904126974590976,
+        format: "svg",
+        colors: {
+            "username": 0xFFFFFF,
+            "top": 0x000000
+            }
+        }))
 
-    .. _here: https://top.gg/api/docs#webhooks
+.. _top.gg docs: https://top.gg/api/docs#widgets
 
 Exceptions
 ----------
 
 The following exceptions are thrown by the library.
 
-.. autoexception:: DBLException
+.. autoexception:: TopGGException
 
 .. autoexception:: UnauthorizedDetected
 
