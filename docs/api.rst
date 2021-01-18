@@ -58,7 +58,7 @@ Widgets
 
 .. note:: General information about top.gg widgets can be in `top.gg docs`_.
 
-In topggpy, :class:`DBLClient` has a :meth:`generate_widget` method that takes an ``options`` dictionary as a parameter.
+In topggpy, :class:`DBLClient` has a :meth:`DBLClient.generate_widget` method that takes an ``options`` dictionary as a parameter.
 
 All available values for each key:
     * ``bot_id``: ID of a bot to generate widget for. Must resolve to an ID of a valid bot when converted to a string;
@@ -69,8 +69,8 @@ All available values for each key:
 
 Example: ::
 
-    print(await self.topggpy.generate_widget(
-        {"id": 270904126974590976,
+    print(await self.topggpy.generate_widget({
+        "id": 270904126974590976,
         format: "svg",
         colors: {
             "username": 0xFFFFFF,
