@@ -27,10 +27,9 @@ DEALINGS IN THE SOFTWARE.
 import asyncio
 import logging
 from asyncio.tasks import Task
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import discord
-from aiohttp.web_runner import TCPSite
 
 from . import errors
 from .http import HTTPClient
@@ -46,11 +45,9 @@ class DBLClient:
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
 
     Parameters
-    ==========
-
-    token:
-        Your bot's top.gg API Token
-
+    ----------
+    token: str
+        Your bot's top.gg API Token.
     bot: discord.Client
         An instance of a discord.py Client object.
     autopost: Optional[bool]
@@ -62,7 +59,7 @@ class DBLClient:
         The path for the webhook request.
     webhook_port: Optional[int]
         The port to run the webhook on. Will activate webhook if set. Must be of int type.
-    **session: Optional
+    **session: Optional[aiohttp session]
         An `aiohttp session`_ to use for requests to the API.
     **loop: Optional[event loop]
         An `event loop`_ to use for asynchronous operations.
@@ -80,7 +77,7 @@ class DBLClient:
     http: HTTPClient
     autopost_task: Task
 
-    def __init__(self, bot: discord.Client, token: str, autopost: bool = False, **kwargs) -> None:
+    def __init__(self, bot: discord.Client, token: str, autopost: bool = False, **kwargs):
         self.bot = bot
         self.bot_id = None
         self.loop = kwargs.get("loop", bot.loop)
@@ -106,7 +103,7 @@ class DBLClient:
                 pass
             await asyncio.sleep(1800)
 
-    def guild_count(self):
+    def guild_count(self) -> int:
         """Gets the guild count from the provided Client object."""
         return len(self.bot.guilds)
 
@@ -116,12 +113,10 @@ class DBLClient:
         Gets weekend status from top.gg.
 
         Returns
-        =======
-
+        -------
         weekend status: bool
             The boolean value of weekend status.
         """
-        await self._ensure_bot_user()
         data = await self.http.get_weekend_status()
         return data['is_weekend']
 
@@ -134,8 +129,7 @@ class DBLClient:
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
         Parameters
-        ==========
-
+        ----------
         guild_count: Union[int, List[int]]
             Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
             If not specified, length of provided client's property `.guilds` will be posted.
@@ -149,66 +143,58 @@ class DBLClient:
             guild_count = self.guild_count()
         await self.http.post_guild_count(guild_count, shard_count, shard_id)
 
-    async def get_guild_count(self, bot_id: int = None):
+    async def get_guild_count(self, bot_id: int = None) -> Dict[str, Dict[str, Union[List[int], int]]]:
         """This function is a coroutine.
 
         Gets a bot's guild count and shard info from top.gg.
 
         Parameters
-        ==========
-
-        bot_id: int[Optional]
-            ID of the bot you want to look up.
-            Defaults to the provided discord.py bot/client.
+        ----------
+        bot_id: int
+            ID of the bot you want to look up. Defaults to the provided Client object.
 
         Returns
-        =======
-
-        stats: dict
-            The guild count and shards of a bot on top.gg.
-            The date object is returned in a datetime.datetime object.
+        -------
+        stats: Dict[str, Dict[str, Union[List[int], int]]]
+            The guild count and shards of a bot on top.gg. The date field is returned in a datetime.datetime object.
+            The
         """
         await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
         return await self.http.get_guild_count(bot_id)
 
-    async def get_bot_upvotes(self):
+    async def get_bot_votes(self) -> List[str]:
         """This function is a coroutine.
 
-        Gets information about last 1000 upvotes for your bot on top.gg.
+        Gets information about last 1000 votes for your bot on top.gg.
 
         .. note::
 
             This API endpoint is only available to the bot's owner.
 
         Returns
-        =======
-
-        users: list
+        -------
+        users: List[str]
             Users who voted for your bot.
-
         """
         await self._ensure_bot_user()
-        return await self.http.get_bot_upvotes(self.bot_id)
+        return await self.http.get_bot_votes(self.bot_id)
 
-    async def get_bot_info(self, bot_id: int = None):
+    async def get_bot_info(self, bot_id: int = None) -> Dict[str, Any]:
         """This function is a coroutine.
 
         Gets information about a bot from top.gg.
 
         Parameters
-        ==========
-
-        bot_id: int[Optional]
-            ID of the bot you want to look up. Will search the if not specified.
+        ----------
+        bot_id: int
+            ID of the bot to look up. Defaults to the provided Client object.
 
         Returns
-        =======
-
-        bot info: dict
-            Information on the bot you looked up.
-            https://top.gg/api/docs#bots
+        -------
+        bot info: Dict[str, Any]
+            Information on the bot you looked up. Returned data can be found at https://top.gg/api/docs#bots
         """
         await self._ensure_bot_user()
         if bot_id is None:
@@ -216,213 +202,71 @@ class DBLClient:
         return await self.http.get_bot_info(bot_id)
 
     async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None,
-                       fields: list = None):
+                       fields: list = None) -> Dict[str, Any]:
         """This function is a coroutine.
 
         Gets information about listed bots on top.gg.
 
         Parameters
-        ==========
-
-        limit: int[Optional]
-            The number of results you want to lookup. Defaults to 50. Max 500.
-        offset: int[Optional]
+        ----------
+        limit: int
+            The number of results to look up. Defaults to 50. Max 500 allowed.
+        offset: int
             The amount of bots to skip. Defaults to 0.
-        sort: str[Optional]
+        sort: str
             The field to sort by. Prefix with ``-`` to reverse the order.
-        search: dict[Optional]
+        search: Dict[str, str]
             The search data.
-        fields: list[Optional]
+        fields: List[Dict[str, Any]]
             Fields to output.
 
         Returns
-        =======
-
-        bots: dict
+        -------
+        bots: Dict[str, Any]
             Returns info on the bots on top.gg.
             https://top.gg/api/docs#bots
         """
-        sort = sort or ""  # weird but works
+        sort = sort or ""
         search = search or {}
         fields = fields or []
-        await self._ensure_bot_user()
         return await self.http.get_bots(limit, offset, sort, search, fields)
 
-    async def get_user_info(self, user_id: int):
+    async def get_user_info(self, user_id: int) -> Dict[str, Any]:
         """This function is a coroutine.
 
         Gets information about a user on top.gg.
 
         Parameters
-        ==========
-
+        ----------
         user_id: int
-            ID of the user you wish to lookup.
+            ID of the user to look up.
 
         Returns
-        =======
-
-        user data: dict
+        -------
+        user data: Dict[str, Any]
             Info about the user.
             https://top.gg/api/docs#users
         """
-        await self._ensure_bot_user()
         return await self.http.get_user_info(user_id)
 
-    async def get_user_vote(self, user_id: int):
+    async def get_user_vote(self, user_id: int) -> bool:
         """This function is a coroutine.
 
-        Gets information about the user's upvote for your bot on top.gg.
+        Gets information about a user's vote for your bot on top.gg.
 
         Parameters
-        ==========
-
+        ----------
         user_id: int
-            ID of the user you wish to lookup.
+            ID of the user.
 
         Returns
-        =======
-
+        -------
         vote status: bool
-            Info about the user's upvote.
+            Info about the user's vote.
         """
         await self._ensure_bot_user()
         data = await self.http.get_user_vote(self.bot_id, user_id)
         return bool(data['voted'])
-
-    async def generate_widget_large(
-        self,
-        bot_id: int = None,
-        top: str = '2C2F33',
-        mid: str = '23272A',
-        user: str = 'FFFFFF',
-        cert: str = 'FFFFFF',
-        data: str = 'FFFFFF',
-        label: str = '99AAB5',
-        highlight: str = '2C2F33'
-    ):
-        """This function is a coroutine.
-
-        Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF become FF00FF).
-
-        Parameters
-        ==========
-
-        bot_id: int
-            ID of the bot you wish to make a widget for.
-        top: str
-            The hex color code of the top bar.
-        mid: str
-            The hex color code of the main section.
-        user: str
-            The hex color code of the username text.
-        cert: str
-            The hex color code of the certified text (if applicable).
-        data: str
-            The hex color code of the statistics (numbers only e.g. 44) of the bot.
-        label: str
-            The hex color code of the description (text e.g. guild count) of the statistics.
-        highlight: str
-            The hex color code of the data boxes.
-
-        Returns
-        =======
-
-        URL of the widget: str
-        """
-        await self._ensure_bot_user()
-        url = 'https://top.gg/api/widget/{0}.png?topcolor={1}&middlecolor={2}&usernamecolor={3}' \
-              '&certifiedcolor={4}&datacolor={5}&labelcolor={6}&highlightcolor={7}'
-        if bot_id is None:
-            bot_id = self.bot_id
-        url = url.format(bot_id, top, mid, user, cert, data, label, highlight)
-        return url
-
-    async def get_widget_large(self, bot_id: int = None):
-        """This function is a coroutine.
-
-        Generates the default large widget.
-
-        Parameters
-        ==========
-
-        bot_id: int
-            ID of the bot you wish to make a widget for.
-
-        Returns
-        =======
-
-        URL of the widget: str
-        """
-        await self._ensure_bot_user()
-        if bot_id is None:
-            bot_id = self.bot_id
-        url = 'https://top.gg/api/widget/{0}.png'.format(bot_id)
-        return url
-
-    async def generate_widget_small(
-        self,
-        bot_id: int = None,
-        avabg: str = '2C2F33',
-        lcol: str = '23272A',
-        rcol: str = '2C2F33',
-        ltxt: str = 'FFFFFF',
-        rtxt: str = 'FFFFFF'
-    ):
-        """This function is a coroutine.
-
-        Generates a custom large widget. Do not add `#` to the color codes (e.g. #FF00FF should be FF00FF).
-
-        Parameters
-        ==========
-
-        bot_id: int
-            ID of the bot you wish to make a widget for.
-        avabg: str
-            The hex color code of the background of the avatar (if the avatar has transparency).
-        lcol: str
-            The hex color code of the left background color.
-        rcol: str
-            The hex color code of the right background color.
-        ltxt: str
-            The hex color code of the left text.
-        rtxt: str
-            The hex color code of the right text.
-
-        Returns
-        =======
-
-        URL of the widget: str
-        """
-        await self._ensure_bot_user()
-        url = 'https://top.gg/api/widget/lib/{0}.png?avatarbg={1}&lefttextcolor={2}' \
-              '&righttextcolor={3}&leftcolor={4}&rightcolor={5}'
-        if bot_id is None:
-            bot_id = self.bot_id
-        url = url.format(bot_id, avabg, ltxt, rtxt, lcol, rcol)
-        return url
-
-    async def get_widget_small(self, bot_id: int = None):
-        """This function is a coroutine.
-
-        Generates the default small widget.
-
-        Parameters
-        ==========
-
-        bot_id: int
-            ID of the bot you wish to make a widget for.
-
-        Returns
-        =======
-
-        URL of the widget: str
-        """
-        await self._ensure_bot_user()
-        if bot_id is None:
-            bot_id = self.bot_id
-        url = 'https://top.gg/api/widget/lib/{0}.png'.format(bot_id)
-        return url
 
     async def close(self):
         """This function is a coroutine.
