@@ -269,6 +269,20 @@ class DBLClient:
         return bool(data['voted'])
 
     async def generate_widget(self, options: Dict[str, Union[str, Dict[str, int], bool]] = None) -> str:
+        """This function is a coroutine.
+
+        Generates a top.gg widget from provided options.
+
+        Parameters
+        ----------
+        options: Dict[str, Union[str, Dict[str, int], bool]]
+            A dictionary consisting of options. For further information, see the :ref:`Widgets` section.
+
+        Returns
+        -------
+        widget: str
+            Generated widget URL.
+        """
         bot_id = options.get("id")
 
         if bot_id is None:
