@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 import asyncio
 import logging
 from asyncio.tasks import Task
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import discord
 
@@ -143,7 +143,7 @@ class DBLClient:
             guild_count = self.guild_count()
         await self.http.post_guild_count(guild_count, shard_count, shard_id)
 
-    async def get_guild_count(self, bot_id: int = None) -> Dict[str, Dict[str, Union[List[int], int]]]:
+    async def get_guild_count(self, bot_id: int = None) -> dict:
         """This function is a coroutine.
 
         Gets a bot's guild count and shard info from top.gg.
@@ -155,7 +155,7 @@ class DBLClient:
 
         Returns
         -------
-        stats: Dict[str, Dict[str, Union[List[int], int]]]
+        stats: dict
             The guild count and shards of a bot on top.gg. The date field is returned in a datetime.datetime object.
             The
         """
@@ -181,7 +181,7 @@ class DBLClient:
         await self._ensure_bot_user()
         return await self.http.get_bot_votes(self.bot_id)
 
-    async def get_bot_info(self, bot_id: int = None) -> Dict[str, Any]:
+    async def get_bot_info(self, bot_id: int = None) -> dict:
         """This function is a coroutine.
 
         Gets information about a bot from top.gg.
@@ -193,7 +193,7 @@ class DBLClient:
 
         Returns
         -------
-        bot info: Dict[str, Any]
+        bot info: dict
             Information on the bot you looked up. Returned data can be found at https://top.gg/api/docs#bots
         """
         await self._ensure_bot_user()
@@ -202,7 +202,7 @@ class DBLClient:
         return await self.http.get_bot_info(bot_id)
 
     async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None,
-                       fields: list = None) -> Dict[str, Any]:
+                       fields: list = None) -> dict:
         """This function is a coroutine.
 
         Gets information about listed bots on top.gg.
@@ -215,14 +215,14 @@ class DBLClient:
             The amount of bots to skip. Defaults to 0.
         sort: str
             The field to sort by. Prefix with ``-`` to reverse the order.
-        search: Dict[str, str]
+        search: dict
             The search data.
-        fields: List[Dict[str, Any]]
+        fields: List[dict]
             Fields to output.
 
         Returns
         -------
-        bots: Dict[str, Any]
+        bots: dict
             Returns info on the bots on top.gg.
             https://top.gg/api/docs#bots
         """
@@ -231,7 +231,7 @@ class DBLClient:
         fields = fields or []
         return await self.http.get_bots(limit, offset, sort, search, fields)
 
-    async def get_user_info(self, user_id: int) -> Dict[str, Any]:
+    async def get_user_info(self, user_id: int) -> dict:
         """This function is a coroutine.
 
         Gets information about a user on top.gg.
@@ -243,7 +243,7 @@ class DBLClient:
 
         Returns
         -------
-        user data: Dict[str, Any]
+        user data: dict
             Info about the user.
             https://top.gg/api/docs#users
         """
@@ -268,14 +268,14 @@ class DBLClient:
         data = await self.http.get_user_vote(self.bot_id, user_id)
         return bool(data['voted'])
 
-    async def generate_widget(self, options: Dict[str, Union[str, Dict[str, int], bool]] = None) -> str:
+    async def generate_widget(self, options: dict = None) -> str:
         """This function is a coroutine.
 
         Generates a top.gg widget from provided options.
 
         Parameters
         ----------
-        options: Dict[str, Union[str, Dict[str, int], bool]]
+        options: dict
             A dictionary consisting of options. For further information, see the :ref:`Widgets` section.
 
         Returns
