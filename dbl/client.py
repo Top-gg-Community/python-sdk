@@ -130,12 +130,12 @@ class DBLClient:
 
         Parameters
         ----------
-        guild_count: Union[int, List[int]]
+        guild_count: Optional[Union[int, List[int]]]
             Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
             If not specified, length of provided client's property `.guilds` will be posted.
-        shard_count: int[Optional]
+        shard_count: Optional[int]
             The total number of shards.
-        shard_id: int[Optional]
+        shard_id: Optional[int]
             The index of the current shard. top.gg uses `0 based indexing`_ for shards.
         """
         await self._ensure_bot_user()
@@ -157,7 +157,6 @@ class DBLClient:
         -------
         stats: dict
             The guild count and shards of a bot on top.gg. The date field is returned in a datetime.datetime object.
-            The
         """
         await self._ensure_bot_user()
         if bot_id is None:
