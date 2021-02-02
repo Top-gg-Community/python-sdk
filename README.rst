@@ -55,7 +55,7 @@ Additional information
 Examples
 --------
 
-Posting server count manually:
+Posting server count manually every 30 minutes:
 
 .. code:: py
 
