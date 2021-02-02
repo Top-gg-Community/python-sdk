@@ -216,7 +216,7 @@ class HTTPClient:
 
 async def _ratelimit_handler(until):
     """Handles the displayed message when we are ratelimited."""
-    duration = round(until - datetime.now().timestamp())
+    duration = round(until - datetime.utcnow().timestamp())
     mins = duration / 60
     fmt = "We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes)."
     log.warning(fmt, duration, mins)
