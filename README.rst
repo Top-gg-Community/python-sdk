@@ -158,6 +158,6 @@ With autopost:
 
 
 .. _top.gg: https://top.gg/
-..  docs.top.gg: https://docs.top.gg/
+.. _docs.top.gg: https://docs.top.gg/
 .. _here: https://dblpy.rtfd.io
 .. _Discord server: https://discord.gg/EYHTgJX
