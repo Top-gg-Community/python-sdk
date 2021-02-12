@@ -39,7 +39,7 @@ Features
 * GET bot info, server count, upvote info
 * GET all bots
 * GET user info
-* GET widgets (large and small) including custom ones. See `top.gg/api/docs`_ for more info.
+* GET widgets (large and small) including custom ones. See `docs.top.gg`_ for more info.
 * GET weekend status
 * Built-in webhook to help you handle top.gg upvotes
 * Automated server count posting
@@ -158,6 +158,6 @@ With autopost:
 
 
 .. _top.gg: https://top.gg/
-.. _top.gg/api/docs: https://top.gg/api/docs
+.. _docs.top.gg: https://docs.top.gg/
 .. _here: https://dblpy.rtfd.io
 .. _Discord server: https://discord.gg/EYHTgJX
