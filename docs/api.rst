@@ -51,7 +51,7 @@ Event reference
 
     The returned data can be found `here`_.
 
-    .. _here: https://top.gg/api/docs#webhooks
+    .. _here: https://docs.top.gg/webhooks
 
 Widgets
 -------
