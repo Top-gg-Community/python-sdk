@@ -61,6 +61,7 @@ class WebhookManager:
             "auth": auth_key or "",
             "func": self._bot_vote_handler
         }
+        return self
 
     def dsl_webhook(self, path: str, auth_key: str):
         self._webhooks["dsl"] = {
@@ -68,6 +69,7 @@ class WebhookManager:
             "auth": auth_key or "",
             "func": self._guild_vote_handler
         }
+        return self
 
     async def _bot_vote_handler(self, request: aiohttp.web.Request):
         data = await request.json()
