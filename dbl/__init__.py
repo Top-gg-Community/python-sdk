@@ -11,7 +11,6 @@ A basic wrapper for the top.gg API.
 __title__ = 'topggpy'
 __author__ = 'Assanali Mukhanov'
 __license__ = 'MIT'
-__version__ = '1.0.0'
 
 from collections import namedtuple
 
@@ -22,4 +21,6 @@ from .webhook import WebhookManager
 
 VersionInfo = namedtuple('VersionInfo', 'major minor micro releaselevel serial')
 
-version_info = VersionInfo(major=0, minor=4, micro=0, releaselevel='final', serial=0)
+version_info = VersionInfo(major=1, minor=0, micro=0, releaselevel='final', serial=0)
+
+__version__ = f'{version_info.major}.{version_info.minor}.{version_info.micro}'
