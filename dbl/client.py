@@ -53,12 +53,9 @@ class DBLClient:
     autopost: Optional[bool]
         Whether to automatically post bot's guild count every 30 minutes.
         This will dispatch :meth:`on_guild_post`.
-    webhook_auth: str
-        The string for Authorization you set on the site for verification.
-    webhook_path: str
-        The path for the webhook request.
-    webhook_port: Optional[int]
-        The port to run the webhook on. Will activate webhook if set. Must be of int type.
+    **post_shard_count: Optional[bool]
+        Whether to post the shard count on autopost.
+        Defaults to False.
     **session: Optional[aiohttp session]
         An `aiohttp session`_ to use for requests to the API.
     **loop: Optional[event loop]
@@ -70,9 +67,7 @@ class DBLClient:
     bot_id: Optional[int]
     loop: asyncio.AbstractEventLoop
     autopost: Optional[bool]
-    webhook_port: Optional[int]
-    webhook_auth: str
-    webhook_path: str
+    _post_shard_count: Optional[bool]
     _is_closed: bool
     http: HTTPClient
     autopost_task: Task
@@ -82,6 +77,7 @@ class DBLClient:
         self.bot_id = None
         self.loop = kwargs.get("loop", bot.loop)
         self.autopost = autopost
+        self._post_shard_count = kwargs.get("post_shard_count", False)
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get("session"))
         self._is_closed = False
 
@@ -97,12 +93,17 @@ class DBLClient:
         await self._ensure_bot_user()
         while not self.bot.is_closed():
             try:
-                await self.post_guild_count()
-                self.bot.dispatch('guild_post')
+                await self.post_guild_count(shard_count=self.bot.shard_count
+                                            if self._post_shard_count
+                                            else None)
+                event_name = 'guild_post'
+                log.debug('Dispatching %s event', event_name)
+                self.bot.dispatch(event_name)
             except errors.HTTPException:
                 pass
             await asyncio.sleep(1800)
 
+    @property
     def guild_count(self) -> int:
         """Gets the guild count from the provided Client object."""
         return len(self.bot.guilds)
@@ -140,7 +141,7 @@ class DBLClient:
         """
         await self._ensure_bot_user()
         if guild_count is None:
-            guild_count = self.guild_count()
+            guild_count = self.guild_count
         await self.http.post_guild_count(guild_count, shard_count, shard_id)
 
     async def get_guild_count(self, bot_id: int = None) -> dict:
