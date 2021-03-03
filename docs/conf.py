@@ -18,10 +18,12 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import re
+# import re
 import sys
 
 sys.path.insert(0, os.path.abspath('../'))
+
+from dbl import __version__ as version
 
 # -- General configuration ------------------------------------------------
 
@@ -73,8 +75,8 @@ author = 'Assanali Mukhanov'
 #
 # The short X.Y version.
 
-with open('../dbl/__init__.py') as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+# with open('../dbl/__init__.py') as f:
+#     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -223,4 +225,5 @@ man_pages = [(master_doc, 'topggpy', 'topggpy Documentation', [author], 1)]
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [(
-    master_doc, 'topggpy', 'topggpy Documentation', author, 'topggpy', 'One line description of project.', 'Miscellaneous'), ]
+    master_doc, 'topggpy', 'topggpy Documentation', author, 'topggpy', 'One line description of project.',
+    'Miscellaneous'), ]
