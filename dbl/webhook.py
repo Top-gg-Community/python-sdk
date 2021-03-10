@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import logging
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Optional, Union
 
 import aiohttp
 import discord
@@ -95,6 +95,17 @@ class WebhookManager:
         self._webserver = web.TCPSite(runner, '0.0.0.0', port)
         await self._webserver.start()
         self._is_closed = False
+        
+    @property
+    def webserver(self) -> Optional[web.TCPSite]:
+        """Returns the internal webserver that handles webhook requests.
+        
+        Returns
+        --------
+        Optional[:class:`aiohttp.web.TCPSite`]
+            The internal webserver if it exists.
+        """
+        return getattr(self, '_webserver', None)
 
     async def close(self):
         await self._webserver.stop()
