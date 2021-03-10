@@ -9,6 +9,15 @@ This page keeps a detailed human friendly rendering of what's new and changed in
 
 .. _changelog:
 
+v1.0.0
+------
+* Added support for server webhooks
+* Large webhook system rework, read the :ref:`webhooks` section for more
+* Renamed ``DBLException`` to ``TopGGException``
+* Renamed ``DBLClient.get_bot_upvotes()`` to :meth:`DBLClient.get_bot_votes`
+* Added :meth:`DBLClient.generate_widget` along with :ref:`widgets` section in the documentation
+* Implemented a properly working ratelimiter
+
 v0.4.0
 ------
 * :meth:`DBLClient.post_guild_count` now supports a custom ``guild_count`` argument, which accepts either an integer or list of integers
@@ -90,10 +99,10 @@ Initial release
     * GET bot info, server count, upvote count, upvote info
     * GET all bots
     * GET specific user info
-    * GET widgets (large and small) including custom ones. See `top.gg/api/docs`_ for more info.
+    * GET widgets (large and small) including custom ones. See `Top.gg docs`_ for more info.
 
 * Not Working / Implemented
 
     * Searching for bots via the api
 
-.. _top.gg/api/docs: https://top.gg/api/docs
+.. _Top.gg docs: https://docs.top.gg/
