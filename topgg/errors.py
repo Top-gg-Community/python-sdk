@@ -102,7 +102,7 @@ class NotFound(HTTPException):
 
 
 class ServerError(HTTPException):
-    """Exception that's thrown when top.gg returns "Server Error" responses
+    """Exception that's thrown when Top.gg returns "Server Error" responses
     (status codes such as 500 and 503).
 
     Subclass of :exc:`HTTPException`

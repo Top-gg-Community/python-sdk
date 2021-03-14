@@ -60,7 +60,7 @@ async def _json_or_text(response: ClientResponse) -> Union[dict, str]:
 
 
 class HTTPClient:
-    """Represents an HTTP client sending HTTP requests to the top.gg API.
+    """Represents an HTTP client sending HTTP requests to the Top.gg API.
 
     .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
@@ -68,7 +68,7 @@ class HTTPClient:
     Parameters
     ----------
     token:
-        A top.gg API Token.
+        A Top.gg API Token.
     **session: Optional[aiohttp session]
         The `aiohttp session`_ used for requests to the API.
     **loop: Optional[`event loop`_]
@@ -94,7 +94,7 @@ class HTTPClient:
 
         # handles rate limits.
         # max_calls is set to 59 because current implementation will retry in 60s
-        # after 60 calls is reached. top.gg has a 1h block so obviously this doesn't work well,
+        # after 60 calls is reached. Top.gg has a 1h block so obviously this doesn't work well,
         # as it will get a 429 when 60 is reached.
 
         if not self.token:
@@ -162,7 +162,7 @@ class HTTPClient:
         await self.session.close()
 
     async def post_guild_count(self, guild_count, shard_count, shard_id):
-        """Posts bot's guild count and shards info on top.gg."""
+        """Posts bot's guild count and shards info on Top.gg."""
         payload = {
             'server_count': guild_count
         }
@@ -174,7 +174,7 @@ class HTTPClient:
         await self.request('POST', '/bots/stats', json=payload)
 
     async def get_weekend_status(self):
-        """Gets the weekend status from top.gg."""
+        """Gets the weekend status from Top.gg."""
         return await self.request('GET', '/weekend')
 
     async def get_guild_count(self, bot_id):
@@ -182,7 +182,7 @@ class HTTPClient:
         return await self.request('GET', f'/bots/{bot_id}/stats')
 
     async def get_bot_info(self, bot_id):
-        """Gets the information of a bot under given bot ID on top.gg."""
+        """Gets the information of a bot under given bot ID on Top.gg."""
         resp: Union[dict, str] = await self.request('GET', f'/bots/{bot_id}')
         resp['date'] = datetime.strptime(resp['date'], '%Y-%m-%dT%H:%M:%S.%fZ')
         for k in resp:
@@ -191,11 +191,11 @@ class HTTPClient:
         return resp
 
     async def get_bot_votes(self, bot_id):
-        """Gets your bot's last 1000 votes on top.gg."""
+        """Gets your bot's last 1000 votes on Top.gg."""
         return await self.request('GET', f'/bots/{bot_id}/votes')
 
     async def get_bots(self, limit, offset, sort, search, fields):
-        """Gets an object of bots on top.gg."""
+        """Gets an object of bots on Top.gg."""
         if limit > 500:
             limit = 50
         fields = ', '.join(fields)
@@ -206,7 +206,7 @@ class HTTPClient:
         })
 
     async def get_user_info(self, user_id):
-        """Gets an object of the user on top.gg."""
+        """Gets an object of the user on Top.gg."""
         return await self.request('GET', f'/users/{user_id}')
 
     async def get_user_vote(self, bot_id, user_id):
