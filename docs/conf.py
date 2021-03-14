@@ -23,7 +23,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath('../'))
 
-from dbl import __version__ as version
+from topgg import __version__ as version
 
 # -- General configuration ------------------------------------------------
 
@@ -37,7 +37,9 @@ from dbl import __version__ as version
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.extlinks',
+    'sphinx.ext.intersphinx'
 ]
 
 on_rtd = os.getenv('READTHEDOCS') == 'True'
@@ -49,7 +51,12 @@ else:
 autodoc_member_order = 'bysource'
 
 extlinks = {
-    'issue': ('https://github.com/top-gg/python-sdk/issues/%s', 'issue '),
+    'issue': ('https://github.com/top-gg/python-sdk/issues/%s', 'GH-'),
+}
+
+intersphinx_mapping = {
+    'py'     : ('https://docs.python.org/3', None),
+    'discord': ('https://discordpy.readthedocs.io/en/latest/', None)
 }
 
 # Add any paths that contain templates here, relative to this directory.

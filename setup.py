@@ -1,7 +1,8 @@
 import os
-import re
 
 from setuptools import find_packages, setup
+
+from topgg import __author__ as author, __version__ as version
 
 
 on_rtd = os.getenv('READTHEDOCS') == 'True'
@@ -11,12 +12,6 @@ with open('requirements.txt') as f:
 
 if on_rtd:
     requirements.append('sphinxcontrib-napoleon')
-
-with open('dbl/__init__.py') as f:
-    # version = re.search(r"__version__\s*=\s*((\"|\')(\w).+\2)", f.read())
-    init_file = f.read()
-    author = re.search(r"^__author__\s*=\s*[\'\"]([^\'\"]*)[\'\"]", init_file, re.MULTILINE).group(1)
-    version = re.search(r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]", init_file, re.MULTILINE).group(1)
 
 with open('README.rst') as f:
     readme = f.read()
@@ -28,10 +23,10 @@ setup(name='dblpy',
       version=version,
       packages=find_packages(),
       license='MIT',
-      description='A simple API wrapper for top.gg written in Python.',
+      description='A simple API wrapper for Top.gg written in Python.',
       long_description=readme,
       include_package_data=True,
-      python_requires='>= 3.5.3',
+      python_requires='>= 3.6',
       install_requires=requirements,
       keywords='discord bot server list discordservers serverlist discordbots botlist topgg top.gg',
       classifiers=[
@@ -44,6 +39,7 @@ setup(name='dblpy',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
           'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
           'Topic :: Internet',
           'Topic :: Software Development :: Libraries',
           'Topic :: Software Development :: Libraries :: Python Modules',
