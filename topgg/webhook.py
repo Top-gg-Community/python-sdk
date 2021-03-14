@@ -55,7 +55,7 @@ class WebhookManager:
         self._is_closed = False
 
     def dbl_webhook(self, route: str, auth_key: str):
-        """Configure and activate a route that listens to bot votes.
+        """Helper method that configures a route that listens to bot votes.
 
         Parameters
         ----------
@@ -72,7 +72,7 @@ class WebhookManager:
         return self
 
     def dsl_webhook(self, route: str, auth_key: str):
-        """Configure and activate a route that listens to server votes.
+        """Helper method that configures a route that listens to server votes.
 
         Parameters
         ----------
@@ -105,7 +105,7 @@ class WebhookManager:
         return web.Response(status=401, text="Unauthorized")
 
     async def run(self, port: int):
-        """Run the webhook.
+        """Runs the webhook.
 
         Parameters
         ----------
