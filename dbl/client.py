@@ -71,9 +71,9 @@ class DBLClient:
     _is_closed: bool
     http: HTTPClient
     autopost_task: Task
-    autoposttimer: int
+    autopost_timer: int
 
-    def __init__(self, bot: discord.Client, token: str, autopost: bool = False,autoposttimer: int = 1800, **kwargs):
+    def __init__(self, bot: discord.Client, token: str, autopost: bool = False,autopost_timer: int = 1800, **kwargs):
         self.bot = bot
         self.bot_id = None
         self.loop = kwargs.get("loop", bot.loop)
@@ -81,7 +81,7 @@ class DBLClient:
         self._post_shard_count = kwargs.get("post_shard_count", False)
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get("session"))
         self._is_closed = False
-        self.autoposttimer = autoposttimer
+        self.autopost_timer = autopost_timer
 
         if self.autopost:
             self.autopost_task = self.loop.create_task(self._auto_post())
@@ -91,7 +91,7 @@ class DBLClient:
         if self.bot_id is None:
             self.bot_id = self.bot.user.id
 
-    async def _auto_post(self,time=self.autoposttimer):
+    async def _auto_post(self,time=autopost_timer):
         await self._ensure_bot_user()
         while not self.bot.is_closed():
             try:
