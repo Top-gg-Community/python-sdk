@@ -91,7 +91,7 @@ class DBLClient:
         if self.bot_id is None:
             self.bot_id = self.bot.user.id
 
-    async def _auto_post(self,time=autopost_timer):
+    async def _auto_post(self):
         await self._ensure_bot_user()
         while not self.bot.is_closed():
             try:
@@ -103,7 +103,7 @@ class DBLClient:
                 self.bot.dispatch(event_name)
             except errors.HTTPException:
                 pass
-            await asyncio.sleep(time)
+            await asyncio.sleep(autopost_timer)
 
     @property
     def guild_count(self) -> int:
