@@ -38,8 +38,8 @@ log = logging.getLogger(__name__)
 
 
 class DBLClient:
-    """Represents a client connection that connects to top.gg.
-    This class is used to interact with the top.gg API.
+    """Represents a client connection that connects to Top.gg.
+    This class is used to interact with the Top.gg API.
 
     .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
@@ -47,7 +47,7 @@ class DBLClient:
     Parameters
     ----------
     token: str
-        Your bot's top.gg API Token.
+        Your bot's Top.gg API Token.
     bot: discord.Client
         An instance of a discord.py Client object.
     autopost: Optional[bool]
@@ -111,7 +111,7 @@ class DBLClient:
     async def get_weekend_status(self):
         """This function is a coroutine.
 
-        Gets weekend status from top.gg.
+        Gets weekend status from Top.gg.
 
         Returns
         -------
@@ -125,7 +125,7 @@ class DBLClient:
                                shard_id: int = None):
         """This function is a coroutine.
 
-        Posts your bot's guild count and shards info to top.gg.
+        Posts your bot's guild count and shards info to Top.gg.
 
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
@@ -137,7 +137,7 @@ class DBLClient:
         shard_count: Optional[int]
             The total number of shards.
         shard_id: Optional[int]
-            The index of the current shard. top.gg uses `0 based indexing`_ for shards.
+            The index of the current shard. Top.gg uses `0 based indexing`_ for shards.
         """
         await self._ensure_bot_user()
         if guild_count is None:
@@ -147,7 +147,7 @@ class DBLClient:
     async def get_guild_count(self, bot_id: int = None) -> dict:
         """This function is a coroutine.
 
-        Gets a bot's guild count and shard info from top.gg.
+        Gets a bot's guild count and shard info from Top.gg.
 
         Parameters
         ----------
@@ -157,7 +157,7 @@ class DBLClient:
         Returns
         -------
         stats: dict
-            The guild count and shards of a bot on top.gg. The date field is returned in a datetime.datetime object.
+            The guild count and shards of a bot on Top.gg. The date field is returned in a datetime.datetime object.
         """
         await self._ensure_bot_user()
         if bot_id is None:
@@ -167,7 +167,7 @@ class DBLClient:
     async def get_bot_votes(self) -> List[str]:
         """This function is a coroutine.
 
-        Gets information about last 1000 votes for your bot on top.gg.
+        Gets information about last 1000 votes for your bot on Top.gg.
 
         .. note::
 
@@ -184,7 +184,7 @@ class DBLClient:
     async def get_bot_info(self, bot_id: int = None) -> dict:
         """This function is a coroutine.
 
-        Gets information about a bot from top.gg.
+        Gets information about a bot from Top.gg.
 
         Parameters
         ----------
@@ -194,7 +194,7 @@ class DBLClient:
         Returns
         -------
         bot info: dict
-            Information on the bot you looked up. Returned data can be found at https://top.gg/api/docs#bots
+            Information on the bot you looked up. Returned data can be found `here <https://docs.top.gg/api/bot/#bot-structure>`_.
         """
         await self._ensure_bot_user()
         if bot_id is None:
@@ -205,7 +205,7 @@ class DBLClient:
                        fields: list = None) -> dict:
         """This function is a coroutine.
 
-        Gets information about listed bots on top.gg.
+        Gets information about listed bots on Top.gg.
 
         Parameters
         ----------
@@ -223,8 +223,7 @@ class DBLClient:
         Returns
         -------
         bots: dict
-            Returns info on the bots on top.gg.
-            https://top.gg/api/docs#bots
+            Returns info on bots that match the search query on Top.gg.
         """
         sort = sort or ""
         search = search or {}
@@ -234,7 +233,7 @@ class DBLClient:
     async def get_user_info(self, user_id: int) -> dict:
         """This function is a coroutine.
 
-        Gets information about a user on top.gg.
+        Gets information about a user on Top.gg.
 
         Parameters
         ----------
@@ -244,15 +243,14 @@ class DBLClient:
         Returns
         -------
         user data: dict
-            Info about the user.
-            https://top.gg/api/docs#users
+            Info about the user. Returned data can be found `in top.gg documentation <https://docs.top.gg/api/user/#structure>`_.
         """
         return await self.http.get_user_info(user_id)
 
     async def get_user_vote(self, user_id: int) -> bool:
         """This function is a coroutine.
 
-        Gets information about a user's vote for your bot on top.gg.
+        Gets information about a user's vote for your bot on Top.gg.
 
         Parameters
         ----------
@@ -271,12 +269,12 @@ class DBLClient:
     async def generate_widget(self, options: dict = None) -> str:
         """This function is a coroutine.
 
-        Generates a top.gg widget from provided options.
+        Generates a Top.gg widget from provided options.
 
         Parameters
         ----------
         options: dict
-            A dictionary consisting of options. For further information, see the :ref:`Widgets` section.
+            A dictionary consisting of options. For further information, see the :ref:`widgets` section.
 
         Returns
         -------
