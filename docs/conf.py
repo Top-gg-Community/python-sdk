@@ -75,7 +75,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'topggpy'
-copyright = '2020, Assanali Mukhanov'
+copyright = '2021, Assanali Mukhanov'
 author = 'Assanali Mukhanov'
 
 # The version info for the project you're documenting, acts as replacement for
