@@ -1,34 +1,31 @@
-.. currentmodule:: dbl
+.. currentmodule:: topgg
 
 API Reference
-===============
+=============
 
 The following section outlines the API of topggpy.
 
 Version Related Info
----------------------
+--------------------
 
 There are two main ways to query version information about the library.
 
 .. data:: version_info
 
-    A named tuple that is similar to `sys.version_info`_.
+    A named tuple that is similar to :obj:`py:sys.version_info`.
 
-    Just like `sys.version_info`_ the valid values for ``releaselevel`` are
+    Just like :obj:`py:sys.version_info` the valid values for ``releaselevel`` are
     'alpha', 'beta', 'candidate' and 'final'.
-
-    .. _sys.version_info: https://docs.python.org/3.6/library/sys.html#sys.version_info
 
 .. data:: __version__
 
-    A string representation of the version. e.g. ``'0.1.0-alpha0'``.
+    A string representation of the version. e.g. ``'0.1.0'``.
 
 Client
 ------
 
 .. autoclass:: DBLClient
     :members:
-
 
 Event reference
 ---------------
@@ -49,23 +46,21 @@ Event reference
         async def on_dbl_vote(data):
             print(data)
 
-    The returned data can be found `here`_.
-
-    .. _here: https://top.gg/api/docs#webhooks
+    The returned data can be found `in Top.gg docs <https://docs.top.gg/resources/webhooks/#bot-webhooks>`_.
 
 Widgets
 -------
 
-.. note:: General information about top.gg widgets can be in `top.gg docs`_.
+.. General information about top.gg widgets can be in `Top.gg docs`_.
 
 In topggpy, :class:`DBLClient` has a :meth:`DBLClient.generate_widget` method that takes an ``options`` dictionary as a parameter.
 
 All available values for each key:
-    * ``bot_id``: ID of a bot to generate widget for. Must resolve to an ID of a valid bot when converted to a string;
+    * ``bot_id``: ID of a bot to generate widget for. Must resolve to an ID of a listed bot when converted to a string;
     * ``format``: must be either ``png`` and ``svg``. Defaults to ``png``;
     * ``type``: used for short widgets (``). For large widget, must be an empty string;
     * ``noavatar``: indicates whether to exclude bot avatar from short widgets. Must be of type ``bool``;
-    * ``colors``: a dictionary consisting of a parameter as a key and HEX color as value. ``color`` will be appended to the key in case ``key.endswith("color")`` returns False. All available fields are mentioned in `top.gg docs`_.
+    * ``colors``: a dictionary consisting of a parameter as a key and HEX color as value. ``color`` will be appended to the key in case ``key.endswith("color")`` returns False.
 
 Example: ::
 
@@ -78,7 +73,19 @@ Example: ::
             }
         }))
 
-.. _top.gg docs: https://top.gg/api/docs#widgets
+Webhooks
+--------
+
+.. attention::
+
+    In order for webhooks to work, the port you provide to :meth:`WebhookManager.run` must be accessible, meaning your firewall must allow incoming requests to it.
+
+.. note::
+
+    :class:`WebhookManager` exposes the internal webserver instance via the :attr:`WebhookManager.webserver` property as well as helper methods.
+
+.. autoclass:: WebhookManager
+    :members:
 
 Exceptions
 ----------
