@@ -1,6 +1,5 @@
-.. currentmodule:: dbl
+.. currentmodule:: topgg
 .. _whats_new:
-
 
 What's New
 ==========
@@ -11,9 +10,11 @@ This page keeps a detailed human friendly rendering of what's new and changed in
 
 v1.0.0
 ------
-* Added support for server webhooks
+* **BREAKING CHANGE:** Renamed the module folder from ``dbl`` to ``topgg``
+* Added ``post_shard_count`` argument to :meth:`DBLClient.post_guild_count` (:issue:`42`)
 * Large webhook system rework, read the :ref:`webhooks` section for more
-* Renamed ``DBLException`` to ``TopGGException``
+* Added support for server webhooks
+* Renamed ``DBLException`` to :class:`TopGGException`
 * Renamed ``DBLClient.get_bot_upvotes()`` to :meth:`DBLClient.get_bot_votes`
 * Added :meth:`DBLClient.generate_widget` along with :ref:`widgets` section in the documentation
 * Implemented a properly working ratelimiter
@@ -27,7 +28,7 @@ v0.4.0
 
 v0.3.3
 ------
-* Internal changes regarding support of top.gg migration
+* Internal changes regarding support of Top.gg migration
 * Fixed errors raised when using :meth:`DBLClient.close` without built-in webhook
 
 v0.3.2
