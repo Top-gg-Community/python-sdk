@@ -1,4 +1,5 @@
 dblpy.egg-info/
+topggpy.egg-info/
 topgg/__pycache__/
 build/
 dist/
@@ -7,3 +8,4 @@ dist/
 /docs/_templates
 .vscode
 /.idea/
+__pycache__
