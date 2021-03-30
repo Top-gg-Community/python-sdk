@@ -36,9 +36,9 @@ class AsyncRateLimiter:
 
     def __init__(self, max_calls, period=1.0, callback=None):
         if period <= 0:
-            raise ValueError("Rate limiting period should be > 0.")
+            raise ValueError("Rate limiting period should be > 0")
         if max_calls <= 0:
-            raise ValueError("Rate limiting number of calls should be > 0.")
+            raise ValueError("Rate limiting number of calls should be > 0")
         self.calls = collections.deque()
 
         self.period = period
