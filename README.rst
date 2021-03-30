@@ -65,7 +65,7 @@ Posting server count manually every 30 minutes:
 
     # This example uses tasks provided by discord.ext to create a task that posts guild count to top.gg every 30 minutes.
 
-    dbl_token = 'dbl_token'  # set this to your bot's top.gg token
+    dbl_token = 'top.gg token'  # set this to your bot's top.gg token
     bot.dblpy = dbl.DBLClient(bot, dbl_token)
     update_stats.start()
 
@@ -88,7 +88,7 @@ Using webhook:
     # This example uses dblpy's webhook system.
     # In order to run the webhook, at least webhook_port argument must be specified (number between 1024 and 49151).
 
-    dbl_token = 'dbl_token'  # set this to your bot's top.gg token
+    dbl_token = 'top.gg token'  # set this to your bot's top.gg token
     bot.dblpy = dbl.DBLClient(bot, dbl_token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
 
     @bot.event
@@ -110,7 +110,7 @@ With autopost:
 
     # This example uses dblpy's autopost feature to post guild count to top.gg every 30 minutes.
 
-    dbl_token = 'dbl_token'  # set this to your bot's top.gg token
+    dbl_token = 'top.gg token'  # set this to your bot's top.gg token
     bot.dblpy = dbl.DBLClient(bot, dbl_token, autopost=True)
 
     @bot.event
