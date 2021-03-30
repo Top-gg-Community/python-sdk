@@ -94,12 +94,12 @@ Using webhook:
     @bot.event
     async def on_dbl_vote(data):
         """An event that is called whenever someone votes for the bot on top.gg."""
-        print("Received an upvote:", "\n", data, sep="")
+        print(f"Received an upvote:\n{data}")
 
     @bot.event
     async def on_dbl_test(data):
         """An event that is called whenever someone tests the webhook system for your bot on top.gg."""
-        print("Received a test upvote:", "\n", data, sep="")
+        print(f"Received a test upvote:\n{data}")
 
 
 With autopost:
@@ -115,7 +115,7 @@ With autopost:
 
     @bot.event
     async def on_guild_post():
-        print("Server count posted successfully")
+        print(f'Posted server count ({bot.dblpy.guild_count})')
 
 
 .. _top.gg: https://top.gg/
