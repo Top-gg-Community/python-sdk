@@ -59,102 +59,63 @@ Posting server count manually every 30 minutes:
 
 .. code:: py
 
-    from discord.ext import commands, tasks
+    from discord.ext import tasks
 
     import dbl
 
+    # This example uses tasks provided by discord.ext to create a task that posts guild count to top.gg every 30 minutes.
 
-    class TopGG(commands.Cog):
-        """
-        This example uses tasks provided by discord.ext to create a task that posts guild count to top.gg every 30 minutes.
-        """
+    dbl_token = 'dbl_token'  # set this to your bot's top.gg token
+    bot.dblpy = dbl.DBLClient(bot, dbl_token)
+    update_stats.start()
 
-        def __init__(self, bot):
-            self.bot = bot
-            self.token = 'dbl_token'  # set this to your DBL token
-            self.dblpy = dbl.DBLClient(self.bot, self.token)
-            self.update_stats.start()
-
-        def cog_unload(self):
-            self.update_stats.cancel()
-
-        @tasks.loop(minutes=30)
-        async def update_stats(self):
-            """This function runs every 30 minutes to automatically update your server count."""
-            await self.bot.wait_until_ready()
-            try:
-                server_count = len(self.bot.guilds)
-                await self.dblpy.post_guild_count(server_count)
-                print('Posted server count ({})'.format(server_count))
-            except Exception as e:
-                print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
-
-
-    def setup(bot):
-        bot.add_cog(TopGG(bot))
+    @tasks.loop(minutes=30)
+    async def update_stats():
+        """This function runs every 30 minutes to automatically update your server count."""
+        try:
+            await bot.dblpy.post_guild_count()
+            print(f'Posted server count ({bot.dblpy.guild_count})')
+        except Exception as e:
+            print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
 
 
 Using webhook:
 
 .. code:: py
 
-    from discord.ext import commands
-
     import dbl
 
+    # This example uses dblpy's webhook system.
+    # In order to run the webhook, at least webhook_port argument must be specified (number between 1024 and 49151).
 
-    class TopGG(commands.Cog):
-        """
-        This example uses dblpy's webhook system.
-        In order to run the webhook, at least webhook_port must be specified (number between 1024 and 49151).
-        """
+    dbl_token = 'dbl_token'  # set this to your bot's top.gg token
+    bot.dblpy = dbl.DBLClient(bot, dbl_token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
 
-        def __init__(self, bot):
-            self.bot = bot
-            self.token = 'dbl_token'  # set this to your DBL token
-            self.dblpy = dbl.DBLClient(self.bot, self.token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
+    @bot.event
+    async def on_dbl_vote(data):
+        """An event that is called whenever someone votes for the bot on top.gg."""
+        print("Received an upvote:", "\n", data, sep="")
 
-        @commands.Cog.listener()
-        async def on_dbl_vote(self, data):
-            """An event that is called whenever someone votes for the bot on top.gg."""
-            print("Received an upvote:", "\n", data, sep="")
-
-        @commands.Cog.listener()
-        async def on_dbl_test(self, data):
-            """An event that is called whenever someone tests the webhook system for your bot on top.gg."""
-            print("Received a test upvote:", "\n", data, sep="")
-
-
-    def setup(bot):
-        bot.add_cog(TopGG(bot))
+    @bot.event
+    async def on_dbl_test(data):
+        """An event that is called whenever someone tests the webhook system for your bot on top.gg."""
+        print("Received a test upvote:", "\n", data, sep="")
 
 
 With autopost:
 
 .. code:: py
 
-    from discord.ext import commands
-
     import dbl
 
+    # This example uses dblpy's autopost feature to post guild count to top.gg every 30 minutes.
 
-    class TopGG(commands.Cog):
-        """
-        This example uses dblpy's autopost feature to post guild count to top.gg every 30 minutes.
-        """
+    dbl_token = 'dbl_token'  # set this to your bot's top.gg token
+    bot.dblpy = dbl.DBLClient(bot, dbl_token, autopost=True)
 
-        def __init__(self, bot):
-            self.bot = bot
-            self.token = 'dbl_token'  # set this to your DBL token
-            self.dblpy = dbl.DBLClient(self.bot, self.token, autopost=True)  # Autopost will post your guild count every 30 minutes
-
-        @commands.Cog.listener()
-        async def on_guild_post(self):
-            print("Server count posted successfully")
-
-
-    def setup(bot):
-        bot.add_cog(TopGG(bot))
+    @bot.event
+    async def on_guild_post():
+        print("Server count posted successfully")
 
 
 .. _top.gg: https://top.gg/
