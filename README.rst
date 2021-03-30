@@ -50,7 +50,7 @@ Additional information
 
 * Before using the webhook provided by this library, make sure that you have specified port open.
 * ``webhook_port`` should be between 1024 and 49151.
-* Below examples are to be used as discord.py cogs. If you need help adding them to your bot, feel free to ask in the ``#development`` channel in our `Discord server`_.
+* If you happen to need help implementing dblpy in your bot, feel free to ask in the ``#development`` or ``#api`` channels in our `Discord server`_.
 
 Examples
 --------
