@@ -46,21 +46,20 @@ class DBLClient:
 
     Parameters
     ----------
-    token: str
-        Your bot's Top.gg API Token.
     bot: discord.Client
         An instance of a discord.py Client object.
+    token: str
+        Your bot's Top.gg API Token.
     autopost: Optional[bool]
         Whether to automatically post bot's guild count every 30 minutes.
         This will dispatch :meth:`on_guild_post`.
     **post_shard_count: Optional[bool]
         Whether to post the shard count on autopost.
         Defaults to False.
+    **autopost_timer: int
+        Interval used by autopost to post server count automatically, measured in seconds. Defaults to 1800 (30 minutes).
     **session: Optional[aiohttp session]
         An `aiohttp session`_ to use for requests to the API.
-    **loop: Optional[event loop]
-        An `event loop`_ to use for asynchronous operations.
-        Defaults to ``bot.loop``.
     """
 
     bot: discord.Client
@@ -75,9 +74,10 @@ class DBLClient:
     def __init__(self, bot: discord.Client, token: str, autopost: bool = False, **kwargs):
         self.bot = bot
         self.bot_id = None
-        self.loop = kwargs.get("loop", bot.loop)
+        self.loop = bot.loop
         self.autopost = autopost
         self._post_shard_count = kwargs.get("post_shard_count", False)
+        self.autopost_interval = kwargs.get("autopost_interval", 1800 if self.autopost else 0)
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get("session"))
         self._is_closed = False
 
@@ -97,7 +97,7 @@ class DBLClient:
                                             if self._post_shard_count
                                             else None)
                 event_name = 'guild_post'
-                log.debug('Dispatching %s event', event_name)
+                log.debug(f'Dispatching {event_name} event')
                 self.bot.dispatch(event_name)
             except errors.HTTPException:
                 pass
