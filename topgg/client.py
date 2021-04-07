@@ -53,12 +53,13 @@ class DBLClient:
     autopost: Optional[bool]
         Whether to automatically post bot's guild count every 30 minutes.
         This will dispatch :meth:`on_guild_post`.
-    **post_shard_count: Optional[bool]
+    post_shard_count: Optional[bool]
         Whether to post the shard count on autopost.
         Defaults to False.
-    **autopost_timer: int
-        Interval used by autopost to post server count automatically, measured in seconds. Defaults to 1800 (30 minutes).
-    **session: Optional[aiohttp session]
+    autopost_timer: int
+        Interval used by autopost to post server count automatically, measured in seconds. Defaults to 1800 (30
+        minutes).
+    **session: :class:`aiohttp.ClientSession`
         An `aiohttp session`_ to use for requests to the API.
     """
 
@@ -71,18 +72,28 @@ class DBLClient:
     http: HTTPClient
     autopost_task: Task
 
-    def __init__(self, bot: discord.Client, token: str, autopost: bool = False, **kwargs):
+    def __init__(self, bot: discord.Client, token: str, autopost: bool = False, post_shard_count: bool = False,
+                 autopost_interval: int = 0, **kwargs):
         self.bot = bot
         self.bot_id = None
         self.loop = bot.loop
         self.autopost = autopost
-        self._post_shard_count = kwargs.get("post_shard_count", False)
-        self.autopost_interval = kwargs.get("autopost_interval", 1800 if self.autopost else 0)
+        self._post_shard_count = post_shard_count
+        self._autopost_interval = autopost_interval
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get("session"))
         self._is_closed = False
 
         if self.autopost:
+            if self._autopost_interval < 900:
+                raise errors.ClientException(
+                    "autopost_interval must be greater than or equal to 900 seconds (15 minutes)"
+                )
             self.autopost_task = self.loop.create_task(self._auto_post())
+        else:
+            if self._post_shard_count:
+                raise errors.ClientException("autopost must be activated if post_shard_count is passed")
+            if self._autopost_interval:
+                raise errors.ClientException("autopost must be activated if autopost_interval is passed")
 
     async def _ensure_bot_user(self):
         await self.bot.wait_until_ready()
@@ -93,14 +104,14 @@ class DBLClient:
         await self._ensure_bot_user()
         while not self.bot.is_closed():
             try:
-                await self.post_guild_count(shard_count=self.bot.shard_count
-                                            if self._post_shard_count
-                                            else None)
-                event_name = 'guild_post'
+                log.debug(f'Attempting to post server count ({self.guild_count})')
+                await self.post_guild_count(shard_count=self.bot.shard_count if self._post_shard_count else None)
+                event_name = 'autopost_success'
                 log.debug(f'Dispatching {event_name} event')
                 self.bot.dispatch(event_name)
-            except errors.HTTPException:
-                pass
+            except Exception as e:
+                event_name = 'autopost_error'
+                self.bot.dispatch(event_name, e)
             await asyncio.sleep(1800)
 
     @property
@@ -194,7 +205,8 @@ class DBLClient:
         Returns
         -------
         bot info: dict
-            Information on the bot you looked up. Returned data can be found `here <https://docs.top.gg/api/bot/#bot-structure>`_.
+            Information on the bot you looked up. Returned data can be found
+            `here <https://docs.top.gg/api/bot/#bot-structure>`_.
         """
         await self._ensure_bot_user()
         if bot_id is None:
@@ -243,7 +255,8 @@ class DBLClient:
         Returns
         -------
         user data: dict
-            Info about the user. Returned data can be found `in top.gg documentation <https://docs.top.gg/api/user/#structure>`_.
+            Info about the user. Returned data can be found `in Top.gg documentation
+            <https://docs.top.gg/api/user/#structure>_`.
         """
         return await self.http.get_user_info(user_id)
 
@@ -266,7 +279,7 @@ class DBLClient:
         data = await self.http.get_user_vote(self.bot_id, user_id)
         return bool(data['voted'])
 
-    async def generate_widget(self, options: dict = None) -> str:
+    async def generate_widget(self, options: dict) -> str:
         """This function is a coroutine.
 
         Generates a Top.gg widget from provided options.
@@ -281,6 +294,8 @@ class DBLClient:
         widget: str
             Generated widget URL.
         """
+        if not isinstance(options, dict):
+            raise errors.ClientException("options argument passed to generate_widget must be a dictionary")
         bot_id = options.get("id")
 
         if bot_id is None:
