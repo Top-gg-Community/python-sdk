@@ -18,6 +18,8 @@ v1.0.0
 * Renamed ``DBLClient.get_bot_upvotes()`` to :meth:`DBLClient.get_bot_votes`
 * Added :meth:`DBLClient.generate_widget` along with :ref:`widgets` section in the documentation
 * Implemented a properly working ratelimiter
+* All autopost events now follow ``on_autopost_x`` naming format, e.g. :func:`on_autopost_error`, :func:`on_autopost_success`
+* Added handlers for autopost args set when autopost is disabled
 
 v0.4.0
 ------

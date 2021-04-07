@@ -14,8 +14,7 @@ There are two main ways to query version information about the library.
 
     A named tuple that is similar to :obj:`py:sys.version_info`.
 
-    Just like :obj:`py:sys.version_info` the valid values for ``releaselevel`` are
-    'alpha', 'beta', 'candidate' and 'final'.
+    Just like :obj:`py:sys.version_info` the valid values for ``releaselevel`` are 'alpha', 'beta', 'candidate' and 'final'.
 
 .. data:: __version__
 
@@ -30,15 +29,22 @@ Client
 Event reference
 ---------------
 
-.. function:: on_guild_post()
+.. function:: on_autopost_success()
 
-    Called when guild count is posted on top.gg
+    Called when autopost posts server count successfully on Top.gg.
+
+.. function:: on_autopost_error(exception)
+
+    Called when autopost raises an exception during server count posting.
+
+    :param exception: The raised exception object.
 
 .. function:: on_dbl_vote(data)
+              on_dsl_vote(data)
 
-    Called when someone votes for your bot on top.gg
+    Called when someone votes for your bot on Top.gg.
 
-    :param data: The data with vote info returned in dict object
+    :param data: The data with vote info returned in dict object.
 
     Example: ::
 
@@ -51,7 +57,7 @@ Event reference
 Widgets
 -------
 
-.. General information about top.gg widgets can be in `Top.gg docs`_.
+.. General information about Top.gg widgets can be in `Top.gg docs`_.
 
 In topggpy, :class:`DBLClient` has a :meth:`DBLClient.generate_widget` method that takes an ``options`` dictionary as a parameter.
 
