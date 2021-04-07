@@ -36,7 +36,7 @@ log = logging.getLogger(__name__)
 
 class WebhookManager:
     """
-    This class is used as a manager for the top.gg webhook.
+    This class is used as a manager for the Top.gg webhook.
 
     Parameters
     ----------

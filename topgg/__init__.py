@@ -4,7 +4,7 @@
 Top.gg Python API Wrapper
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 A basic wrapper for the Top.gg API.
-:copyright: (c) 2021 Assanali Mukhanov & top.gg
+:copyright: (c) 2021 Assanali Mukhanov & Top.gg
 :license: MIT, see LICENSE for more details.
 """
 from collections import namedtuple
