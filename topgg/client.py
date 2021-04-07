@@ -112,7 +112,7 @@ class DBLClient:
             except Exception as e:
                 event_name = 'autopost_error'
                 self.bot.dispatch(event_name, e)
-            await asyncio.sleep(1800)
+            await asyncio.sleep(self._autopost_interval)
 
     @property
     def guild_count(self) -> int:
