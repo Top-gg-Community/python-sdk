@@ -92,7 +92,10 @@ class DBLClient:
                 raise errors.ClientException(
                     "autopost_interval must be greater than or equal to 900 seconds (15 minutes)"
                 )
-            self.bot.on_autopost_error = self.on_autopost_error
+
+            if not hasattr(self.bot, 'on_autopost_error'):
+                self.bot.on_autopost_error = self.on_autopost_error
+
             self.autopost_task = self.loop.create_task(self._auto_post())
         else:
             if self._post_shard_count:
@@ -103,7 +106,8 @@ class DBLClient:
     async def on_autopost_error(self, exception):
         # only print if there's no external autopost_error listeners.
         if (isinstance(self.bot, BotBase)
-            and self.bot.extra_events.get("on_autopost_error")):
+            and self.bot.extra_events.get("on_autopost_error")
+        ):
             return
 
         print('Ignoring exception in auto post loop:', file=sys.stderr)
