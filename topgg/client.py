@@ -26,10 +26,14 @@ DEALINGS IN THE SOFTWARE.
 
 import asyncio
 import logging
+import sys
+import traceback
 from asyncio.tasks import Task
+from contextlib import suppress
 from typing import List, Optional, Union
 
 import discord
+from discord.ext.commands.bot import BotBase
 
 from . import errors
 from .http import HTTPClient
@@ -50,13 +54,13 @@ class DBLClient:
         An instance of a discord.py Client object.
     token: str
         Your bot's Top.gg API Token.
-    autopost: Optional[bool]
+    autopost: bool
         Whether to automatically post bot's guild count every 30 minutes.
         This will dispatch :meth:`on_guild_post`.
-    post_shard_count: Optional[bool]
+    post_shard_count: bool
         Whether to post the shard count on autopost.
         Defaults to False.
-    autopost_timer: int
+    autopost_interval: int
         Interval used by autopost to post server count automatically, measured in seconds. Defaults to 1800 (30
         minutes).
     **session: :class:`aiohttp.ClientSession`
@@ -66,8 +70,8 @@ class DBLClient:
     bot: discord.Client
     bot_id: Optional[int]
     loop: asyncio.AbstractEventLoop
-    autopost: Optional[bool]
-    _post_shard_count: Optional[bool]
+    autopost: bool
+    _post_shard_count: bool
     _is_closed: bool
     http: HTTPClient
     autopost_task: Task
@@ -88,12 +92,22 @@ class DBLClient:
                 raise errors.ClientException(
                     "autopost_interval must be greater than or equal to 900 seconds (15 minutes)"
                 )
+            self.bot.on_autopost_error = self.on_autopost_error
             self.autopost_task = self.loop.create_task(self._auto_post())
         else:
             if self._post_shard_count:
                 raise errors.ClientException("autopost must be activated if post_shard_count is passed")
             if self._autopost_interval:
                 raise errors.ClientException("autopost must be activated if autopost_interval is passed")
+
+    async def on_autopost_error(self, exception):
+        # only print if there's no external autopost_error listeners.
+        if (isinstance(self.bot, BotBase)
+            and self.bot.extra_events.get("on_autopost_error")):
+            return
+
+        print('Ignoring exception in auto post loop:', file=sys.stderr)
+        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
 
     async def _ensure_bot_user(self):
         await self.bot.wait_until_ready()
@@ -112,6 +126,10 @@ class DBLClient:
             except Exception as e:
                 event_name = 'autopost_error'
                 self.bot.dispatch(event_name, e)
+
+                if isinstance(e, errors.Unauthorized):
+                    raise
+                
             await asyncio.sleep(1800)
 
     @property
@@ -329,3 +347,6 @@ class DBLClient:
             if self.autopost:
                 self.autopost_task.cancel()
             self._is_closed = True
+
+        with suppress(AttributeError):
+            delattr(self.bot, 'on_autopost_error')
