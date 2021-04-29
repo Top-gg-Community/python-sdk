@@ -109,11 +109,10 @@ class DBLClient:
             if self.autopost_interval:
                 raise errors.ClientException("autopost must be activated if autopost_interval is passed")
 
-    async def on_autopost_error(self, exception):
+    async def on_autopost_error(self, exception: Exception):
         # only print if there's no external autopost_error listeners.
-        if (isinstance(self.bot, BotBase)
-            and self.bot.extra_events.get("on_autopost_error")
-        ):
+        if isinstance(self.bot, BotBase) \
+                and self.bot.extra_events.get("on_autopost_error"):
             return
 
         print('Ignoring exception in auto post loop:', file=sys.stderr)
@@ -138,8 +137,8 @@ class DBLClient:
 
                 if isinstance(e, errors.Unauthorized):
                     raise
-                
-            await asyncio.sleep(self._autopost_interval)
+
+            await asyncio.sleep(self.autopost_interval)
 
     @property
     def is_closed(self) -> bool:
