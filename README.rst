@@ -49,7 +49,7 @@ Additional information
 ----------------------
 
 * Before using the webhook provided by this library, make sure that you have specified port open.
-* ``webhook_port`` should be between 1024 and 49151.
+* Optimal values for port are between 1024 and 49151.
 * If you happen to need help implementing topggpy in your bot, feel free to ask in the ``#development`` or ``#api`` channels in our `Discord server <https://discord.gg/EYHTgJX>`_.
 
 Examples
