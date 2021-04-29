@@ -104,8 +104,6 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: ClientException
 
-.. autoexception:: AlreadyClosed
-
 .. autoexception:: HTTPException
     :members:
 
