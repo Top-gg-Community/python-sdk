@@ -68,7 +68,7 @@ class HTTPException(TopGGException):
 
 
 class Unauthorized(HTTPException):
-    """Exception that's thrown for when status code 401 occurs.
+    """Exception that's thrown when status code 401 occurs.
 
     Subclass of :exc:`HTTPException`
     """
@@ -84,7 +84,7 @@ class UnauthorizedDetected(TopGGException):
 
 
 class Forbidden(HTTPException):
-    """Exception that's thrown for when status code 403 occurs.
+    """Exception that's thrown when status code 403 occurs.
 
     Subclass of :exc:`HTTPException`
     """
@@ -92,7 +92,7 @@ class Forbidden(HTTPException):
 
 
 class NotFound(HTTPException):
-    """Exception that's thrown for when status code 404 occurs.
+    """Exception that's thrown when status code 404 occurs.
 
     Subclass of :exc:`HTTPException`
     """
