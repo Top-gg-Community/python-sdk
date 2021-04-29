@@ -77,7 +77,7 @@ class DBLClient:
     autopost_task: Task
 
     def __init__(self, bot: discord.Client, token: str, autopost: bool = False, post_shard_count: bool = False,
-                 autopost_interval: int = 0, **kwargs):
+                 autopost_interval: int = 1800, **kwargs):
         self.bot = bot
         self.bot_id = None
         self.loop = bot.loop
