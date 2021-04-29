@@ -44,20 +44,12 @@ class AsyncRateLimiter:
         self.period = period
         self.max_calls = max_calls
         self.callback = callback
-        self.__lock = None
+        self.__lock = asyncio.Lock()
 
         # Lock to protect creation of self.__lock
         self.__init_lock = threading.Lock()
 
-    def __init_async_lock(self):
-        with self.__init_lock:
-            if self.__lock is None:
-                self.__lock = asyncio.Lock()
-
     async def __aenter__(self):
-        if self.__lock is None:
-            self.__init_async_lock()
-
         async with self.__lock:
             if len(self.calls) >= self.max_calls:
                 until = datetime.utcnow().timestamp() + self.period - self._timespan
