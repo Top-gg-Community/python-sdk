@@ -13,7 +13,6 @@ Welcome to topggpy's documentation!
    whats_new
    api
 
-
 Indices and tables
 ==================
 

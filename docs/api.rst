@@ -89,7 +89,7 @@ Webhooks
 
 .. note::
 
-    :class:`WebhookManager` exposes the internal webserver instance via the :attr:`WebhookManager.webserver` property as well as helper methods.
+    :class:`WebhookManager` exposes the internal webserver instance via the :attr:`WebhookManager.webserver` property.
 
 .. autoclass:: WebhookManager
     :members:
