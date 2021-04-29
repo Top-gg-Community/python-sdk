@@ -1,12 +1,13 @@
 .. currentmodule:: topgg
 
+#############
 API Reference
-=============
+#############
 
 The following section outlines the API of topggpy.
 
 Version Related Info
---------------------
+====================
 
 There are two main ways to query version information about the library.
 
@@ -21,13 +22,13 @@ There are two main ways to query version information about the library.
     A string representation of the version. e.g. ``'0.1.0'``.
 
 Client
-------
+======
 
 .. autoclass:: DBLClient
     :members:
 
 Event reference
----------------
+===============
 
 .. function:: on_autopost_success()
 
@@ -55,7 +56,7 @@ Event reference
     The returned data can be found `in Top.gg docs <https://docs.top.gg/resources/webhooks/#bot-webhooks>`_.
 
 Widgets
--------
+=======
 
 .. General information about Top.gg widgets can be in `Top.gg docs`_.
 
@@ -80,7 +81,7 @@ Example: ::
         }))
 
 Webhooks
---------
+========
 
 .. attention::
 
@@ -94,7 +95,7 @@ Webhooks
     :members:
 
 Exceptions
-----------
+==========
 
 The following exceptions are thrown by the library.
 

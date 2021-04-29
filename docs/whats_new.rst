@@ -1,15 +1,17 @@
 .. currentmodule:: topgg
 .. _whats_new:
 
+##########
 What's New
-==========
+##########
 
 This page keeps a detailed human friendly rendering of what's new and changed in specific versions.
 
 .. _changelog:
 
 v1.0.0
-------
+======
+
 * Renamed the module folder from ``dbl`` to ``topgg``
 * Added ``post_shard_count`` argument to :meth:`DBLClient.post_guild_count` (:issue:`42`)
 * Large webhook system rework, read the :ref:`webhooks` section for more
@@ -23,36 +25,41 @@ v1.0.0
 * Added handlers for autopost args set when autopost is disabled
 
 v0.4.0
-------
+======
+
 * :meth:`DBLClient.post_guild_count` now supports a custom ``guild_count`` argument, which accepts either an integer or list of integers
 * Reworked how shard info is posted
 * Removed ``InvalidArgument`` and ``ConnectionClosed`` exceptions
 * Added ``ServerError`` exception
 
 v0.3.3
-------
+======
+
 * Internal changes regarding support of Top.gg migration
 * Fixed errors raised when using :meth:`DBLClient.close` without built-in webhook
 
 v0.3.2
-------
+======
+
 * ``Client`` class has been renamed to ``DBLClient``
 
 v0.3.1
-------
+======
+
 * Added ``on_guild_post``, an event that is called when autoposter successfully posts guild count
 * Renamed ``get_upvote_info`` to ``get_bot_upvotes``
 * Added ``get_user_vote``
 
 v0.3.0
-------
+======
+
 * :class:`DBLClient` now has ``autopost`` kwarg that will post server count automatically every 30 minutes
 * Fixed code 403 errors
 * Added ``on_dbl_vote``, an event that is called when you test your webhook
 * Added ``on_dbl_test``, an event that is called when someone tests your webhook
 
 v0.2.1
-------
+======
 
 * Added webhook
 * Removed support for discord.py versions lower than 1.0.0
@@ -61,7 +68,7 @@ v0.2.1
 * **BREAKING CHANGE**: Removed ``post_server_count`` and ``get_server_count``
 
 v0.2
-----
+====
 
 * Added ``post_guild_count``
 
@@ -77,23 +84,23 @@ v0.2
 * Fixed example in README
 
 v0.1.6
-------
+======
 
 * Bug fixes & improvements
 
 v0.1.4
-------
+======
 
 * Initial ratelimit handling
 
 v0.1.3
-------
+======
 
 * Added documentation
 * Fixed some minor bugs
 
 v0.1.2
-------
+======
 
 Initial release
 
@@ -103,10 +110,8 @@ Initial release
     * GET bot info, server count, upvote count, upvote info
     * GET all bots
     * GET specific user info
-    * GET widgets (large and small) including custom ones. See `Top.gg docs`_ for more info.
+    * GET widgets (large and small) including custom ones. See `Top.gg docs <https://docs.top.gg/>`_ for more info.
 
 * Not Working / Implemented
 
     * Searching for bots via the api
-
-.. _Top.gg docs: https://docs.top.gg/
