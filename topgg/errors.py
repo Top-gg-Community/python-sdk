@@ -44,11 +44,9 @@ class ClientException(TopGGException):
 class HTTPException(TopGGException):
     """Exception that's thrown when an HTTP request operation fails.
 
-    .. _aiohttp.ClientResponse: http://aiohttp.readthedocs.org/en/stable/client_reference.html#aiohttp.ClientResponse
-
     Attributes
     ----------
-    response: `aiohttp.ClientResponse`_
+    response: :class:`aiohttp.ClientResponse`
         The response of the failed HTTP request.
     text: str
         The text of the error. Could be an empty string.

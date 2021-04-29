@@ -49,13 +49,14 @@ Additional information
 ----------------------
 
 * Before using the webhook provided by this library, make sure that you have specified port open.
-* ``webhook_port`` should be between 1024 and 49151.
+* Optimal values for port are between 1024 and 49151.
 * If you happen to need help implementing topggpy in your bot, feel free to ask in the ``#development`` or ``#api`` channels in our `Discord server <https://discord.gg/EYHTgJX>`_.
 
 Examples
 --------
 
 Posting server count manually every 30 minutes:
+===============================================
 
 .. code:: py
 
@@ -67,7 +68,6 @@ Posting server count manually every 30 minutes:
 
     dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
     bot.dblpy = dbl.DBLClient(bot, dbl_token)
-    update_stats.start()
 
     @tasks.loop(minutes=30)
     async def update_stats():
@@ -78,8 +78,11 @@ Posting server count manually every 30 minutes:
         except Exception as e:
             print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
 
+    update_stats.start()
+
 
 Using webhook:
+==============
 
 .. code:: py
 
@@ -103,6 +106,7 @@ Using webhook:
 
 
 With autopost:
+==============
 
 .. code:: py
 
@@ -116,4 +120,3 @@ With autopost:
     @bot.event
     async def on_guild_post():
         print(f'Posted server count ({bot.dblpy.guild_count})')
-

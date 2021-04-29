@@ -129,9 +129,12 @@ class WebhookManager:
         Optional[:class:`aiohttp.web.TCPSite`]
             The internal webserver if it exists.
         """
-        return getattr(self, '_webserver', None)
+        try:
+            return self._webserver
+        except AttributeError:
+            return None
 
     async def close(self):
-        """Stop the webhook."""
+        """Stops the webhook."""
         await self._webserver.stop()
         self._is_closed = True

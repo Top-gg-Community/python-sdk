@@ -71,7 +71,7 @@ class DBLClient:
     bot_id: Optional[int]
     loop: asyncio.AbstractEventLoop
     autopost: bool
-    _post_shard_count: bool
+    post_shard_count: bool
     _is_closed: bool
     http: HTTPClient
     autopost_task: Task
@@ -82,13 +82,19 @@ class DBLClient:
         self.bot_id = None
         self.loop = bot.loop
         self.autopost = autopost
-        self._post_shard_count = post_shard_count
-        self._autopost_interval = autopost_interval
+        self.post_shard_count = post_shard_count
+        self.autopost_interval = autopost_interval
         self.http = HTTPClient(token, loop=self.loop, session=kwargs.get("session"))
         self._is_closed = False
 
+        if not isinstance(self.autopost, bool):
+            raise errors.ClientException("autopost must be of type bool")
+        if not isinstance(self.post_shard_count, bool):
+            raise errors.ClientException("post_shard_count must be of type bool")
         if self.autopost:
-            if self._autopost_interval < 900:
+            if not isinstance(self.autopost_interval, int):
+                raise errors.ClientException("autopost_interval must be of type int")
+            if self.autopost_interval < 900:
                 raise errors.ClientException(
                     "autopost_interval must be greater than or equal to 900 seconds (15 minutes)"
                 )
@@ -98,9 +104,9 @@ class DBLClient:
 
             self.autopost_task = self.loop.create_task(self._auto_post())
         else:
-            if self._post_shard_count:
+            if self.post_shard_count:
                 raise errors.ClientException("autopost must be activated if post_shard_count is passed")
-            if self._autopost_interval:
+            if self.autopost_interval:
                 raise errors.ClientException("autopost must be activated if autopost_interval is passed")
 
     async def on_autopost_error(self, exception):
@@ -123,9 +129,8 @@ class DBLClient:
         while not self.bot.is_closed():
             try:
                 log.debug(f'Attempting to post server count ({self.guild_count})')
-                await self.post_guild_count(shard_count=self.bot.shard_count if self._post_shard_count else None)
+                await self.post_guild_count(shard_count=self.bot.shard_count if self.post_shard_count else None)
                 event_name = 'autopost_success'
-                log.debug(f'Dispatching {event_name} event')
                 self.bot.dispatch(event_name)
             except Exception as e:
                 event_name = 'autopost_error'
@@ -135,6 +140,10 @@ class DBLClient:
                     raise
                 
             await asyncio.sleep(self._autopost_interval)
+
+    @property
+    def is_closed(self) -> bool:
+        return self._is_closed
 
     @property
     def guild_count(self) -> int:
@@ -344,7 +353,7 @@ class DBLClient:
 
         Closes all connections.
         """
-        if self._is_closed:
+        if self.is_closed:
             return
         else:
             await self.http.close()

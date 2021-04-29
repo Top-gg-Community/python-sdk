@@ -10,7 +10,7 @@ This page keeps a detailed human friendly rendering of what's new and changed in
 
 v1.0.0
 ------
-* **BREAKING CHANGE:** Renamed the module folder from ``dbl`` to ``topgg``
+* Renamed the module folder from ``dbl`` to ``topgg``
 * Added ``post_shard_count`` argument to :meth:`DBLClient.post_guild_count` (:issue:`42`)
 * Large webhook system rework, read the :ref:`webhooks` section for more
 * Added support for server webhooks
@@ -18,6 +18,7 @@ v1.0.0
 * Renamed ``DBLClient.get_bot_upvotes()`` to :meth:`DBLClient.get_bot_votes`
 * Added :meth:`DBLClient.generate_widget` along with :ref:`widgets` section in the documentation
 * Implemented a properly working ratelimiter
+* Added :func:`on_autopost_error`
 * All autopost events now follow ``on_autopost_x`` naming format, e.g. :func:`on_autopost_error`, :func:`on_autopost_success`
 * Added handlers for autopost args set when autopost is disabled
 
@@ -35,7 +36,7 @@ v0.3.3
 
 v0.3.2
 ------
-* **BREAKING CHANGE**: ``Client`` class has been renamed to ``DBLClient``
+* ``Client`` class has been renamed to ``DBLClient``
 
 v0.3.1
 ------
