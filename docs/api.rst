@@ -62,7 +62,7 @@ Widgets
 In topggpy, :class:`DBLClient` has a :meth:`DBLClient.generate_widget` method that takes an ``options`` dictionary as a parameter.
 
 All available values for each key:
-    * ``bot_id``: ID of a bot to generate widget for. Must resolve to an ID of a listed bot when converted to a string;
+    * ``id``: ID of a bot to generate the widget for. Must resolve to an ID of an approved bot when converted to a string;
     * ``format``: must be either ``png`` and ``svg``. Defaults to ``png``;
     * ``type``: used for short widgets (``). For large widget, must be an empty string;
     * ``noavatar``: indicates whether to exclude bot avatar from short widgets. Must be of type ``bool``;
@@ -103,6 +103,8 @@ The following exceptions are thrown by the library.
 .. autoexception:: UnauthorizedDetected
 
 .. autoexception:: ClientException
+
+.. autoexception:: AlreadyClosed
 
 .. autoexception:: HTTPException
     :members:
