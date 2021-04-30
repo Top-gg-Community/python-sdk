@@ -69,9 +69,9 @@ class HTTPClient:
     ----------
     token:
         A Top.gg API Token.
-    **session: Optional[aiohttp session]
+    **session: `aiohttp session`_
         The `aiohttp session`_ used for requests to the API.
-    **loop: Optional[`event loop`_]
+    **loop: `event loop`_
         An `event loop`_ used for asynchronous operations.
     """
 
@@ -81,10 +81,6 @@ class HTTPClient:
         self.loop = kwargs.get('loop') or asyncio.get_event_loop()
         self.session = kwargs.get('session') or aiohttp.ClientSession(loop=self.loop)
         self.rate_limiter = AsyncRateLimiter(max_calls=59, period=60, callback=_ratelimit_handler)
-
-        self._global_over = asyncio.Event()
-        self._global_over.set()
-
         self.user_agent = f"topggpy (https://github.com/top-gg/python-sdk {__version__}) Python/" \
                           f"{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
 
@@ -111,7 +107,7 @@ class HTTPClient:
 
         kwargs['headers'] = headers
 
-        for _ in range(5):
+        for _ in range(2):
             async with self.rate_limiter:
                 async with self.session.request(method, url, **kwargs) as resp:
                     log.debug('%s %s with %s has returned %s', method, url, kwargs.get('data'), resp.status)
@@ -130,18 +126,19 @@ class HTTPClient:
                         log.warning(fmt, retry_after, mins)
 
                         # check if it's a global ratelimit (True as only 1 ratelimit atm - /api/bots)
-                        is_global = True  # is_global = data.get('global', False)
-                        if is_global:
-                            self._global_over.clear()
+                        # is_global = True
+                        # is_global = data.get('global', False)
+                        # if is_global:
+                        #     self._global_over.clear()
 
                         await asyncio.sleep(retry_after, loop=self.loop)
                         log.debug('Done sleeping for the ratelimit. Retrying...')
 
                         # release the global lock now that the
                         # global ratelimit has passed
-                        if is_global:
-                            self._global_over.set()
-                            log.debug('Global ratelimit is now over.')
+                        # if is_global:
+                        #     self._global_over.set()
+                        log.debug('Global ratelimit is now over.')
                         continue
 
                     elif resp.status == 400:
@@ -152,11 +149,11 @@ class HTTPClient:
                         raise errors.Forbidden(resp, data)
                     elif resp.status == 404:
                         raise errors.NotFound(resp, data)
-                    else:
+                    elif resp.status >= 500:
                         raise errors.ServerError(resp, data)
-                        # raise errors.HTTPException(resp, data)
-            # We've run out of retries, raise.
-            raise errors.HTTPException(resp, data)
+
+        # We've run out of retries, raise.
+        raise errors.HTTPException(resp, data)
 
     async def close(self):
         await self.session.close()
