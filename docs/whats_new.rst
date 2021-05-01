@@ -1,4 +1,5 @@
 .. currentmodule:: topgg
+
 .. _whats_new:
 
 ##########
@@ -15,8 +16,10 @@ v1.0.0
 * Renamed the module folder from ``dbl`` to ``topgg``
 * Added ``post_shard_count`` argument to :meth:`DBLClient.post_guild_count`
 * Autopost now supports automatic shard posting
-* Large webhook system rework, read the :ref:`webhooks` section for more
-* Added support for server webhooks
+*  Large webhook system rework, read the :ref:`webhooks` section for more
+
+   * Added support for server webhooks
+
 * Renamed ``DBLException`` to :class:`TopGGException`
 * Renamed ``DBLClient.get_bot_upvotes()`` to :meth:`DBLClient.get_bot_votes`
 * Added :meth:`DBLClient.generate_widget` along with the :ref:`widgets` section in the documentation
@@ -66,18 +69,18 @@ v0.2.1
 * Removed support for discord.py versions lower than 1.0.0
 * Made :meth:`DBLClient.get_weekend_status` return a boolean value
 * Added webhook example in README
-* **BREAKING CHANGE**: Removed ``post_server_count`` and ``get_server_count``
+* Removed ``post_server_count`` and ``get_server_count``
 
 v0.2
 ====
 
-* Added ``post_guild_count``
+*  Added ``post_guild_count``
 
- * Made ``post_server_count`` an alias for ``post_guild_count``
+   * Made ``post_server_count`` an alias for ``post_guild_count``
 
-* Added ``get_guild_count``
+   * Added ``get_guild_count``
 
- * Made ``get_server_count`` an alias for ``get_guild_count``
+* Made ``get_server_count`` an alias for ``get_guild_count``
 
 * Added :meth:`DBLClient.get_weekend_status`
 * Removed all parameters from :meth:`DBLClient.get_upvote_info`
