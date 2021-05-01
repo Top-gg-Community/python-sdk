@@ -13,12 +13,13 @@ v1.0.0
 ======
 
 * Renamed the module folder from ``dbl`` to ``topgg``
-* Added ``post_shard_count`` argument to :meth:`DBLClient.post_guild_count` (:issue:`42`)
+* Added ``post_shard_count`` argument to :meth:`DBLClient.post_guild_count`
+* Autopost now supports automatic shard posting
 * Large webhook system rework, read the :ref:`webhooks` section for more
 * Added support for server webhooks
 * Renamed ``DBLException`` to :class:`TopGGException`
 * Renamed ``DBLClient.get_bot_upvotes()`` to :meth:`DBLClient.get_bot_votes`
-* Added :meth:`DBLClient.generate_widget` along with :ref:`widgets` section in the documentation
+* Added :meth:`DBLClient.generate_widget` along with the :ref:`widgets` section in the documentation
 * Implemented a properly working ratelimiter
 * Added :func:`on_autopost_error`
 * All autopost events now follow ``on_autopost_x`` naming format, e.g. :func:`on_autopost_error`, :func:`on_autopost_success`
