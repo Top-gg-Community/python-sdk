@@ -126,7 +126,7 @@ class WebhookManager:
 
         Returns
         --------
-        Optional[:class:`aiohttp.web.Application`]
+        :class:`aiohttp.web.Application`
             The internal web application if it exists.
         """
         return self.__app
