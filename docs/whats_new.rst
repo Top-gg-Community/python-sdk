@@ -10,6 +10,11 @@ This page keeps a detailed human friendly rendering of what's new and changed in
 
 .. _changelog:
 
+v1.0.1
+======
+
+* :attr:`WebhookManager.webserver` now instead returns :class:`aiohttp.web.Application` for ease of use.
+
 v1.0.0
 ======
 
