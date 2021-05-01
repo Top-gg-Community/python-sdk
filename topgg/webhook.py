@@ -124,18 +124,15 @@ class WebhookManager:
         self._is_closed = False
 
     @property
-    def webserver(self) -> Optional[web.TCPSite]:
+    def webserver(self) -> web.Application:
         """Returns the internal webserver that handles webhook requests.
 
         Returns
         --------
-        Optional[:class:`aiohttp.web.TCPSite`]
-            The internal webserver if it exists.
+        :class:`aiohttp.web.Application`
+            The internal web application if it exists.
         """
-        try:
-            return self._webserver
-        except AttributeError:
-            return None
+        return self.__app
 
     async def close(self):
         """Stops the webhook."""

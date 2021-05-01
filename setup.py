@@ -2,8 +2,7 @@ import os
 
 from setuptools import find_packages, setup
 
-from topgg import __author__ as author
-from topgg import __version__ as version
+from topgg import __author__ as author, __version__ as version, __license__ as license
 
 on_rtd = os.getenv("READTHEDOCS") == "True"
 
@@ -17,13 +16,13 @@ with open("README.rst") as f:
     readme = f.read()
 
 setup(
-    name="dblpy",
+    name="topggpy",
     author=f"{author}, Top.gg",
     author_email="shivaco.osu@gmail.com",
     url="https://github.com/top-gg/python-sdk",
     version=version,
     packages=find_packages(),
-    license="MIT",
+    license=license,
     description="A simple API wrapper for Top.gg written in Python.",
     long_description=readme,
     include_package_data=True,
