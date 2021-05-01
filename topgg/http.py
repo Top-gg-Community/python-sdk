@@ -88,11 +88,6 @@ class HTTPClient:
         """Handles requests to the API."""
         url = f"{self.BASE}{url}"
 
-        # handles rate limits.
-        # max_calls is set to 59 because current implementation will retry in 60s
-        # after 60 calls is reached. Top.gg has a 1h block so obviously this doesn't work well,
-        # as it will get a 429 when 60 is reached.
-
         if not self.token:
             raise errors.UnauthorizedDetected("Top.gg API token not provided")
 
