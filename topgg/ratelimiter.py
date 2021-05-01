@@ -23,9 +23,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+
 import asyncio
 import collections
-import threading
 from datetime import datetime
 
 
@@ -45,9 +45,6 @@ class AsyncRateLimiter:
         self.max_calls = max_calls
         self.callback = callback
         self.__lock = asyncio.Lock()
-
-        # Lock to protect creation of self.__lock
-        self.__init_lock = threading.Lock()
 
     async def __aenter__(self):
         async with self.__lock:
