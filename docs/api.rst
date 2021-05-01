@@ -39,13 +39,15 @@ Event reference
     Called when autopost raises an exception during server count posting.
 
     :param exception: The raised exception object.
+    :type exception: Exception
 
 .. function:: on_dbl_vote(data)
               on_dsl_vote(data)
 
     Called when someone votes for your bot on Top.gg.
 
-    :param data: The data with vote info returned in dict object.
+    :param data: The data with vote info returned.
+    :type data: dict
 
     Example: ::
 
