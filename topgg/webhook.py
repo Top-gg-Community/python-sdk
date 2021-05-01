@@ -43,6 +43,7 @@ class WebhookManager:
     bot: discord.Client
         The Client object that will be utilized by this manager's webhook(s) to emit events.
     """
+
     __app: web.Application
     _webhooks: Dict[str, Dict[str, Union[str, Callable]]]
     _webserver: web.TCPSite
@@ -66,8 +67,8 @@ class WebhookManager:
         """
         self._webhooks["dbl"] = {
             "route": route or "/dbl",
-            "auth" : auth_key or "",
-            "func" : self._bot_vote_handler
+            "auth": auth_key or "",
+            "func": self._bot_vote_handler,
         }
         return self
 
@@ -83,23 +84,23 @@ class WebhookManager:
         """
         self._webhooks["dsl"] = {
             "route": route or "/dsl",
-            "auth" : auth_key or "",
-            "func" : self._guild_vote_handler
+            "auth": auth_key or "",
+            "func": self._guild_vote_handler,
         }
         return self
 
     async def _bot_vote_handler(self, request: aiohttp.web.Request):
-        data = await request.json()
         auth = request.headers.get("Authorization", "")
         if auth == self._webhooks["dbl"]["auth"]:
+            data = await request.json()
             self.bot.dispatch("dbl_vote", data)
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
 
     async def _guild_vote_handler(self, request: aiohttp.web.Request):
-        data = await request.json()
         auth = request.headers.get("Authorization", "")
         if auth == self._webhooks["dsl"]["auth"]:
+            data = await request.json()
             self.bot.dispatch("dsl_vote", data)
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
@@ -113,10 +114,12 @@ class WebhookManager:
             The port to run the webhook on.
         """
         for webhook in self._webhooks:
-            self.__app.router.add_post(self._webhooks[webhook]["route"], self._webhooks[webhook]["func"])
+            self.__app.router.add_post(
+                self._webhooks[webhook]["route"], self._webhooks[webhook]["func"]
+            )
         runner = web.AppRunner(self.__app)
         await runner.setup()
-        self._webserver = web.TCPSite(runner, '0.0.0.0', port)
+        self._webserver = web.TCPSite(runner, "0.0.0.0", port)
         await self._webserver.start()
         self._is_closed = False
 

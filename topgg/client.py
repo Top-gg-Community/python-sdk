@@ -60,9 +60,9 @@ class DBLClient:
     post_shard_count: bool
         Whether to post the shard count on autopost.
         Defaults to False.
-    autopost_interval: int
+    autopost_interval: Optional[int]
         Interval used by autopost to post server count automatically, measured in seconds. Defaults to 1800 (30
-        minutes).
+        minutes) if autopost is True, otherwise None.
     **session: :class:`aiohttp.ClientSession`
         An `aiohttp session`_ to use for requests to the API.
     """
@@ -75,9 +75,17 @@ class DBLClient:
     _is_closed: bool
     http: HTTPClient
     autopost_task: Task
+    autopost_interval: Optional[int]
 
-    def __init__(self, bot: discord.Client, token: str, autopost: bool = False, post_shard_count: bool = False,
-                 autopost_interval: int = 1800, **kwargs):
+    def __init__(
+        self,
+        bot: discord.Client,
+        token: str,
+        autopost: bool = False,
+        post_shard_count: bool = False,
+        autopost_interval: Optional[int] = None,
+        **kwargs,
+    ):
         self.bot = bot
         self.bot_id = None
         self.loop = bot.loop
@@ -92,6 +100,8 @@ class DBLClient:
         if not isinstance(self.post_shard_count, bool):
             raise errors.ClientException("post_shard_count must be of type bool")
         if self.autopost:
+            if self.autopost_interval is None:
+                self.autopost_interval = 1800
             if not isinstance(self.autopost_interval, int):
                 raise errors.ClientException("autopost_interval must be of type int")
             if self.autopost_interval < 900:
@@ -99,24 +109,31 @@ class DBLClient:
                     "autopost_interval must be greater than or equal to 900 seconds (15 minutes)"
                 )
 
-            if not hasattr(self.bot, 'on_autopost_error'):
+            if not hasattr(self.bot, "on_autopost_error"):
                 self.bot.on_autopost_error = self.on_autopost_error
 
             self.autopost_task = self.loop.create_task(self._auto_post())
         else:
             if self.post_shard_count:
-                raise errors.ClientException("autopost must be activated if post_shard_count is passed")
+                raise errors.ClientException(
+                    "autopost must be activated if post_shard_count is passed"
+                )
             if self.autopost_interval:
-                raise errors.ClientException("autopost must be activated if autopost_interval is passed")
+                raise errors.ClientException(
+                    "autopost must be activated if autopost_interval is passed"
+                )
 
     async def on_autopost_error(self, exception: Exception):
         # only print if there's no external autopost_error listeners.
-        if isinstance(self.bot, BotBase) \
-                and self.bot.extra_events.get("on_autopost_error"):
+        if isinstance(self.bot, BotBase) and self.bot.extra_events.get(
+            "on_autopost_error"
+        ):
             return
 
-        print('Ignoring exception in auto post loop:', file=sys.stderr)
-        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+        print("Ignoring exception in auto post loop:", file=sys.stderr)
+        traceback.print_exception(
+            type(exception), exception, exception.__traceback__, file=sys.stderr
+        )
 
     async def _ensure_bot_user(self):
         await self.bot.wait_until_ready()
@@ -127,12 +144,14 @@ class DBLClient:
         await self._ensure_bot_user()
         while not self.bot.is_closed():
             try:
-                log.debug(f'Attempting to post server count ({self.guild_count})')
-                await self.post_guild_count(shard_count=self.bot.shard_count if self.post_shard_count else None)
-                event_name = 'autopost_success'
+                log.debug(f"Attempting to post server count ({self.guild_count})")
+                await self.post_guild_count(
+                    shard_count=self.bot.shard_count if self.post_shard_count else None
+                )
+                event_name = "autopost_success"
                 self.bot.dispatch(event_name)
             except Exception as e:
-                event_name = 'autopost_error'
+                event_name = "autopost_error"
                 self.bot.dispatch(event_name, e)
 
                 if isinstance(e, errors.Unauthorized):
@@ -160,10 +179,14 @@ class DBLClient:
             The boolean value of weekend status.
         """
         data = await self.http.get_weekend_status()
-        return data['is_weekend']
+        return data["is_weekend"]
 
-    async def post_guild_count(self, guild_count: Union[int, List[int]] = None, shard_count: int = None,
-                               shard_id: int = None):
+    async def post_guild_count(
+        self,
+        guild_count: Union[int, List[int]] = None,
+        shard_count: int = None,
+        shard_id: int = None,
+    ):
         """This function is a coroutine.
 
         Posts your bot's guild count and shards info to Top.gg.
@@ -243,8 +266,14 @@ class DBLClient:
             bot_id = self.bot_id
         return await self.http.get_bot_info(bot_id)
 
-    async def get_bots(self, limit: int = 50, offset: int = 0, sort: str = None, search: dict = None,
-                       fields: list = None) -> dict:
+    async def get_bots(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        sort: str = None,
+        search: dict = None,
+        fields: list = None,
+    ) -> dict:
         """This function is a coroutine.
 
         Gets information about listed bots on Top.gg.
@@ -307,7 +336,7 @@ class DBLClient:
         """
         await self._ensure_bot_user()
         data = await self.http.get_user_vote(self.bot_id, user_id)
-        return bool(data['voted'])
+        return bool(data["voted"])
 
     async def generate_widget(self, options: dict) -> str:
         """This function is a coroutine.
@@ -325,24 +354,26 @@ class DBLClient:
             Generated widget URL.
         """
         if not isinstance(options, dict):
-            raise errors.ClientException("options argument passed to generate_widget must be a dictionary")
+            raise errors.ClientException(
+                "options argument passed to generate_widget must be a dictionary"
+            )
         bot_id = options.get("id")
 
         if bot_id is None:
             await self._ensure_bot_user()
             bot_id = self.bot_id
         opts = {
-            "format"  : options.get("format") or "png",
-            "type"    : options.get("type") or "",
+            "format": options.get("format") or "png",
+            "type": options.get("type") or "",
             "noavatar": options.get("noavatar") or False,
-            "colors"  : options.get("colors") or options.get("colours") or {}
+            "colors": options.get("colors") or options.get("colours") or {},
         }
 
         widget_query = f"noavatar={str(opts['noavatar']).lower()}"
-        for key, value in opts['colors'].items():
+        for key, value in opts["colors"].items():
             widget_query += f"&{key.lower()}{'' if key.lower().endswith('color') else 'color'}={value:x}"
-        widget_format = opts['format']
-        widget_type = f"/{opts['type']}" if opts['type'] else ""
+        widget_format = opts["format"]
+        widget_type = f"/{opts['type']}" if opts["type"] else ""
 
         url = f"""https://top.gg/api/widget{widget_type}/{bot_id}.{widget_format}?{widget_query}"""
         return url
@@ -361,4 +392,4 @@ class DBLClient:
             self._is_closed = True
 
         with suppress(AttributeError):
-            delattr(self.bot, 'on_autopost_error')
+            delattr(self.bot, "on_autopost_error")

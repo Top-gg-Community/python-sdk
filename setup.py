@@ -2,47 +2,48 @@ import os
 
 from setuptools import find_packages, setup
 
-from topgg import __author__ as author, __version__ as version
+from topgg import __author__ as author
+from topgg import __version__ as version
 
+on_rtd = os.getenv("READTHEDOCS") == "True"
 
-on_rtd = os.getenv('READTHEDOCS') == 'True'
-
-with open('requirements.txt') as f:
+with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 if on_rtd:
-    requirements.append('sphinxcontrib-napoleon')
+    requirements.append("sphinxcontrib-napoleon")
 
-with open('README.rst') as f:
+with open("README.rst") as f:
     readme = f.read()
 
-setup(name='dblpy',
-      author=f'{author}, Top.gg',
-      author_email='shivaco.osu@gmail.com',
-      url='https://github.com/top-gg/python-sdk',
-      version=version,
-      packages=find_packages(),
-      license='MIT',
-      description='A simple API wrapper for Top.gg written in Python.',
-      long_description=readme,
-      include_package_data=True,
-      python_requires='>= 3.6',
-      install_requires=requirements,
-      keywords='discord bot server list discordservers serverlist discordbots botlist topgg top.gg',
-      classifiers=[
-          'Development Status :: 5 - Production/Stable',
-          'License :: OSI Approved :: MIT License',
-          'Intended Audience :: Developers',
-          'Natural Language :: English',
-          'Operating System :: OS Independent',
-          'Programming Language :: Python :: 3 :: Only',
-          'Programming Language :: Python :: 3.6',
-          'Programming Language :: Python :: 3.7',
-          'Programming Language :: Python :: 3.8',
-          'Programming Language :: Python :: 3.9',
-          'Topic :: Internet',
-          'Topic :: Software Development :: Libraries',
-          'Topic :: Software Development :: Libraries :: Python Modules',
-          'Topic :: Utilities',
-      ]
-      )
+setup(
+    name="dblpy",
+    author=f"{author}, Top.gg",
+    author_email="shivaco.osu@gmail.com",
+    url="https://github.com/top-gg/python-sdk",
+    version=version,
+    packages=find_packages(),
+    license="MIT",
+    description="A simple API wrapper for Top.gg written in Python.",
+    long_description=readme,
+    include_package_data=True,
+    python_requires=">= 3.6",
+    install_requires=requirements,
+    keywords="discord bot server list discordservers serverlist discordbots botlist topgg top.gg",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "License :: OSI Approved :: MIT License",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Internet",
+        "Topic :: Software Development :: Libraries",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Utilities",
+    ],
+)

@@ -46,9 +46,6 @@ class AsyncRateLimiter:
         self.callback = callback
         self.__lock = asyncio.Lock()
 
-        # Lock to protect creation of self.__lock
-        self.__init_lock = threading.Lock()
-
     async def __aenter__(self):
         async with self.__lock:
             if len(self.calls) >= self.max_calls:

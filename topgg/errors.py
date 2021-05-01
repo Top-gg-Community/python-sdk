@@ -30,6 +30,7 @@ class TopGGException(Exception):
 
     Ideally speaking, this could be caught to handle any exceptions thrown from this library.
     """
+
     pass
 
 
@@ -38,6 +39,7 @@ class ClientException(TopGGException):
 
     These are usually for exceptions that happened due to user input.
     """
+
     pass
 
 
@@ -55,8 +57,8 @@ class HTTPException(TopGGException):
     def __init__(self, response, message):
         self.response = response
         if isinstance(message, dict):
-            self.text = message.get('message', '')
-            self.code = message.get('code', 0)
+            self.text = message.get("message", "")
+            self.code = message.get("code", 0)
         else:
             self.text = message
 
@@ -72,6 +74,7 @@ class Unauthorized(HTTPException):
 
     Subclass of :exc:`HTTPException`
     """
+
     pass
 
 
@@ -80,6 +83,7 @@ class UnauthorizedDetected(TopGGException):
 
     Subclass of :exc:`TopGGException`
     """
+
     pass
 
 
@@ -88,6 +92,7 @@ class Forbidden(HTTPException):
 
     Subclass of :exc:`HTTPException`
     """
+
     pass
 
 
@@ -96,6 +101,7 @@ class NotFound(HTTPException):
 
     Subclass of :exc:`HTTPException`
     """
+
     pass
 
 
@@ -105,4 +111,5 @@ class ServerError(HTTPException):
 
     Subclass of :exc:`HTTPException`
     """
+
     pass
