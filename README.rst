@@ -1,11 +1,12 @@
+##################
 DBL Python Library
-==================
+##################
 .. image:: https://img.shields.io/pypi/v/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
    :alt: View on PyPi
 .. image:: https://img.shields.io/pypi/pyversions/dblpy.svg
    :target: https://pypi.python.org/pypi/dblpy
-   :alt: v1.0
+   :alt: v1.0.0
 .. image:: https://readthedocs.org/projects/dblpy/badge/?version=latest
    :target: https://dblpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
@@ -41,7 +42,7 @@ Features
 * GET user info
 * GET widgets (large and small) including custom ones. See `docs.top.gg <https://docs.top.gg/>`_ for more info.
 * GET weekend status
-* Built-in webhook to help you handle Top.gg upvotes
+* Built-in webhook to handle Top.gg votes
 * Automated server count posting
 * Searching for bots via the API
 
@@ -56,7 +57,7 @@ Examples
 --------
 
 Posting server count manually every 30 minutes:
-===============================================
+"""""""""""""""""""""""""""""""""""""""""""""""
 
 .. code:: py
 
@@ -80,9 +81,8 @@ Posting server count manually every 30 minutes:
 
     update_stats.start()
 
-
 Using webhook:
-==============
+""""""""""""""
 
 .. code:: py
 
@@ -97,16 +97,15 @@ Using webhook:
     @bot.event
     async def on_dbl_vote(data):
         """An event that is called whenever someone votes for the bot on Top.gg."""
-        print(f"Received an upvote:\n{data}")
+        print(f"Received a vote:\n{data}")
 
     @bot.event
     async def on_dbl_test(data):
         """An event that is called whenever someone tests the webhook system for your bot on Top.gg."""
-        print(f"Received a test upvote:\n{data}")
-
+        print(f"Received a test vote:\n{data}")
 
 With autopost:
-==============
+""""""""""""""
 
 .. code:: py
 

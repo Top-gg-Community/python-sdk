@@ -15,7 +15,7 @@ v1.0.0
 
 * Renamed the module folder from ``dbl`` to ``topgg``
 * Added ``post_shard_count`` argument to :meth:`DBLClient.post_guild_count`
-* Autopost now supports automatic shard posting
+* Autopost now supports automatic shard posting (:issue:`42`)
 *  Large webhook system rework, read the :ref:`webhooks` section for more
 
    * Added support for server webhooks
