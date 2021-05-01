@@ -31,7 +31,9 @@ def session():
 async def test_DBLClient_validates_constructor_and_passes_for_valid_values(
     bot, mocker, autopost, post_shard_count, autopost_interval, session
 ):
-    mocker.patch("topgg.DBLClient._auto_post", return_value=None)
+    mocker.patch(
+        "topgg.DBLClient._auto_post", return_value=None, new_callable=mock.AsyncMock
+    )
     DBLClient(
         bot,
         None,
@@ -69,7 +71,11 @@ async def test_DBLClient_autopost_breaks_on_401(bot, mocker, session):
     mocker.patch(
         "topgg.DBLClient.post_guild_count", side_effect=Unauthorized(response, {})
     )
-    mocker.patch("topgg.DBLClient._ensure_bot_user", return_value=None)
+    mocker.patch(
+        "topgg.DBLClient._ensure_bot_user",
+        return_value=None,
+        new_callable=mock.AsyncMock,
+    )
 
     obj = DBLClient(bot, None, False, session=session)
 
