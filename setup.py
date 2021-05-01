@@ -16,7 +16,7 @@ if on_rtd:
 with open('README.rst') as f:
     readme = f.read()
 
-setup(name='dblpy',
+setup(name='topggpy',
       author=f'{author}, Top.gg',
       author_email='shivaco.osu@gmail.com',
       url='https://github.com/top-gg/python-sdk',
