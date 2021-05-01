@@ -2,7 +2,7 @@ import os
 
 from setuptools import find_packages, setup
 
-from topgg import __author__ as author, __version__ as version
+from topgg import __author__ as author, __version__ as version, __license__ as license
 
 
 on_rtd = os.getenv('READTHEDOCS') == 'True'
@@ -22,7 +22,7 @@ setup(name='topggpy',
       url='https://github.com/top-gg/python-sdk',
       version=version,
       packages=find_packages(),
-      license='MIT',
+      license=license,
       description='A simple API wrapper for Top.gg written in Python.',
       long_description=readme,
       include_package_data=True,
