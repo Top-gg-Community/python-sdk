@@ -64,12 +64,12 @@ Posting server count manually every 30 minutes:
 
     from discord.ext import tasks
 
-    import dbl
+    import topgg
 
     # This example uses tasks provided by discord.ext to create a task that posts guild count to Top.gg every 30 minutes.
 
     dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
-    bot.topggpy = dbl.DBLClient(bot, dbl_token)
+    bot.topggpy = topgg.DBLClient(bot, dbl_token)
 
     @tasks.loop(minutes=30)
     async def update_stats():
@@ -87,13 +87,13 @@ Using webhook:
 
 .. code:: py
 
-    import dbl
+    import topgg
 
     # This example uses topggpy's webhook system.
     # In order to run the webhook, at least webhook_port argument must be specified (number between 1024 and 49151).
 
     dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
-    bot.topggpy = dbl.DBLClient(bot, dbl_token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
+    bot.topggpy = topgg.DBLClient(bot, dbl_token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
 
     @bot.event
     async def on_dbl_vote(data):
@@ -110,12 +110,12 @@ With autopost:
 
 .. code:: py
 
-    import dbl
+    import topgg
 
     # This example uses topggpy's autopost feature to post guild count to Top.gg every 30 minutes.
 
     dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
-    bot.topggpy = dbl.DBLClient(bot, dbl_token, autopost=True)
+    bot.topggpy = topgg.DBLClient(bot, dbl_token, autopost=True)
 
     @bot.event
     async def on_guild_post():
