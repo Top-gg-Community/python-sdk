@@ -31,7 +31,14 @@ def exc():
 
 @pytest.mark.parametrize(
     "autopost, post_shard_count, autopost_interval",
-    [(True, True, 900), (True, False, 900), (True, True, None), (True, False, None)],
+    [
+        (True, True, 900),
+        (True, False, 900),
+        (True, True, None),
+        (True, False, None),
+        (False, False, None),
+        (False, False, 0),
+    ],
 )
 @pytest.mark.asyncio
 async def test_DBLClient_validates_constructor_and_passes_for_valid_values(
@@ -50,7 +57,14 @@ async def test_DBLClient_validates_constructor_and_passes_for_valid_values(
 
 @pytest.mark.parametrize(
     "autopost, post_shard_count, autopost_interval",
-    [(False, True, 900), (True, True, 0), (True, True, 500)],
+    [
+        (True, True, 0),
+        (True, False, 500),
+        (False, True, 0),
+        (False, True, 900),
+        (False, True, None),
+        (False, False, 1800),
+    ],
 )
 def test_DBLClient_validates_constructor_and_fails_for_invalid_values(
     bot, mocker, autopost, post_shard_count, autopost_interval, session
