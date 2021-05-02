@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import logging
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, Union
 
 import aiohttp
 import discord

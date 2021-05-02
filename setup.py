@@ -2,7 +2,9 @@ import os
 
 from setuptools import find_packages, setup
 
-from topgg import __author__ as author, __version__ as version, __license__ as license
+from topgg import __author__ as author
+from topgg import __license__ as license
+from topgg import __version__ as version
 
 on_rtd = os.getenv("READTHEDOCS") == "True"
 
