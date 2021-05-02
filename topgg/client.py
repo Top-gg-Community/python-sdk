@@ -30,7 +30,7 @@ import sys
 import traceback
 from asyncio.tasks import Task
 from contextlib import suppress
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, TypedDict, Union
 
 import discord
 from discord.ext.commands.bot import BotBase
@@ -39,6 +39,17 @@ from . import errors
 from .http import HTTPClient
 
 log = logging.getLogger(__name__)
+
+_Colors = Dict[str, int]
+
+
+class _WidgetOptions(TypedDict, total=False):
+    id: Optional[int]
+    format: str
+    type: str
+    noavatar: bool
+    colors: _Colors
+    colours: _Colors
 
 
 class DBLClient:
@@ -183,9 +194,9 @@ class DBLClient:
 
     async def post_guild_count(
         self,
-        guild_count: Union[int, List[int]] = None,
-        shard_count: int = None,
-        shard_id: int = None,
+        guild_count: Optional[Union[int, List[int]]] = None,
+        shard_count: Optional[int] = None,
+        shard_id: Optional[int] = None,
     ):
         """This function is a coroutine.
 
@@ -208,7 +219,7 @@ class DBLClient:
             guild_count = self.guild_count
         await self.http.post_guild_count(guild_count, shard_count, shard_id)
 
-    async def get_guild_count(self, bot_id: int = None) -> dict:
+    async def get_guild_count(self, bot_id: Optional[int] = None) -> dict:
         """This function is a coroutine.
 
         Gets a bot's guild count and shard info from Top.gg.
@@ -245,7 +256,7 @@ class DBLClient:
         await self._ensure_bot_user()
         return await self.http.get_bot_votes(self.bot_id)
 
-    async def get_bot_info(self, bot_id: int = None) -> dict:
+    async def get_bot_info(self, bot_id: Optional[int] = None) -> dict:
         """This function is a coroutine.
 
         Gets information about a bot from Top.gg.
@@ -270,9 +281,9 @@ class DBLClient:
         self,
         limit: int = 50,
         offset: int = 0,
-        sort: str = None,
-        search: dict = None,
-        fields: list = None,
+        sort: Optional[str] = None,
+        search: Optional[dict] = None,
+        fields: Optional[list] = None,
     ) -> dict:
         """This function is a coroutine.
 
@@ -338,7 +349,7 @@ class DBLClient:
         data = await self.http.get_user_vote(self.bot_id, user_id)
         return bool(data["voted"])
 
-    async def generate_widget(self, options: dict) -> str:
+    async def generate_widget(self, options: _WidgetOptions) -> str:
         """This function is a coroutine.
 
         Generates a Top.gg widget from provided options.
@@ -362,7 +373,7 @@ class DBLClient:
         if bot_id is None:
             await self._ensure_bot_user()
             bot_id = self.bot_id
-        opts = {
+        opts: _WidgetOptions = {
             "format": options.get("format") or "png",
             "type": options.get("type") or "",
             "noavatar": options.get("noavatar") or False,

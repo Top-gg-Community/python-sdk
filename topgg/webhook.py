@@ -25,13 +25,20 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import logging
-from typing import Callable, Dict, Union
+from typing import Dict, TypedDict
 
 import aiohttp
 import discord
 from aiohttp import web
+from aiohttp.web_urldispatcher import _WebHandler
 
 log = logging.getLogger(__name__)
+
+
+class _Webhook(TypedDict):
+    route: str
+    auth: str
+    func: _WebHandler
 
 
 class WebhookManager:
@@ -45,7 +52,10 @@ class WebhookManager:
     """
 
     __app: web.Application
-    _webhooks: Dict[str, Dict[str, Union[str, Callable]]]
+    _webhooks: Dict[
+        str,
+        _Webhook,
+    ]
     _webserver: web.TCPSite
     _is_closed: bool
 
@@ -65,11 +75,11 @@ class WebhookManager:
         auth_key: str
             The Authorization key that will be used to verify the incoming requests.
         """
-        self._webhooks["dbl"] = {
-            "route": route or "/dbl",
-            "auth": auth_key or "",
-            "func": self._bot_vote_handler,
-        }
+        self._webhooks["dbl"] = _Webhook(
+            route=route or "/dbl",
+            auth=auth_key or "",
+            func=self._bot_vote_handler,
+        )
         return self
 
     def dsl_webhook(self, route: str, auth_key: str):
@@ -82,14 +92,14 @@ class WebhookManager:
         auth_key: str
             The Authorization key that will be used to verify the incoming requests.
         """
-        self._webhooks["dsl"] = {
-            "route": route or "/dsl",
-            "auth": auth_key or "",
-            "func": self._guild_vote_handler,
-        }
+        self._webhooks["dsl"] = _Webhook(
+            route=route or "/dsl",
+            auth=auth_key or "",
+            func=self._guild_vote_handler,
+        )
         return self
 
-    async def _bot_vote_handler(self, request: aiohttp.web.Request):
+    async def _bot_vote_handler(self, request: aiohttp.web.Request) -> web.Response:
         auth = request.headers.get("Authorization", "")
         if auth == self._webhooks["dbl"]["auth"]:
             data = await request.json()
@@ -97,7 +107,7 @@ class WebhookManager:
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
 
-    async def _guild_vote_handler(self, request: aiohttp.web.Request):
+    async def _guild_vote_handler(self, request: aiohttp.web.Request) -> web.Response:
         auth = request.headers.get("Authorization", "")
         if auth == self._webhooks["dsl"]["auth"]:
             data = await request.json()
@@ -106,10 +116,8 @@ class WebhookManager:
         return web.Response(status=401, text="Unauthorized")
 
     async def _run(self, port: int):
-        for webhook in self._webhooks:
-            self.__app.router.add_post(
-                self._webhooks[webhook]["route"], self._webhooks[webhook]["func"]
-            )
+        for webhook in self._webhooks.values():
+            self.__app.router.add_post(webhook["route"], webhook["func"])
         runner = web.AppRunner(self.__app)
         await runner.setup()
         self._webserver = web.TCPSite(runner, "0.0.0.0", port)
