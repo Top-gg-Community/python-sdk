@@ -118,11 +118,12 @@ With autopost:
 
     import topgg
 
-    # This example uses topggpy's autopost feature to post guild count to Top.gg every 30 minutes.
+    # This example uses topggpy's autopost feature to post guild count to Top.gg every 30 minutes
+    # as well as the shard count if applicable.
 
     dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
-    bot.topggpy = topgg.DBLClient(bot, dbl_token, autopost=True)
+    bot.topggpy = topgg.DBLClient(bot, dbl_token, autopost=True, post_shard_count=True)
 
     @bot.event
     async def on_autopost_success():
-        print(f'Posted server count ({bot.topggpy.guild_count})')
+        print(f'Posted server count ({bot.topggpy.guild_count}), shard count ({bot.shard_count})')
