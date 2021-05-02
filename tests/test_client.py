@@ -67,7 +67,7 @@ def test_DBLClient_validates_constructor_and_fails_for_invalid_values(
 
 
 @pytest.mark.asyncio
-async def test_DBLClient_autopost_breaks_on_401(bot, mocker, session):
+async def test_DBLClient_breaks_autopost_loop_on_401(bot, mocker, session):
     response = mock.Mock("reason, status")
     response.reason = "Unauthorized"
     response.status = 401
