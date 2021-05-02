@@ -93,11 +93,16 @@ Using webhook:
     # In order to run the webhook, at least webhook_port argument must be specified (number between 1024 and 49151).
 
     dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
-    bot.topggpy = topgg.DBLClient(bot, dbl_token, webhook_path='/dblwebhook', webhook_auth='password', webhook_port=5000)
+    bot.topggpy = topgg.DBLClient(bot, dbl_token)
+    bot.topgg_webhook = topgg.WebhookManager(bot).dbl_webhook("/dblwebhook", "password")
+    bot.loop.create_task(bot.topgg_webhook.run(5000))
 
     @bot.event
     async def on_dbl_vote(data):
         """An event that is called whenever someone votes for the bot on Top.gg."""
+        if data["type"] == "test":
+            return bot.dispatch('dbl_test', data)
+
         print(f"Received a vote:\n{data}")
 
     @bot.event
@@ -118,5 +123,5 @@ With autopost:
     bot.topggpy = topgg.DBLClient(bot, dbl_token, autopost=True)
 
     @bot.event
-    async def on_guild_post():
+    async def on_autopost_success():
         print(f'Posted server count ({bot.topggpy.guild_count})')
