@@ -6,21 +6,16 @@ from discord import Client
 from topgg import WebhookManager
 
 
-def test_WebhookManager_routes():
-    obj = (
-        WebhookManager(mock.Mock(Client))
-        .dbl_webhook("dbl", None)
-        .dsl_webhook("dsl", None)
-    )
-    assert len(obj._webhooks) == 2
-
-
 auth = "youshallnotpass"
 
 
 @pytest.fixture
 def webhook_manager():
-    return WebhookManager(Client()).dbl_webhook("/dbl", auth)
+    return WebhookManager(Client()).dbl_webhook("/dbl", auth).dsl_webhook("/dsl", auth)
+
+
+def test_WebhookManager_routes(webhook_manager):
+    assert len(webhook_manager._webhooks) == 2
 
 
 @pytest.mark.asyncio
@@ -44,19 +39,25 @@ async def test_WebhookManager_run_method(webhook_manager):
 async def test_WebhookManager_validates_auth(webhook_manager, headers, result, state):
     await webhook_manager.run(5000)
 
-    _state = False
+    dbl_state = dsl_state = False
 
     @webhook_manager.bot.event
     async def on_dbl_vote(data):
-        nonlocal _state
-        _state = True
+        nonlocal dbl_state
+        dbl_state = True
+
+    @webhook_manager.bot.event
+    async def on_dsl_vote(data):
+        nonlocal dsl_state
+        dsl_state = True
 
     try:
-        async with aiohttp.request(
-            "POST", "http://localhost:5000/dbl", headers=headers, json={}
-        ) as r:
-            assert r.status == result
+        for path in ("dbl", "dsl"):
+            async with aiohttp.request(
+                "POST", f"http://localhost:5000/{path}", headers=headers, json={}
+            ) as r:
+                assert r.status == result
 
-        assert _state is state
+            assert locals()[f"{path}_state"] is state
     finally:
         await webhook_manager.close()
