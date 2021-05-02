@@ -30,7 +30,13 @@ import sys
 import traceback
 from asyncio.tasks import Task
 from contextlib import suppress
-from typing import Dict, List, Optional, TypedDict, Union
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
+from typing import Dict, List, Optional, Union
 
 import discord
 from discord.ext.commands.bot import BotBase
