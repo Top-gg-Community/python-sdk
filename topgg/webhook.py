@@ -125,12 +125,12 @@ class WebhookManager:
 
     @property
     def webserver(self) -> web.Application:
-        """Returns the internal webserver that handles webhook requests.
+        """Returns the internal web application that handles webhook requests.
 
         Returns
         --------
         :class:`aiohttp.web.Application`
-            The internal web application if it exists.
+            The internal web application.
         """
         return self.__app
 
