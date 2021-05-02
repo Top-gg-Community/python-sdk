@@ -11,7 +11,7 @@ from topgg.errors import ClientException, Unauthorized, UnauthorizedDetected
 
 
 @pytest.fixture
-async def bot():
+def bot():
     bot = mock.Mock(Client)
     bot.loop = asyncio.get_event_loop()
     bot.guilds = []
