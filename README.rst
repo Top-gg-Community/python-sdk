@@ -90,17 +90,18 @@ Using webhook:
     import topgg
 
     # This example uses topggpy's webhook system.
-    # In order to run the webhook, at least webhook_port argument must be specified (number between 1024 and 49151).
+    # The port must be a number between 1024 and 49151.
 
     dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
-    bot.topggpy = topgg.DBLClient(bot, dbl_token)
     bot.topgg_webhook = topgg.WebhookManager(bot).dbl_webhook("/dblwebhook", "password")
-    bot.loop.create_task(bot.topgg_webhook.run(5000))
+    bot.topgg_webhook.run(5000)  # this method can be awaited as well
 
     @bot.event
     async def on_dbl_vote(data):
         """An event that is called whenever someone votes for the bot on Top.gg."""
         if data["type"] == "test":
+            # this is roughly equivalent to
+            # return await on_dbl_test(data) in this case
             return bot.dispatch('dbl_test', data)
 
         print(f"Received a vote:\n{data}")

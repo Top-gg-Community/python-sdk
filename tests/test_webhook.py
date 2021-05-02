@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 import mock
 import pytest
@@ -18,7 +20,9 @@ def test_WebhookManager_routes():
 @pytest.mark.asyncio
 async def test_WebhookManager_auth_validates():
     auth = "youshallnotpass"
-    obj = WebhookManager(mock.Mock(Client)).dbl_webhook("/dbl", auth)
+    client = mock.Mock(Client)
+    client.loop = asyncio.get_event_loop()
+    obj = WebhookManager(client).dbl_webhook("/dbl", auth)
 
     await obj.run(5000)
 

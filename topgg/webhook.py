@@ -105,14 +105,7 @@ class WebhookManager:
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
 
-    async def run(self, port: int):
-        """Runs the webhook.
-
-        Parameters
-        ----------
-        port: int
-            The port to run the webhook on.
-        """
+    async def _run(self, port: int):
         for webhook in self._webhooks:
             self.__app.router.add_post(
                 self._webhooks[webhook]["route"], self._webhooks[webhook]["func"]
@@ -122,6 +115,16 @@ class WebhookManager:
         self._webserver = web.TCPSite(runner, "0.0.0.0", port)
         await self._webserver.start()
         self._is_closed = False
+
+    def run(self, *args):
+        """Runs the webhook.
+
+        Parameters
+        ----------
+        port: int
+            The port to run the webhook on.
+        """
+        return self.bot.loop.create_task(self._run(*args))
 
     @property
     def webserver(self) -> web.Application:
