@@ -1,0 +1,11 @@
+# Formatting
+git+https://github.com/timothycrosley/isort
+git+https://github.com/psf/black
+
+# Unit Testing
+mock
+pytest-asyncio
+pytest-mock
+
+# Linting
+flake8

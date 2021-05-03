@@ -27,6 +27,7 @@ DEALINGS IN THE SOFTWARE.
 import asyncio
 import collections
 from datetime import datetime
+from typing import Any, Awaitable, Callable, Optional
 
 
 class AsyncRateLimiter:
@@ -34,12 +35,17 @@ class AsyncRateLimiter:
     Provides rate limiting for an operation with a configurable number of requests for a time period.
     """
 
-    def __init__(self, max_calls, period=1.0, callback=None):
+    def __init__(
+        self,
+        max_calls: int,
+        period: float = 1.0,
+        callback: Optional[Callable[[int], Awaitable[Any]]] = None,
+    ):
         if period <= 0:
             raise ValueError("Rate limiting period should be > 0")
         if max_calls <= 0:
             raise ValueError("Rate limiting number of calls should be > 0")
-        self.calls = collections.deque()
+        self.calls = collections.deque()  # type: collections.deque
 
         self.period = period
         self.max_calls = max_calls

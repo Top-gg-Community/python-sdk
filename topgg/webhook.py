@@ -25,13 +25,27 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import logging
-from typing import Callable, Dict, Optional, Union
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
+
+from typing import Dict
 
 import aiohttp
 import discord
 from aiohttp import web
+from aiohttp.web_urldispatcher import _WebHandler
 
 log = logging.getLogger(__name__)
+
+
+class _Webhook(TypedDict):
+    route: str
+    auth: str
+    func: _WebHandler
 
 
 class WebhookManager:
@@ -43,8 +57,12 @@ class WebhookManager:
     bot: discord.Client
         The Client object that will be utilized by this manager's webhook(s) to emit events.
     """
+
     __app: web.Application
-    _webhooks: Dict[str, Dict[str, Union[str, Callable]]]
+    _webhooks: Dict[
+        str,
+        _Webhook,
+    ]
     _webserver: web.TCPSite
     _is_closed: bool
 
@@ -64,11 +82,11 @@ class WebhookManager:
         auth_key: str
             The Authorization key that will be used to verify the incoming requests.
         """
-        self._webhooks["dbl"] = {
-            "route": route or "/dbl",
-            "auth" : auth_key or "",
-            "func" : self._bot_vote_handler
-        }
+        self._webhooks["dbl"] = _Webhook(
+            route=route or "/dbl",
+            auth=auth_key or "",
+            func=self._bot_vote_handler,
+        )
         return self
 
     def dsl_webhook(self, route: str, auth_key: str):
@@ -81,30 +99,39 @@ class WebhookManager:
         auth_key: str
             The Authorization key that will be used to verify the incoming requests.
         """
-        self._webhooks["dsl"] = {
-            "route": route or "/dsl",
-            "auth" : auth_key or "",
-            "func" : self._guild_vote_handler
-        }
+        self._webhooks["dsl"] = _Webhook(
+            route=route or "/dsl",
+            auth=auth_key or "",
+            func=self._guild_vote_handler,
+        )
         return self
 
-    async def _bot_vote_handler(self, request: aiohttp.web.Request):
-        data = await request.json()
+    async def _bot_vote_handler(self, request: aiohttp.web.Request) -> web.Response:
         auth = request.headers.get("Authorization", "")
         if auth == self._webhooks["dbl"]["auth"]:
+            data = await request.json()
             self.bot.dispatch("dbl_vote", data)
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
 
-    async def _guild_vote_handler(self, request: aiohttp.web.Request):
-        data = await request.json()
+    async def _guild_vote_handler(self, request: aiohttp.web.Request) -> web.Response:
         auth = request.headers.get("Authorization", "")
         if auth == self._webhooks["dsl"]["auth"]:
+            data = await request.json()
             self.bot.dispatch("dsl_vote", data)
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
 
-    async def run(self, port: int):
+    async def _run(self, port: int):
+        for webhook in self._webhooks.values():
+            self.__app.router.add_post(webhook["route"], webhook["func"])
+        runner = web.AppRunner(self.__app)
+        await runner.setup()
+        self._webserver = web.TCPSite(runner, "0.0.0.0", port)
+        await self._webserver.start()
+        self._is_closed = False
+
+    def run(self, *args):
         """Runs the webhook.
 
         Parameters
@@ -112,22 +139,16 @@ class WebhookManager:
         port: int
             The port to run the webhook on.
         """
-        for webhook in self._webhooks:
-            self.__app.router.add_post(self._webhooks[webhook]["route"], self._webhooks[webhook]["func"])
-        runner = web.AppRunner(self.__app)
-        await runner.setup()
-        self._webserver = web.TCPSite(runner, '0.0.0.0', port)
-        await self._webserver.start()
-        self._is_closed = False
+        return self.bot.loop.create_task(self._run(*args))
 
     @property
     def webserver(self) -> web.Application:
-        """Returns the internal webserver that handles webhook requests.
+        """Returns the internal web application that handles webhook requests.
 
         Returns
         --------
         :class:`aiohttp.web.Application`
-            The internal web application if it exists.
+            The internal web application.
         """
         return self.__app
 
