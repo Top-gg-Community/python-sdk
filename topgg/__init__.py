@@ -13,10 +13,13 @@ from collections import namedtuple
 __title__ = "topggpy"
 __author__ = "Assanali Mukhanov"
 __license__ = "MIT"
-VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
-version_info = VersionInfo(major=1, minor=0, micro=1, releaselevel="final", serial=0)
+__version__ = "1.0.1"
 
-__version__ = f"{version_info.major}.{version_info.minor}.{version_info.micro}"
+VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
+major, minor, micro = __version__.split(".")
+version_info = VersionInfo(
+    major=major, minor=minor, micro=micro, releaselevel="final", serial=0
+)
 
 from .client import DBLClient
 from .errors import *

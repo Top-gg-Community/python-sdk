@@ -1,10 +1,21 @@
 import os
-
+import pathlib
+import re
+import types
 from setuptools import find_packages, setup
 
-from topgg import __author__ as author
-from topgg import __license__ as license
-from topgg import __version__ as version
+
+HERE = pathlib.Path(__file__).parent
+
+txt = (HERE / "topgg" / "__init__.py").read_text("utf-8")
+
+groups = {}
+
+for match in re.finditer(r'__(?P<identifier>.*)__\s*=\s*"(?P<value>[^"]+)"\r?', txt):
+    group = match.groupdict()
+    groups[group["identifier"]] = group["value"]
+
+metadata = types.SimpleNamespace(**groups)
 
 on_rtd = os.getenv("READTHEDOCS") == "True"
 
@@ -19,12 +30,12 @@ with open("README.rst") as f:
 
 setup(
     name="topggpy",
-    author=f"{author}, Top.gg",
+    author=f"{metadata.author}, Top.gg",
     author_email="shivaco.osu@gmail.com",
     url="https://github.com/top-gg/python-sdk",
-    version=version,
+    version=metadata.version,
     packages=find_packages(),
-    license=license,
+    license=metadata.license,
     description="A simple API wrapper for Top.gg written in Python.",
     long_description=readme,
     include_package_data=True,
