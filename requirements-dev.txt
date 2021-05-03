@@ -6,3 +6,6 @@ git+https://github.com/psf/black
 mock
 pytest-asyncio
 pytest-mock
+
+# Linting
+flake8
