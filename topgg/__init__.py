@@ -16,7 +16,7 @@ __license__ = "MIT"
 __version__ = "1.0.1"
 
 VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
-major, minor, micro = __version__.split(".")
+major, minor, micro = (int(i) for i in __version__.split("."))
 version_info = VersionInfo(
     major=major, minor=minor, micro=micro, releaselevel="final", serial=0
 )
