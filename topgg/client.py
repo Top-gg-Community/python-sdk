@@ -30,32 +30,20 @@ import sys
 import traceback
 from asyncio.tasks import Task
 from contextlib import suppress
-
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
-
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import discord
 from discord.ext.commands.bot import BotBase
 
 from . import errors
 from .http import HTTPClient
+# if sys.version_info >= (3, 8):
+#     from typing import TypedDict
+# else:
+#     from typing_extensions import TypedDict
+from .types import WidgetOptions
 
 log = logging.getLogger(__name__)
-
-_Colors = Dict[str, int]
-
-
-class _WidgetOptions(TypedDict, total=False):
-    id: Optional[int]
-    format: str
-    type: str
-    noavatar: bool
-    colors: _Colors
-    colours: _Colors
 
 
 class DBLClient:
@@ -287,10 +275,10 @@ class DBLClient:
         self,
         limit: int = 50,
         offset: int = 0,
-        sort: Optional[str] = None,
-        search: Optional[dict] = None,
-        fields: Optional[list] = None,
-    ) -> dict:
+        sort: str = None,
+        search: Dict[str, Any] = None,
+        fields: List[str] = None,
+    ) -> Dict[str, Any]:
         """This function is a coroutine.
 
         Gets information about listed bots on Top.gg.
@@ -303,9 +291,9 @@ class DBLClient:
             The amount of bots to skip. Defaults to 0.
         sort: str
             The field to sort by. Prefix with ``-`` to reverse the order.
-        search: dict
+        search: Dict[str, Any]
             The search data.
-        fields: List[dict]
+        fields: List[str]
             Fields to output.
 
         Returns
@@ -355,14 +343,14 @@ class DBLClient:
         data = await self.http.get_user_vote(self.bot_id, user_id)
         return bool(data["voted"])
 
-    async def generate_widget(self, options: _WidgetOptions) -> str:
+    async def generate_widget(self, options: WidgetOptions) -> str:
         """This function is a coroutine.
 
-        Generates a Top.gg widget from provided options.
+        Generates a Top.gg widget from provided :class:`WidgetOptions` object.
 
         Parameters
         ----------
-        options: dict
+        options: :class:`WidgetOptions`
             A dictionary consisting of options. For further information, see the :ref:`widgets` section.
 
         Returns
@@ -374,23 +362,17 @@ class DBLClient:
             raise errors.ClientException(
                 "options argument passed to generate_widget must be a dictionary"
             )
-        bot_id = options.get("id")
+        bot_id = options.id
 
         if bot_id is None:
             await self._ensure_bot_user()
             bot_id = self.bot_id
-        opts: _WidgetOptions = {
-            "format": options.get("format") or "png",
-            "type": options.get("type") or "",
-            "noavatar": options.get("noavatar") or False,
-            "colors": options.get("colors") or options.get("colours") or {},
-        }
 
-        widget_query = f"noavatar={str(opts['noavatar']).lower()}"
-        for key, value in opts["colors"].items():
+        widget_query = f"noavatar={str(options.noavatar).lower()}"
+        for key, value in options.colors.items():
             widget_query += f"&{key.lower()}{'' if key.lower().endswith('color') else 'color'}={value:x}"
-        widget_format = opts["format"]
-        widget_type = f"/{opts['type']}" if opts["type"] else ""
+        widget_format = options.format
+        widget_type = f"/{options.type}" if options.type else ""
 
         url = f"""https://top.gg/api/widget{widget_type}/{bot_id}.{widget_format}?{widget_query}"""
         return url

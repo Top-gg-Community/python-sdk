@@ -36,6 +36,7 @@ from aiohttp import ClientResponse
 
 from . import __version__, errors
 from .ratelimiter import AsyncRateLimiter
+from .types import DataDict
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ async def _json_or_text(response: ClientResponse) -> Union[dict, str]:
     """
     text = await response.text()
     if response.headers["Content-Type"] == "application/json; charset=utf-8":
-        return json.loads(text)
+        return DataDict.from_dict(json.loads(text))
     return text
 
 
@@ -183,12 +184,7 @@ class HTTPClient:
 
     async def get_bot_info(self, bot_id):
         """Gets the information of a bot under given bot ID on Top.gg."""
-        resp: Union[dict, str] = await self.request("GET", f"/bots/{bot_id}")
-        resp["date"] = datetime.strptime(resp["date"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        for k in resp:
-            if resp[k] == "":
-                resp[k] = None
-        return resp
+        return await self.request("GET", f"/bots/{bot_id}")
 
     async def get_bot_votes(self, bot_id):
         """Gets your bot's last 1000 votes on Top.gg."""

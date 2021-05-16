@@ -5,7 +5,6 @@ from discord import Client
 
 from topgg import WebhookManager
 
-
 auth = "youshallnotpass"
 
 

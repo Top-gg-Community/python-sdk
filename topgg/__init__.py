@@ -24,4 +24,5 @@ version_info = VersionInfo(
 from .client import DBLClient
 from .errors import *
 from .http import HTTPClient
+from .types import WidgetOptions
 from .webhook import WebhookManager
