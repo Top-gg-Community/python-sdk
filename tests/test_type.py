@@ -34,6 +34,28 @@ d = {
     "donatebotguildid": "",
 }
 
+query_dict = {"qwe": "1", "rty": "2", "uio": "3"}
+
+vote_data_dict = {
+    "type": "test",
+    "query": "?" + "&".join(f"{k}={v}" for k, v in query_dict.items()),
+    "user": "1",
+}
+
+bot_vote_dict = {
+    "bot": "2",
+    "user": "3",
+    "type": "test",
+    "query": "?" + "&".join(f"{k}={v}" for k, v in query_dict.items()),
+}
+
+server_vote_dict = {
+    "guild": "4",
+    "user": "5",
+    "type": "upvote",
+    "query": "?" + "&".join(f"{k}={v}" for k, v in query_dict.items()),
+}
+
 
 @pytest.fixture
 def data_dict():
@@ -48,6 +70,21 @@ def bot_data():
 @pytest.fixture
 def widget_options():
     return types.WidgetOptions(id=int(d["id"]))
+
+
+@pytest.fixture
+def vote_data():
+    return types.VoteDataDict(**vote_data_dict)
+
+
+@pytest.fixture
+def bot_vote_data():
+    return types.BotVoteData(**bot_vote_dict)
+
+
+@pytest.fixture
+def server_vote_data():
+    return types.ServerVoteData(**server_vote_dict)
 
 
 def test_data_dict_fields(data_dict: types.DataDict):
@@ -85,4 +122,38 @@ def test_widget_options_fields(widget_options: types.WidgetOptions):
             == widget_options[attr]
             == widget_options[attr]
             == getattr(widget_options, attr)
+        )
+
+
+def test_vote_data_fields(vote_data: types.VoteDataDict):
+    assert isinstance(vote_data.query, dict)
+    vote_data.type = "upvote"
+
+    for attr in vote_data:
+        assert getattr(vote_data, attr) == vote_data.get(attr) == vote_data[attr]
+
+
+def test_bot_vote_data_fields(bot_vote_data: types.BotVoteData):
+    assert isinstance(bot_vote_data.query, dict)
+    bot_vote_data.type = "upvote"
+
+    assert isinstance(bot_vote_data["bot"], int)
+    for attr in bot_vote_data:
+        assert (
+            getattr(bot_vote_data, attr)
+            == bot_vote_data.get(attr)
+            == bot_vote_data[attr]
+        )
+
+
+def test_server_vote_data_fields(server_vote_data: types.BotVoteData):
+    assert isinstance(server_vote_data.query, dict)
+    server_vote_data.type = "upvote"
+
+    assert isinstance(server_vote_data["guild"], int)
+    for attr in server_vote_data:
+        assert (
+            getattr(server_vote_data, attr)
+            == server_vote_data.get(attr)
+            == server_vote_data[attr]
         )
