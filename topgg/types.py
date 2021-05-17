@@ -9,6 +9,29 @@ def camel_to_snake(string: str) -> str:
     return "".join(["_" + c.lower() if c.isupper() else c for c in string]).lstrip("_")
 
 
+def parse_vote_dict(d: dict) -> dict:
+    data = d.copy()
+
+    query = data.get("query", "").lstrip("?")
+    if query:
+        query_dict = {k: v for k, v in [pair.split("=") for pair in query.split("&")]}
+        data["query"] = DataDict(**query_dict)
+
+    if "bot" in data:
+        data["bot"] = int(data["bot"])
+
+    elif "guild" in data:
+        data["guild"] = int(data["guild"])
+
+    for key, value in data.copy().items():
+        converted_key = camel_to_snake(key)
+        if key != converted_key:
+            del data[key]
+            data[converted_key] = value
+
+    return data
+
+
 def parse_dict(d: dict) -> dict:
     data = d.copy()
 
@@ -41,24 +64,30 @@ def parse_dict(d: dict) -> dict:
 
 class DataDict(dict):
     def __init__(self, *args, **kwargs):
-        kwargs = parse_dict(kwargs)
-        super().__init__(*args, **kwargs)
-        self.__dict__ = self
+        self.__dict__ = parse_dict(kwargs)
 
     @classmethod
     def from_dict(cls, data: dict):
-        obj = cls(**parse_dict(data))
+        obj = cls(**data)
         return obj
 
     def __setitem__(self, key, value):
-        dict.__setitem__(self, key, value)
-        setattr(self, key, value)
+        self.__dict__[key] = value
 
     def __getitem__(self, item):
-        return dict.__getitem__(self, item)
+        return self.__dict__[item]
 
     def get(self, key):
-        return dict.get(self, key)
+        return self.__dict__.get(key)
+
+    def __repr__(self):
+        return repr(self.__dict__)
+
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __len__(self):
+        return len(self.__dict__)
 
 
 class WidgetOptions(DataDict):
@@ -96,13 +125,12 @@ class WidgetOptions(DataDict):
     def __setitem__(self, key, value):
         if key == "colours":
             key = "colors"
-        dict.__setitem__(self, key, value)
-        setattr(self, key, value)
+        super().__setitem__(key, value)
 
     def __getitem__(self, item):
         if item == "colours":
             item = "colors"
-        return dict.__getitem__(self, item)
+        return super().__getitem__(item)
 
     def get(self, key):
         if key == "colours":
@@ -153,3 +181,21 @@ class UserData(DataDict):
     mod: bool
     web_mod: bool
     admin: bool
+
+
+class VoteDataDict(DataDict):
+    type: str
+    user: int
+    query: Optional[Dict[str, str]]
+
+    def __init__(self, **kwargs):
+        self.__dict__ = parse_vote_dict(kwargs)
+
+
+class BotVoteData(VoteDataDict):
+    bot: int
+    is_weekend: bool
+
+
+class ServerVoteData(VoteDataDict):
+    guild: int
