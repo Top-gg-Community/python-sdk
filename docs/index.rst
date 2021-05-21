@@ -10,8 +10,9 @@ Welcome to topggpy's documentation!
 .. toctree::
    :maxdepth: 2
 
-   whats_new
    api
+   whats_new
+   models
 
 Indices and tables
 ==================
