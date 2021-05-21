@@ -56,10 +56,12 @@ server_vote_dict = {
     "query": "?" + "&".join(f"{k}={v}" for k, v in query_dict.items()),
 }
 
+bot_stats_dict = {"shards": [1, 5, 8]}
+
 
 @pytest.fixture
 def data_dict():
-    return types.DataDict.from_dict(d)
+    return types.DataDict(**d)
 
 
 @pytest.fixture
@@ -85,6 +87,11 @@ def bot_vote_data():
 @pytest.fixture
 def server_vote_data():
     return types.ServerVoteData(**server_vote_dict)
+
+
+@pytest.fixture
+def bot_stats_data():
+    return types.BotStatsData(**bot_stats_dict)
 
 
 def test_data_dict_fields(data_dict: types.DataDict):
@@ -157,3 +164,9 @@ def test_server_vote_data_fields(server_vote_data: types.BotVoteData):
             == server_vote_data.get(attr)
             == server_vote_data[attr]
         )
+
+
+def test_bot_stats_data_attrs(bot_stats_data: types.BotStatsData):
+    for count in ("server_count", "shard_count"):
+        assert isinstance(bot_stats_data[count], int) or bot_stats_data[count] is None
+    assert isinstance(bot_stats_data["shards"], list)
