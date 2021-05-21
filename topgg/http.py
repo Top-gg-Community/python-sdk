@@ -89,7 +89,7 @@ class HTTPClient:
             f"{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
         )
 
-    async def request(self, method, url, **kwargs) -> Union[dict, str]:
+    async def request(self, method, url, **kwargs) -> Union[DataDict, str]:
         """Handles requests to the API."""
         url = f"{self.BASE}{url}"
 
