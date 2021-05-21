@@ -10,6 +10,10 @@ This page keeps a detailed human friendly rendering of what's new and changed in
 
 .. _changelog:
 
+v1.1.0
+======
+* Introduced `data models <models.html>`_.
+
 v1.0.1
 ======
 
