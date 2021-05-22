@@ -56,6 +56,20 @@ server_vote_dict = {
     "query": "?" + "&".join(f"{k}={v}" for k, v in query_dict.items()),
 }
 
+user_data_dict = {
+    "discriminator": "0001",
+    "avatar": "a_1241439d430def25c100dd28add2d42f",
+    "id": "140862798832861184",
+    "username": "Xetera",
+    "defAvatar": "322c936a8c8be1b803cd94861bdfa868",
+    "admin": True,
+    "webMod": True,
+    "mod": True,
+    "certifiedDev": False,
+    "supporter": False,
+    "social": {},
+}
+
 bot_stats_dict = {"shards": [1, 5, 8]}
 
 
@@ -67,6 +81,11 @@ def data_dict():
 @pytest.fixture
 def bot_data():
     return types.BotData(**d)
+
+
+@pytest.fixture
+def user_data():
+    return types.UserData(**user_data_dict)
 
 
 @pytest.fixture
@@ -169,4 +188,15 @@ def test_server_vote_data_fields(server_vote_data: types.BotVoteData):
 def test_bot_stats_data_attrs(bot_stats_data: types.BotStatsData):
     for count in ("server_count", "shard_count"):
         assert isinstance(bot_stats_data[count], int) or bot_stats_data[count] is None
-    assert isinstance(bot_stats_data["shards"], list)
+    assert isinstance(bot_stats_data.shards, list)
+    if bot_stats_data.shards:
+        for shard in bot_stats_data.shards:
+            assert isinstance(shard, int)
+
+
+def test_user_data_attrs(user_data: types.UserData):
+    assert isinstance(user_data.social, types.SocialData)
+    for attr in user_data:
+        if "id" in attr.lower():
+            assert isinstance(user_data[attr], int) or user_data[attr] is None
+        assert user_data[attr] == getattr(user_data, attr) == user_data.get(attr)
