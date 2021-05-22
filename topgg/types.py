@@ -35,8 +35,28 @@ def parse_vote_dict(d: dict) -> dict:
 def parse_dict(d: dict) -> dict:
     data = d.copy()
 
-    if data.get("social"):
-        data["social"] = SocialData(**data["social"])
+    for key, value in data.copy().items():
+        if "id" in key.lower():
+            if value == "":
+                value = None
+            else:
+                if isinstance(value, str) and value.isdigit():
+                    value = int(value)
+                else:
+                    continue
+        elif value == "":
+            value = None
+
+        converted_key = camel_to_snake(key)
+        if key != converted_key:
+            del data[key]
+        data[converted_key] = value
+
+    return data
+
+
+def parse_bot_dict(d: dict) -> dict:
+    data = parse_dict(d.copy())
 
     if data.get("date") and not isinstance(data["date"], datetime):
         data["date"] = datetime.strptime(data["date"], "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -47,23 +67,26 @@ def parse_dict(d: dict) -> dict:
         data["guilds"] = [int(e) for e in data["guilds"]]
 
     for key, value in data.copy().items():
-        del data[key]
-        if "id" in key.lower():
-            if value == "":
-                value = None
-            else:
-                if isinstance(value, int):
-                    continue
-                elif value.isdigit():
-                    value = int(value)
-        elif value == "":
-            value = None
-        data[camel_to_snake(key)] = value
+        converted_key = camel_to_snake(key)
+        if key != converted_key:
+            del data[key]
+        data[converted_key] = value
+
+    return data
+
+
+def parse_user_dict(d: dict) -> dict:
+    data = d.copy()
+
+    if data.get("social"):
+        data["social"] = SocialData(**data["social"])
+
     return data
 
 
 def parse_bot_stats_dict(d: dict) -> dict:
     data = d.copy()
+
     if "server_count" not in data:
         data["server_count"] = None
     if "shards" not in data:
@@ -162,6 +185,9 @@ class BotData(DataDict):
     monthly_points: int
     donatebotguildid: int
 
+    def __init__(self, **kwargs):
+        super().__init__(**parse_bot_dict(kwargs))
+
 
 class BotStatsData(DataDict):
     server_count: Optional[int]
@@ -173,7 +199,22 @@ class BotStatsData(DataDict):
 
     def __init__(self, **kwargs):
         super().__init__(**parse_bot_stats_dict(kwargs))
-        self.__dict__ = self
+
+
+class BriefUserData(DataDict):
+    """Model that contains brief information about a Top.gg user."""
+
+    id: int
+    """The Discord ID of the user."""
+    username: str
+    """The Discord username of the user."""
+    avatar: str
+    """The Discord avatar URL of the user."""
+
+    def __init__(self, **kwargs):
+        if kwargs["id"].isdigit():
+            kwargs["id"] = int(kwargs["id"])
+        super().__init__(**kwargs)
 
 
 class SocialData(DataDict):
@@ -206,6 +247,9 @@ class UserData(DataDict):
     web_mod: bool
     admin: bool
 
+    def __init__(self, **kwargs):
+        super().__init__(**parse_user_dict(kwargs))
+
 
 class VoteDataDict(DataDict):
     """Model that contains information about an incoming vote from top.gg."""
@@ -216,7 +260,6 @@ class VoteDataDict(DataDict):
 
     def __init__(self, **kwargs):
         super().__init__(**parse_vote_dict(kwargs))
-        self.__dict__ = self
 
 
 class BotVoteData(VoteDataDict):
