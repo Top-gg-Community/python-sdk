@@ -16,6 +16,8 @@ def parse_vote_dict(d: dict) -> dict:
     if query:
         query_dict = {k: v for k, v in [pair.split("=") for pair in query.split("&")]}
         data["query"] = DataDict(**query_dict)
+    else:
+        data["query"] = {}
 
     if "bot" in data:
         data["bot"] = int(data["bot"])
@@ -78,8 +80,7 @@ def parse_bot_dict(d: dict) -> dict:
 def parse_user_dict(d: dict) -> dict:
     data = d.copy()
 
-    if data.get("social"):
-        data["social"] = SocialData(**data["social"])
+    data["social"] = SocialData(**data.get("social", {}))
 
     return data
 
@@ -113,10 +114,18 @@ class WidgetOptions(DataDict):
     :meth:`DBLClient.generate_widget`."""
 
     id: Optional[int]
+    """ID of a bot to generate the widget for. Must resolve to an ID of a listed bot when converted to a string."""
     colors: Colors
+    """A dictionary consisting of a parameter as a key and HEX color (type `int`) as value. ``color`` will be 
+    appended to the key in case it doesn't end with ``color``."""
     noavatar: bool
+    """Indicates whether to exclude the bot's avatar from short widgets. Must be of type ``bool``. Defaults to 
+    ``False``."""
     format: str
+    """Format to apply to the widget. Must be either ``png`` and ``svg``. Defaults to ``png``."""
     type: str
+    """Type of a short widget (``status``, ``servers``, ``library``, ``upvotes``, and ``owner``). For large widget, 
+    must be an empty string."""
 
     def __init__(
         self,
@@ -154,6 +163,7 @@ class WidgetOptions(DataDict):
         return super().__getitem__(item)
 
     def get(self, key, default=None):
+        """:meta private:"""
         if key == "colours":
             key = "colors"
         return super().get(key, default)
@@ -190,9 +200,11 @@ class BotData(DataDict):
 
 
 class BotStatsData(DataDict):
+    """Model that contains information about a listed bot's guild and shard count."""
+
     server_count: Optional[int]
     """The amount of servers the bot is in."""
-    shards: List[str]
+    shards: List[int]
     """The amount of servers the bot is in per shard."""
     shard_count: Optional[int]
     """The amount of shards a bot has."""
@@ -252,26 +264,30 @@ class UserData(DataDict):
 
 
 class VoteDataDict(DataDict):
-    """Model that contains information about an incoming vote from top.gg."""
+    """Base model that represents received information from Top.gg via webhooks."""
 
     type: str
+    """Type of the action (``upvote`` or ``test``)."""
     user: int
-    query: Optional[Dict[str, str]]
+    """ID of the voter."""
+    query: DataDict
+    """Query parameters in :ref:`DataDict`."""
 
     def __init__(self, **kwargs):
         super().__init__(**parse_vote_dict(kwargs))
 
 
 class BotVoteData(VoteDataDict):
-    """Model that contains information about a bot vote. The data this model contains can be found `here
-    <https://docs.top.gg/resources/webhooks/#bot-webhooks>`__."""
+    """Model that contains information about a bot vote."""
 
     bot: int
+    """ID of the bot the user voted for."""
     is_weekend: bool
+    """Boolean value indicating whether the action was done on a weekend."""
 
 
 class ServerVoteData(VoteDataDict):
-    """Model that contains information about a server vote. The data this model contains can be found `here
-    <https://docs.top.gg/resources/webhooks/#server-webhooks>`__."""
+    """Model that contains information about a server vote."""
 
     guild: int
+    """ID of the guild the user voted for."""
