@@ -41,8 +41,7 @@ from .http import HTTPClient
 #     from typing import TypedDict
 # else:
 #     from typing_extensions import TypedDict
-from .types import (BotData, BotStatsData, BriefUserData, UserData,
-                    WidgetOptions)
+from . import types
 
 log = logging.getLogger(__name__)
 
@@ -214,7 +213,7 @@ class DBLClient:
             guild_count = self.guild_count
         await self.http.post_guild_count(guild_count, shard_count, shard_id)
 
-    async def get_guild_count(self, bot_id: Optional[int] = None) -> BotStatsData:
+    async def get_guild_count(self, bot_id: Optional[int] = None) -> types.BotStatsData:
         """This function is a coroutine.
 
         Gets a bot's guild count and shard info from Top.gg.
@@ -226,16 +225,16 @@ class DBLClient:
 
         Returns
         -------
-        stats: BotStatsData
+        stats: :ref:`BotStatsData`
             The guild count and shards of a bot on Top.gg.
         """
         await self._ensure_bot_user()
         if bot_id is None:
             bot_id = self.bot_id
         response = await self.http.get_guild_count(bot_id)
-        return BotStatsData(**response)
+        return types.BotStatsData(**response)
 
-    async def get_bot_votes(self) -> List[BriefUserData]:
+    async def get_bot_votes(self) -> List[types.BriefUserData]:
         """This function is a coroutine.
 
         Gets information about last 1000 votes for your bot on Top.gg.
@@ -245,14 +244,14 @@ class DBLClient:
 
         Returns
         -------
-        users: List[BriefUserData]
+        users: List[:ref:`BriefUserData`]
             Users who voted for your bot.
         """
         await self._ensure_bot_user()
         response = await self.http.get_bot_votes(self.bot_id)
-        return [BriefUserData(**user) for user in response]
+        return [types.BriefUserData(**user) for user in response]
 
-    async def get_bot_info(self, bot_id: Optional[int] = None) -> BotData:
+    async def get_bot_info(self, bot_id: Optional[int] = None) -> types.BotData:
         """This function is a coroutine.
 
         Gets information about a bot from Top.gg.
@@ -264,7 +263,7 @@ class DBLClient:
 
         Returns
         -------
-        bot info: BotData
+        bot info: :ref:`BotData`
             Information on the bot you looked up. Returned data can be found
             `here <https://docs.top.gg/api/bot/#bot-structure>`_.
         """
@@ -272,7 +271,7 @@ class DBLClient:
         if bot_id is None:
             bot_id = self.bot_id
         response = await self.http.get_bot_info(bot_id)
-        return BotData(**response)
+        return types.BotData(**response)
 
     async def get_bots(
         self,
@@ -308,10 +307,10 @@ class DBLClient:
         search = search or {}
         fields = fields or []
         response = await self.http.get_bots(limit, offset, sort, search, fields)
-        response["results"] = [BotData(**bot_data) for bot_data in response["results"]]
+        response["results"] = [types.BotData(**bot_data) for bot_data in response["results"]]
         return response
 
-    async def get_user_info(self, user_id: int) -> UserData:
+    async def get_user_info(self, user_id: int) -> types.UserData:
         """This function is a coroutine.
 
         Gets information about a user on Top.gg.
@@ -323,11 +322,11 @@ class DBLClient:
 
         Returns
         -------
-        user data: UserData
+        user data: :ref:`UserData`
             Information about a Top.gg user.
         """
         response = await self.http.get_user_info(user_id)
-        return UserData(**response)
+        return types.UserData(**response)
 
     async def get_user_vote(self, user_id: int) -> bool:
         """This function is a coroutine.
@@ -348,22 +347,22 @@ class DBLClient:
         data = await self.http.get_user_vote(self.bot_id, user_id)
         return bool(data["voted"])
 
-    async def generate_widget(self, options: WidgetOptions) -> str:
+    async def generate_widget(self, options: types.WidgetOptions) -> str:
         """This function is a coroutine.
 
-        Generates a Top.gg widget from the provided :class:`WidgetOptions` object.
+        Generates a Top.gg widget from the provided :ref:`WidgetOptions` object.
 
         Parameters
         ----------
-        options: :class:`WidgetOptions`
-            A :class:`WidgetOptions` object. For further information, see the :ref:`widgets` section.
+        options: :ref:`WidgetOptions`
+            A :ref:`WidgetOptions` object containing widget parameters.
 
         Returns
         -------
         widget: str
             Generated widget URL.
         """
-        if not isinstance(options, WidgetOptions):
+        if not isinstance(options, types.WidgetOptions):
             raise errors.ClientException(
                 "options argument passed to generate_widget must be of type WidgetOptions"
             )
