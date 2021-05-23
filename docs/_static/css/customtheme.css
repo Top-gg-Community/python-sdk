@@ -1,0 +1,5 @@
+@import 'theme.css';
+
+.descname, .descclassname {
+    color: black;
+}
