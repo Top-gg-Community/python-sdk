@@ -8,11 +8,18 @@ What's New
 
 This page keeps a detailed human friendly rendering of what's new and changed in specific versions.
 
-.. _changelog:
-
 v1.1.0
 ======
-* Introduced `data models <models.html>`_.
+
+*  Introduced `data models <models.html>`_.
+
+   * :meth:`DBLClient.get_bot_votes` now returns a list of :class:`BriefUserData` objects.
+
+   * :meth:`DBLClient.get_bot_info` now returns a :class:`BotData` object
+
+   * :meth:`DBLClient.get_guild_count` now returns :class:`BotStatsData`
+
+   * :meth:`DBLClient.get_user_info` now returns :class:`UserData`
 
 v1.0.1
 ======
@@ -31,7 +38,7 @@ v1.0.0
 
 * Renamed ``DBLException`` to :class:`TopGGException`
 * Renamed ``DBLClient.get_bot_upvotes()`` to :meth:`DBLClient.get_bot_votes`
-* Added :meth:`DBLClient.generate_widget` along with the :ref:`widgets` section in the documentation
+* Added :meth:`DBLClient.generate_widget` along with the ``widgets`` section in the documentation
 * Implemented a properly working ratelimiter
 * Added :func:`on_autopost_error`
 * All autopost events now follow ``on_autopost_x`` naming format, e.g. :func:`on_autopost_error`, :func:`on_autopost_success`
