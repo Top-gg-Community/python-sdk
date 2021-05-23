@@ -23,7 +23,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
-from __future__ import annotations
 
 import logging
 import sys
@@ -77,7 +76,7 @@ class WebhookManager:
         self.__app = web.Application()
         self._is_closed = False
 
-    def dbl_webhook(self, route: str = "/dbl", auth_key: str = "") -> WebhookManager:
+    def dbl_webhook(self, route: str = "/dbl", auth_key: str = "") -> "WebhookManager":
         """Helper method that configures a route that listens to bot votes.
 
         Parameters
@@ -99,7 +98,7 @@ class WebhookManager:
         )
         return self
 
-    def dsl_webhook(self, route: str = "/dsl", auth_key: str = "") -> WebhookManager:
+    def dsl_webhook(self, route: str = "/dsl", auth_key: str = "") -> "WebhookManager":
         """Helper method that configures a route that listens to server votes.
 
         Parameters
