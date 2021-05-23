@@ -35,13 +35,12 @@ from typing import Any, Dict, List, Optional, Union
 import discord
 from discord.ext.commands.bot import BotBase
 
-from . import errors
-from .http import HTTPClient
 # if sys.version_info >= (3, 8):
 #     from typing import TypedDict
 # else:
 #     from typing_extensions import TypedDict
-from . import types
+from . import errors, types
+from .http import HTTPClient
 
 log = logging.getLogger(__name__)
 
@@ -307,7 +306,9 @@ class DBLClient:
         search = search or {}
         fields = fields or []
         response = await self.http.get_bots(limit, offset, sort, search, fields)
-        response["results"] = [types.BotData(**bot_data) for bot_data in response["results"]]
+        response["results"] = [
+            types.BotData(**bot_data) for bot_data in response["results"]
+        ]
         return response
 
     async def get_user_info(self, user_id: int) -> types.UserData:
