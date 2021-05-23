@@ -70,46 +70,30 @@ class HTTPException(TopGGException):
 
 
 class Unauthorized(HTTPException):
-    """Exception that's thrown when status code 401 occurs.
-
-    Subclass of :exc:`HTTPException`
-    """
+    """Exception that's thrown when status code 401 occurs."""
 
     pass
 
 
 class UnauthorizedDetected(TopGGException):
-    """Exception that's thrown when no API Token is provided.
-
-    Subclass of :exc:`TopGGException`
-    """
+    """Exception that's thrown when no API Token is provided."""
 
     pass
 
 
 class Forbidden(HTTPException):
-    """Exception that's thrown when status code 403 occurs.
-
-    Subclass of :exc:`HTTPException`
-    """
+    """Exception that's thrown when status code 403 occurs."""
 
     pass
 
 
 class NotFound(HTTPException):
-    """Exception that's thrown when status code 404 occurs.
-
-    Subclass of :exc:`HTTPException`
-    """
+    """Exception that's thrown when status code 404 occurs."""
 
     pass
 
 
 class ServerError(HTTPException):
-    """Exception that's thrown when Top.gg returns "Server Error" responses
-    (status codes such as 500 and 503).
-
-    Subclass of :exc:`HTTPException`
-    """
+    """Exception that's thrown when Top.gg returns "Server Error" responses (status codes such as 500 and 503)."""
 
     pass
