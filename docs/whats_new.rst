@@ -21,6 +21,8 @@ v1.1.0
 
    * :meth:`DBLClient.get_user_info` now returns :class:`UserData`
 
+* :meth:`WebhookManager.run` now returns an :class:`asyncio.Task`, meaning it can now be optionally awaited
+
 v1.0.1
 ======
 
