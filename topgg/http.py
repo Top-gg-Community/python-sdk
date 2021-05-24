@@ -56,7 +56,7 @@ async def _json_or_text(response: ClientResponse) -> Union[dict, str]:
     """
     text = await response.text()
     if response.headers["Content-Type"] == "application/json; charset=utf-8":
-        return DataDict(json.loads(text))
+        return DataDict(**json.loads(text))
     return text
 
 
