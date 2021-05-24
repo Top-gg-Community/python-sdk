@@ -17,9 +17,9 @@ v1.1.0
 
    * :meth:`DBLClient.get_bot_info` now returns a :class:`BotData` object
 
-   * :meth:`DBLClient.get_guild_count` now returns :class:`BotStatsData`
+   * :meth:`DBLClient.get_guild_count` now returns a :class:`BotStatsData` object
 
-   * :meth:`DBLClient.get_user_info` now returns :class:`UserData`
+   * :meth:`DBLClient.get_user_info` now returns a :class:`UserData` object
 
 * :meth:`WebhookManager.run` now returns an :class:`asyncio.Task`, meaning it can now be optionally awaited
 
