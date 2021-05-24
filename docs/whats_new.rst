@@ -87,8 +87,8 @@ v0.2.1
 * Added webhook example in README
 * Removed ``post_server_count`` and ``get_server_count``
 
-v0.2
-====
+v0.2.0
+======
 
 *  Added ``post_guild_count``
 
