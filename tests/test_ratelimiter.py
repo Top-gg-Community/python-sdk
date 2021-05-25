@@ -6,12 +6,12 @@ n = period = 10
 
 
 @pytest.fixture
-def limiter():
+def limiter() -> AsyncRateLimiter:
     return AsyncRateLimiter(max_calls=n, period=period)
 
 
 @pytest.mark.asyncio
-async def test_AsyncRateLimiter_calls(limiter):
+async def test_AsyncRateLimiter_calls(limiter: AsyncRateLimiter) -> None:
     for _ in range(n):
         async with limiter:
             pass
@@ -20,7 +20,7 @@ async def test_AsyncRateLimiter_calls(limiter):
 
 
 @pytest.mark.asyncio
-async def test_AsyncRateLimiter_timespan_property(limiter):
+async def test_AsyncRateLimiter_timespan_property(limiter: AsyncRateLimiter) -> None:
     for _ in range(n):
         async with limiter:
             pass

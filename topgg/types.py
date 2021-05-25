@@ -1,6 +1,8 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, MutableMapping, Optional, TypeVar
 
+KT = TypeVar("KT")
+VT = TypeVar("VT")
 Colors = Dict[str, int]
 Colours = Colors
 
@@ -98,18 +100,18 @@ def parse_bot_stats_dict(d: dict) -> dict:
     return data
 
 
-class DataDict(dict):
+class DataDict(dict, MutableMapping[KT, VT]):
     """Base class used to represent received data from the API.
 
     Every data model subclasses this class.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: VT) -> None:
         super().__init__(**parse_dict(kwargs))
         self.__dict__ = self
 
 
-class WidgetOptions(DataDict):
+class WidgetOptions(DataDict[str, Any]):
     """Model that represents widget options that are passed to Top.gg widget URL generated via
     :meth:`DBLClient.generate_widget`."""
 
@@ -130,11 +132,11 @@ class WidgetOptions(DataDict):
     def __init__(
         self,
         id: Optional[int] = None,
-        format: str = None,
-        type: str = None,
+        format: Optional[str] = None,
+        type: Optional[str] = None,
         noavatar: bool = False,
-        colors: Colors = None,
-        colours: Colors = None,
+        colors: Optional[Colors] = None,
+        colours: Optional[Colors] = None,
     ):
         super().__init__(
             id=id or None,
@@ -149,27 +151,27 @@ class WidgetOptions(DataDict):
         return self.colors
 
     @colours.setter
-    def colours(self, value):
+    def colours(self, value: Colours) -> None:
         self.colors = value
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         if key == "colours":
             key = "colors"
         super().__setitem__(key, value)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Any:
         if item == "colours":
             item = "colors"
         return super().__getitem__(item)
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: Any = None) -> Any:
         """:meta private:"""
         if key == "colours":
             key = "colors"
         return super().get(key, default)
 
 
-class BotData(DataDict):
+class BotData(DataDict[str, Any]):
     """Model that contains information about a listed bot on top.gg. The data this model contains can be found `here
     <https://docs.top.gg/api/bot/#bot-structure>`__."""
 
@@ -195,11 +197,11 @@ class BotData(DataDict):
     monthly_points: int
     donatebotguildid: int
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         super().__init__(**parse_bot_dict(kwargs))
 
 
-class BotStatsData(DataDict):
+class BotStatsData(DataDict[str, Any]):
     """Model that contains information about a listed bot's guild and shard count."""
 
     server_count: Optional[int]
@@ -209,11 +211,11 @@ class BotStatsData(DataDict):
     shard_count: Optional[int]
     """The amount of shards a bot has."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         super().__init__(**parse_bot_stats_dict(kwargs))
 
 
-class BriefUserData(DataDict):
+class BriefUserData(DataDict[str, Any]):
     """Model that contains brief information about a Top.gg user."""
 
     id: int
@@ -223,13 +225,13 @@ class BriefUserData(DataDict):
     avatar: str
     """The Discord avatar URL of the user."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         if kwargs["id"].isdigit():
             kwargs["id"] = int(kwargs["id"])
         super().__init__(**kwargs)
 
 
-class SocialData(DataDict):
+class SocialData(DataDict[str, str]):
     """Model that contains social information about a top.gg user."""
 
     youtube: str
@@ -244,7 +246,7 @@ class SocialData(DataDict):
     """The GitHub username of the user."""
 
 
-class UserData(DataDict):
+class UserData(DataDict[str, Any]):
     """Model that contains information about a top.gg user. The data this model contains can be found `here
     <https://docs.top.gg/api/user/#structure>`__."""
 
@@ -259,11 +261,11 @@ class UserData(DataDict):
     web_mod: bool
     admin: bool
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         super().__init__(**parse_user_dict(kwargs))
 
 
-class VoteDataDict(DataDict):
+class VoteDataDict(DataDict[str, Any]):
     """Base model that represents received information from Top.gg via webhooks."""
 
     type: str
@@ -273,7 +275,7 @@ class VoteDataDict(DataDict):
     query: DataDict
     """Query parameters in :ref:`DataDict`."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         super().__init__(**parse_vote_dict(kwargs))
 
 

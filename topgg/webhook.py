@@ -23,7 +23,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
-
 import logging
 import sys
 
@@ -32,13 +31,17 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import TypedDict
 
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
 import aiohttp
 import discord
 from aiohttp import web
-# noinspection PyProtectedMember
-from aiohttp.web_urldispatcher import _WebHandler
+
+if TYPE_CHECKING:
+    import asyncio
+
+    # noinspection PyProtectedMember
+    from aiohttp.web_urldispatcher import _WebHandler
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +49,7 @@ log = logging.getLogger(__name__)
 class _Webhook(TypedDict):
     route: str
     auth: str
-    func: _WebHandler
+    func: "_WebHandler"
 
 
 class WebhookManager:
@@ -136,7 +139,7 @@ class WebhookManager:
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
 
-    async def _run(self, port: int):
+    async def _run(self, port: int) -> None:
         for webhook in self._webhooks.values():
             self.__app.router.add_post(webhook["route"], webhook["func"])
         runner = web.AppRunner(self.__app)
@@ -145,7 +148,7 @@ class WebhookManager:
         await self._webserver.start()
         self._is_closed = False
 
-    def run(self, port: int):
+    def run(self, port: int) -> "asyncio.Task[None]":
         """Runs the webhook.
 
         Parameters
@@ -166,7 +169,7 @@ class WebhookManager:
         """
         return self.__app
 
-    async def close(self):
+    async def close(self) -> None:
         """Stops the webhook."""
         await self._webserver.stop()
         self._is_closed = True

@@ -29,7 +29,7 @@ import json
 import logging
 import sys
 from datetime import datetime
-from typing import Union
+from typing import Any, Coroutine, Dict, List, Optional, Sequence, Union, cast
 
 import aiohttp
 from aiohttp import ClientResponse
@@ -41,7 +41,7 @@ from .types import DataDict
 log = logging.getLogger(__name__)
 
 
-async def _json_or_text(response: ClientResponse) -> Union[dict, str]:
+async def _json_or_text(response: ClientResponse) -> Union[DataDict, str]:
     """
 
     Parameters
@@ -76,7 +76,7 @@ class HTTPClient:
         An `event loop`_ used for asynchronous operations.
     """
 
-    def __init__(self, token, **kwargs):
+    def __init__(self, token: str, **kwargs: Any) -> None:
         self.BASE = "https://top.gg/api"
         self.token = token
         self.loop = kwargs.get("loop") or asyncio.get_event_loop()
@@ -89,7 +89,7 @@ class HTTPClient:
             f"{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
         )
 
-    async def request(self, method, url, **kwargs) -> Union[DataDict, str]:
+    async def request(self, method: str, url: str, **kwargs: Any) -> DataDict:
         """Handles requests to the API."""
         url = f"{self.BASE}{url}"
 
@@ -121,7 +121,7 @@ class HTTPClient:
                     data = await _json_or_text(resp)
 
                     if 300 > resp.status >= 200:
-                        return data
+                        return cast(DataDict, data)
 
                     elif resp.status == 429:  # we are being ratelimited
                         fmt = "We are being ratelimited. Retrying in %.2f seconds (%.3f minutes)."
@@ -161,10 +161,15 @@ class HTTPClient:
         # We've run out of retries, raise.
         raise errors.HTTPException(resp, data)
 
-    async def close(self):
+    async def close(self) -> None:
         await self.session.close()
 
-    async def post_guild_count(self, guild_count, shard_count, shard_id):
+    async def post_guild_count(
+        self,
+        guild_count: Optional[Union[int, List[int]]],
+        shard_count: Optional[int],
+        shard_id: Optional[int],
+    ) -> None:
         """Posts bot's guild count and shards info on Top.gg."""
         payload = {"server_count": guild_count}
         if shard_count:
@@ -174,30 +179,36 @@ class HTTPClient:
 
         await self.request("POST", "/bots/stats", json=payload)
 
-    async def get_weekend_status(self):
+    def get_weekend_status(self) -> Coroutine[Any, Any, DataDict]:
         """Gets the weekend status from Top.gg."""
-        return await self.request("GET", "/weekend")
+        return self.request("GET", "/weekend")
 
-    async def get_guild_count(self, bot_id):
+    def get_guild_count(self, bot_id: int) -> Coroutine[Any, Any, DataDict]:
         """Gets the guild count of the given Bot ID."""
-        return await self.request("GET", f"/bots/{bot_id}/stats")
+        return self.request("GET", f"/bots/{bot_id}/stats")
 
-    async def get_bot_info(self, bot_id):
+    def get_bot_info(self, bot_id: int) -> Coroutine[Any, Any, DataDict]:
         """Gets the information of a bot under given bot ID on Top.gg."""
-        return await self.request("GET", f"/bots/{bot_id}")
+        return self.request("GET", f"/bots/{bot_id}")
 
-    async def get_bot_votes(self, bot_id):
+    def get_bot_votes(self, bot_id: int) -> Coroutine[Any, Any, DataDict]:
         """Gets your bot's last 1000 votes on Top.gg."""
-        return await self.request("GET", f"/bots/{bot_id}/votes")
+        return self.request("GET", f"/bots/{bot_id}/votes")
 
-    async def get_bots(self, limit, offset, sort, search, fields):
+    def get_bots(
+        self,
+        limit: int,
+        offset: int,
+        sort: str,
+        search: Dict[str, str],
+        fields: Sequence[str],
+    ) -> Coroutine[Any, Any, DataDict]:
         """Gets an object of bots on Top.gg."""
-        if limit > 500:
-            limit = 50
+        limit = min(limit, 500)
         fields = ", ".join(fields)
         search = " ".join([f"{field}: {value}" for field, value in search.items()])
 
-        return await self.request(
+        return self.request(
             "GET",
             "/bots",
             params={
@@ -209,18 +220,16 @@ class HTTPClient:
             },
         )
 
-    async def get_user_info(self, user_id):
+    def get_user_info(self, user_id: int) -> Coroutine[Any, Any, DataDict]:
         """Gets an object of the user on Top.gg."""
-        return await self.request("GET", f"/users/{user_id}")
+        return self.request("GET", f"/users/{user_id}")
 
-    async def get_user_vote(self, bot_id, user_id):
+    def get_user_vote(self, bot_id: int, user_id: int) -> Coroutine[Any, Any, DataDict]:
         """Gets info whether the user has voted for your bot."""
-        return await self.request(
-            "GET", f"/bots/{bot_id}/check", params={"userId": user_id}
-        )
+        return self.request("GET", f"/bots/{bot_id}/check", params={"userId": user_id})
 
 
-async def _ratelimit_handler(until):
+async def _ratelimit_handler(until: float) -> None:
     """Handles the displayed message when we are ratelimited."""
     duration = round(until - datetime.utcnow().timestamp())
     mins = duration / 60
@@ -230,7 +239,7 @@ async def _ratelimit_handler(until):
     log.warning(fmt, duration, mins)
 
 
-def to_json(obj):
+def to_json(obj: Any) -> str:
     if json.__name__ == "ujson":
         return json.dumps(obj, ensure_ascii=True)
     return json.dumps(obj, separators=(",", ":"), ensure_ascii=True)
