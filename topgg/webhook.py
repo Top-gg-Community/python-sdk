@@ -23,7 +23,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
-import asyncio
 import logging
 import sys
 
@@ -32,14 +31,17 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import TypedDict
 
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
 import aiohttp
 import discord
 from aiohttp import web
 
-# noinspection PyProtectedMember
-from aiohttp.web_urldispatcher import _WebHandler
+if TYPE_CHECKING:
+    import asyncio
+
+    # noinspection PyProtectedMember
+    from aiohttp.web_urldispatcher import _WebHandler
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ log = logging.getLogger(__name__)
 class _Webhook(TypedDict):
     route: str
     auth: str
-    func: _WebHandler
+    func: "_WebHandler"
 
 
 class WebhookManager:
