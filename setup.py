@@ -38,6 +38,7 @@ setup(
     license=metadata.license,
     description="A simple API wrapper for Top.gg written in Python.",
     long_description=readme,
+    package_data={"topgg": ["py.typed"]},
     include_package_data=True,
     python_requires=">= 3.6",
     install_requires=requirements,
