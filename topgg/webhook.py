@@ -37,6 +37,7 @@ from typing import Dict
 import aiohttp
 import discord
 from aiohttp import web
+# noinspection PyProtectedMember
 from aiohttp.web_urldispatcher import _WebHandler
 
 log = logging.getLogger(__name__)
@@ -51,6 +52,9 @@ class _Webhook(TypedDict):
 class WebhookManager:
     """
     This class is used as a manager for the Top.gg webhook.
+
+    Methods :meth:`WebhookManager.dbl_webhook` and :meth:`WebhookManager.dsl_webhook` return a modified version of
+    the object, allowing for method chaining.
 
     Parameters
     ----------
@@ -72,15 +76,20 @@ class WebhookManager:
         self.__app = web.Application()
         self._is_closed = False
 
-    def dbl_webhook(self, route: str, auth_key: str):
+    def dbl_webhook(self, route: str = "/dbl", auth_key: str = "") -> "WebhookManager":
         """Helper method that configures a route that listens to bot votes.
 
         Parameters
         ----------
         route: str
-            The route to use for bot votes.
+            The route to use for bot votes. Must start with ``/``. Defaults to ``/dbl``.
         auth_key: str
             The Authorization key that will be used to verify the incoming requests.
+            All requests are allowed if this is not set.
+
+        Returns
+        -------
+        Modified version of the object: WebhookManager
         """
         self._webhooks["dbl"] = _Webhook(
             route=route or "/dbl",
@@ -89,15 +98,20 @@ class WebhookManager:
         )
         return self
 
-    def dsl_webhook(self, route: str, auth_key: str):
+    def dsl_webhook(self, route: str = "/dsl", auth_key: str = "") -> "WebhookManager":
         """Helper method that configures a route that listens to server votes.
 
         Parameters
         ----------
         route: str
-            The route to use for server votes.
+            The route to use for server votes. Must start with ``/``. Defaults to ``/dsl``.
         auth_key: str
             The Authorization key that will be used to verify the incoming requests.
+            All requests are allowed if this is not set.
+
+        Returns
+        -------
+        Modified version of the object: WebhookManager
         """
         self._webhooks["dsl"] = _Webhook(
             route=route or "/dsl",
@@ -131,7 +145,7 @@ class WebhookManager:
         await self._webserver.start()
         self._is_closed = False
 
-    def run(self, *args):
+    def run(self, port: int):
         """Runs the webhook.
 
         Parameters
@@ -139,7 +153,7 @@ class WebhookManager:
         port: int
             The port to run the webhook on.
         """
-        return self.bot.loop.create_task(self._run(*args))
+        return self.bot.loop.create_task(self._run(port))
 
     @property
     def webserver(self) -> web.Application:

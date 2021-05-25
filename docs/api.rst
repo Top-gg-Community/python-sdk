@@ -42,12 +42,11 @@ Event reference
     :type exception: Exception
 
 .. function:: on_dbl_vote(data)
-              on_dsl_vote(data)
 
     Called when someone votes for your bot on Top.gg.
 
-    :param data: The data with vote info returned.
-    :type data: dict
+    :param data: The data model containing bot vote information.
+    :type data: :ref:`BotVoteData`
 
     Example: ::
 
@@ -55,65 +54,16 @@ Event reference
         async def on_dbl_vote(data):
             print(data)
 
-    The returned data can be found `in Top.gg docs <https://docs.top.gg/resources/webhooks/#bot-webhooks>`_.
+.. function:: on_dsl_vote(data)
 
-Widgets
-=======
+    Called when someone votes for your bot on Top.gg.
 
-.. General information about Top.gg widgets can be in `Top.gg docs`_.
+    :param data: The data model containing server vote information.
+    :type data: :ref:`ServerVoteData`
 
-In topggpy, :class:`DBLClient` has a :meth:`DBLClient.generate_widget` method that takes an ``options`` dictionary as a parameter.
+    Example: ::
 
-All available values for each key:
-    * ``id``: ID of a bot to generate the widget for. Must resolve to an ID of an approved bot when converted to a string;
-    * ``format``: must be either ``png`` and ``svg``. Defaults to ``png``;
-    * ``type``: used for short widgets (``). For large widget, must be an empty string;
-    * ``noavatar``: indicates whether to exclude bot avatar from short widgets. Must be of type ``bool``;
-    * ``colors``: a dictionary consisting of a parameter as a key and HEX color as value. ``color`` will be appended to the key in case ``key.endswith("color")`` returns False.
+        @bot.event
+        async def on_dsl_vote(data):
+            print(data)
 
-Example: ::
-
-    print(await self.topggpy.generate_widget({
-        "id": 270904126974590976,
-        format: "svg",
-        colors: {
-            "username": 0xFFFFFF,
-            "top": 0x000000
-            }
-        }))
-
-Webhooks
-========
-
-.. attention::
-
-    In order for webhooks to work, the port you provide to :meth:`WebhookManager.run` must be accessible, meaning your firewall must allow incoming requests to it.
-
-.. note::
-
-    :class:`WebhookManager` exposes the internal webserver instance via the :attr:`WebhookManager.webserver` property.
-
-.. autoclass:: WebhookManager
-    :members:
-
-Exceptions
-==========
-
-The following exceptions are thrown by the library.
-
-.. autoexception:: TopGGException
-
-.. autoexception:: UnauthorizedDetected
-
-.. autoexception:: ClientException
-
-.. autoexception:: HTTPException
-    :members:
-
-.. autoexception:: Unauthorized
-
-.. autoexception:: Forbidden
-
-.. autoexception:: NotFound
-
-.. autoexception:: ServerError

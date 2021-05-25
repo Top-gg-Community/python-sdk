@@ -13,10 +13,10 @@ from collections import namedtuple
 __title__ = "topggpy"
 __author__ = "Assanali Mukhanov"
 __license__ = "MIT"
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 
 VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
-major, minor, micro = __version__.split(".")
+major, minor, micro = (int(i) for i in __version__.split("."))
 version_info = VersionInfo(
     major=major, minor=minor, micro=micro, releaselevel="final", serial=0
 )
@@ -24,4 +24,5 @@ version_info = VersionInfo(
 from .client import DBLClient
 from .errors import *
 from .http import HTTPClient
+from .types import WidgetOptions
 from .webhook import WebhookManager
