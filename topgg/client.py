@@ -30,7 +30,7 @@ import sys
 import traceback
 from asyncio.tasks import Task
 from contextlib import suppress
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import discord
 from discord.ext.commands.bot import BotBase
@@ -72,14 +72,14 @@ class DBLClient:
     """
 
     bot: discord.Client
-    bot_id: Optional[int]
+    bot_id: int
     loop: asyncio.AbstractEventLoop
     autopost: bool
     post_shard_count: bool
     _is_closed: bool
     http: HTTPClient
     autopost_task: Task
-    autopost_interval: Optional[int]
+    autopost_interval: Optional[float]
 
     def __init__(
         self,
@@ -87,11 +87,10 @@ class DBLClient:
         token: str,
         autopost: bool = False,
         post_shard_count: bool = False,
-        autopost_interval: Optional[int] = None,
-        **kwargs,
-    ):
+        autopost_interval: Optional[float] = None,
+        **kwargs: Any,
+    ) -> None:
         self.bot = bot
-        self.bot_id = None
         self.loop = bot.loop
         self.autopost = autopost
         self.post_shard_count = post_shard_count
@@ -127,7 +126,7 @@ class DBLClient:
                     "autopost must be activated if autopost_interval is passed"
                 )
 
-    async def on_autopost_error(self, exception: Exception):
+    async def on_autopost_error(self, exception: Exception) -> None:
         # only print if there's no external autopost_error listeners.
         if isinstance(self.bot, BotBase) and self.bot.extra_events.get(
             "on_autopost_error"
@@ -139,12 +138,12 @@ class DBLClient:
             type(exception), exception, exception.__traceback__, file=sys.stderr
         )
 
-    async def _ensure_bot_user(self):
+    async def _ensure_bot_user(self) -> None:
         await self.bot.wait_until_ready()
-        if self.bot_id is None:
+        if not hasattr(self, "bot_id") or self.bot_id is None:
             self.bot_id = self.bot.user.id
 
-    async def _auto_post(self):
+    async def _auto_post(self) -> None:
         await self._ensure_bot_user()
         while not self.bot.is_closed():
             try:
@@ -161,7 +160,7 @@ class DBLClient:
                 if isinstance(e, errors.Unauthorized):
                     raise
 
-            await asyncio.sleep(self.autopost_interval)
+            await asyncio.sleep(cast(float, self.autopost_interval))
 
     @property
     def is_closed(self) -> bool:
@@ -172,7 +171,7 @@ class DBLClient:
         """Gets the guild count from the provided Client object."""
         return len(self.bot.guilds)
 
-    async def get_weekend_status(self):
+    async def get_weekend_status(self) -> bool:
         """This function is a coroutine.
 
         Gets weekend status from Top.gg.
@@ -190,7 +189,7 @@ class DBLClient:
         guild_count: Optional[Union[int, List[int]]] = None,
         shard_count: Optional[int] = None,
         shard_id: Optional[int] = None,
-    ):
+    ) -> None:
         """This function is a coroutine.
 
         Posts your bot's guild count and shards info to Top.gg.
@@ -276,9 +275,9 @@ class DBLClient:
         self,
         limit: int = 50,
         offset: int = 0,
-        sort: str = None,
-        search: Dict[str, Any] = None,
-        fields: List[str] = None,
+        sort: Optional[str] = None,
+        search: Optional[Dict[str, Any]] = None,
+        fields: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """This function is a coroutine.
 
@@ -382,7 +381,7 @@ class DBLClient:
         url = f"""https://top.gg/api/widget{widget_type}/{bot_id}.{widget_format}?{widget_query}"""
         return url
 
-    async def close(self):
+    async def close(self) -> None:
         """This function is a coroutine.
 
         Closes all connections.

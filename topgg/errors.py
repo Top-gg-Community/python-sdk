@@ -23,6 +23,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+from typing import TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from aiohttp import ClientResponse
 
 
 class TopGGException(Exception):
@@ -54,7 +58,7 @@ class HTTPException(TopGGException):
         The text of the error. Could be an empty string.
     """
 
-    def __init__(self, response, message):
+    def __init__(self, response: "ClientResponse", message: Union[dict, str]) -> None:
         self.response = response
         if isinstance(message, dict):
             self.text = message.get("message", "")

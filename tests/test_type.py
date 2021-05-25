@@ -2,7 +2,7 @@ import pytest
 
 from topgg import types
 
-d = {
+d: dict = {
     "defAvatar": "6debd47ed13483642cf09e832ed0bc1b",
     "invite": "",
     "website": "https://top.gg",
@@ -74,53 +74,53 @@ bot_stats_dict = {"shards": [1, 5, 8]}
 
 
 @pytest.fixture
-def data_dict():
+def data_dict() -> types.DataDict:
     return types.DataDict(**d)
 
 
 @pytest.fixture
-def bot_data():
+def bot_data() -> types.BotData:
     return types.BotData(**d)
 
 
 @pytest.fixture
-def user_data():
+def user_data() -> types.UserData:
     return types.UserData(**user_data_dict)
 
 
 @pytest.fixture
-def widget_options():
+def widget_options() -> types.WidgetOptions:
     return types.WidgetOptions(id=int(d["id"]))
 
 
 @pytest.fixture
-def vote_data():
+def vote_data() -> types.VoteDataDict:
     return types.VoteDataDict(**vote_data_dict)
 
 
 @pytest.fixture
-def bot_vote_data():
+def bot_vote_data() -> types.BotVoteData:
     return types.BotVoteData(**bot_vote_dict)
 
 
 @pytest.fixture
-def server_vote_data():
+def server_vote_data() -> types.ServerVoteData:
     return types.ServerVoteData(**server_vote_dict)
 
 
 @pytest.fixture
-def bot_stats_data():
+def bot_stats_data() -> types.BotStatsData:
     return types.BotStatsData(**bot_stats_dict)
 
 
-def test_data_dict_fields(data_dict: types.DataDict):
+def test_data_dict_fields(data_dict: types.DataDict) -> None:
     for attr in data_dict:
         if "id" in attr.lower():
             assert isinstance(data_dict[attr], int) or data_dict[attr] is None
         assert data_dict.get(attr) == data_dict[attr] == getattr(data_dict, attr)
 
 
-def test_bot_data_fields(bot_data: types.BotData):
+def test_bot_data_fields(bot_data: types.BotData) -> None:
     bot_data.github = "I'm a GitHub link!"
     bot_data.support = "Support has arrived!"
 
@@ -133,7 +133,7 @@ def test_bot_data_fields(bot_data: types.BotData):
         assert bot_data.get(attr) == bot_data[attr] == getattr(bot_data, attr)
 
 
-def test_widget_options_fields(widget_options: types.WidgetOptions):
+def test_widget_options_fields(widget_options: types.WidgetOptions) -> None:
     assert widget_options["colors"] == widget_options["colours"]
 
     widget_options.colours = {"background": 0}
@@ -151,7 +151,7 @@ def test_widget_options_fields(widget_options: types.WidgetOptions):
         )
 
 
-def test_vote_data_fields(vote_data: types.VoteDataDict):
+def test_vote_data_fields(vote_data: types.VoteDataDict) -> None:
     assert isinstance(vote_data.query, dict)
     vote_data.type = "upvote"
 
@@ -159,7 +159,7 @@ def test_vote_data_fields(vote_data: types.VoteDataDict):
         assert getattr(vote_data, attr) == vote_data.get(attr) == vote_data[attr]
 
 
-def test_bot_vote_data_fields(bot_vote_data: types.BotVoteData):
+def test_bot_vote_data_fields(bot_vote_data: types.BotVoteData) -> None:
     assert isinstance(bot_vote_data.query, dict)
     bot_vote_data.type = "upvote"
 
@@ -172,7 +172,7 @@ def test_bot_vote_data_fields(bot_vote_data: types.BotVoteData):
         )
 
 
-def test_server_vote_data_fields(server_vote_data: types.BotVoteData):
+def test_server_vote_data_fields(server_vote_data: types.BotVoteData) -> None:
     assert isinstance(server_vote_data.query, dict)
     server_vote_data.type = "upvote"
 
@@ -185,7 +185,7 @@ def test_server_vote_data_fields(server_vote_data: types.BotVoteData):
         )
 
 
-def test_bot_stats_data_attrs(bot_stats_data: types.BotStatsData):
+def test_bot_stats_data_attrs(bot_stats_data: types.BotStatsData) -> None:
     for count in ("server_count", "shard_count"):
         assert isinstance(bot_stats_data[count], int) or bot_stats_data[count] is None
     assert isinstance(bot_stats_data.shards, list)
@@ -194,7 +194,7 @@ def test_bot_stats_data_attrs(bot_stats_data: types.BotStatsData):
             assert isinstance(shard, int)
 
 
-def test_user_data_attrs(user_data: types.UserData):
+def test_user_data_attrs(user_data: types.UserData) -> None:
     assert isinstance(user_data.social, types.SocialData)
     for attr in user_data:
         if "id" in attr.lower():
