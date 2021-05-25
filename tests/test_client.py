@@ -52,7 +52,7 @@ async def test_DBLClient_validates_constructor_and_passes_for_valid_values(
     autopost_interval: Optional[int],
     session: ClientSession,
 ) -> None:
-    mocker.patch("topgg.DBLClient._auto_post", new_callable=mocker.AsyncMock)
+    mocker.patch("topgg.DBLClient._auto_post", new_callable=mock.AsyncMock)  # type: ignore
     DBLClient(
         bot,
         "",
@@ -106,7 +106,7 @@ async def test_DBLClient_breaks_autopost_loop_on_401(
     )
     mocker.patch(
         "topgg.DBLClient._ensure_bot_user",
-        new_callable=mocker.AsyncMock,
+        new_callable=mock.AsyncMock,  # type: ignore
     )
 
     obj = DBLClient(bot, "", False, session=session)
@@ -136,7 +136,7 @@ async def test_Client_with_default_autopost_error_handler(
     exc: Exception,
 ) -> None:
     client = Client()
-    mocker.patch("topgg.DBLClient._auto_post", new_callable=mocker.AsyncMock)
+    mocker.patch("topgg.DBLClient._auto_post", new_callable=mock.AsyncMock)  # type: ignore
     dbl = DBLClient(client, "", True, session=session)
     assert client.on_autopost_error == dbl.on_autopost_error
     await client.on_autopost_error(exc)
@@ -155,7 +155,7 @@ async def test_Client_with_custom_autopost_error_handler(
         nonlocal state
         state = True
 
-    mocker.patch("topgg.DBLClient._auto_post", new_callable=mocker.AsyncMock)
+    mocker.patch("topgg.DBLClient._auto_post", new_callable=mock.AsyncMock)  # type: ignore
     DBLClient(client, "", True, session=session)
     await client.on_autopost_error(exc)
     assert state
@@ -176,7 +176,7 @@ async def test_Bot_with_autopost_error_listener(
         nonlocal state
         state = True
 
-    mocker.patch("topgg.DBLClient._auto_post", new_callable=mocker.AsyncMock)
+    mocker.patch("topgg.DBLClient._auto_post", new_callable=mock.AsyncMock)  # type: ignore
     DBLClient(bot, "", True, session=session)
 
     # await to make sure all the listeners were run before asserting
