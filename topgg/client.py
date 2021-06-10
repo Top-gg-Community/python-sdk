@@ -308,7 +308,7 @@ class DBLClient:
         response["results"] = [
             types.BotData(**bot_data) for bot_data in response["results"]
         ]
-        return response
+        return types.DataDict(**response)
 
     async def get_user_info(self, user_id: int) -> types.UserData:
         """This function is a coroutine.
