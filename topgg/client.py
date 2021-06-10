@@ -278,7 +278,7 @@ class DBLClient:
         sort: Optional[str] = None,
         search: Optional[Dict[str, Any]] = None,
         fields: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+    ) -> types.DataDict[str, Any]:
         """This function is a coroutine.
 
         Gets information about listed bots on Top.gg.
@@ -298,7 +298,7 @@ class DBLClient:
 
         Returns
         -------
-        bots: dict
+        bots: :ref:`DataDict`
             Info on bots that match the search query on Top.gg.
         """
         sort = sort or ""
