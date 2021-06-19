@@ -29,19 +29,20 @@ import json
 import logging
 import sys
 from datetime import datetime
-from typing import Any, Coroutine, Dict, List, Optional, Sequence, Union, cast
+from typing import Any, Coroutine, Dict, Iterable, List, Optional, Sequence, Union, cast
 
 import aiohttp
 from aiohttp import ClientResponse
 
 from . import __version__, errors
 from .ratelimiter import AsyncRateLimiter
-from .types import DataDict
 
 log = logging.getLogger(__name__)
 
 
-async def _json_or_text(response: ClientResponse) -> Union[DataDict, str]:
+async def _json_or_text(
+    response: ClientResponse,
+) -> Union[dict, str]:
     """
 
     Parameters
@@ -56,7 +57,7 @@ async def _json_or_text(response: ClientResponse) -> Union[DataDict, str]:
     """
     text = await response.text()
     if response.headers["Content-Type"] == "application/json; charset=utf-8":
-        return DataDict(**json.loads(text))
+        return json.loads(text)
     return text
 
 
@@ -89,7 +90,7 @@ class HTTPClient:
             f"{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
         )
 
-    async def request(self, method: str, url: str, **kwargs: Any) -> DataDict:
+    async def request(self, method: str, url: str, **kwargs: Any) -> dict:
         """Handles requests to the API."""
         url = f"{self.BASE}{url}"
 
@@ -121,7 +122,7 @@ class HTTPClient:
                     data = await _json_or_text(resp)
 
                     if 300 > resp.status >= 200:
-                        return cast(DataDict, data)
+                        return cast(dict, data)
 
                     elif resp.status == 429:  # we are being ratelimited
                         fmt = "We are being ratelimited. Retrying in %.2f seconds (%.3f minutes)."
@@ -179,19 +180,19 @@ class HTTPClient:
 
         await self.request("POST", "/bots/stats", json=payload)
 
-    def get_weekend_status(self) -> Coroutine[Any, Any, DataDict]:
+    def get_weekend_status(self) -> Coroutine[Any, Any, dict]:
         """Gets the weekend status from Top.gg."""
         return self.request("GET", "/weekend")
 
-    def get_guild_count(self, bot_id: int) -> Coroutine[Any, Any, DataDict]:
+    def get_guild_count(self, bot_id: int) -> Coroutine[Any, Any, dict]:
         """Gets the guild count of the given Bot ID."""
         return self.request("GET", f"/bots/{bot_id}/stats")
 
-    def get_bot_info(self, bot_id: int) -> Coroutine[Any, Any, DataDict]:
+    def get_bot_info(self, bot_id: int) -> Coroutine[Any, Any, dict]:
         """Gets the information of a bot under given bot ID on Top.gg."""
         return self.request("GET", f"/bots/{bot_id}")
 
-    def get_bot_votes(self, bot_id: int) -> Coroutine[Any, Any, DataDict]:
+    def get_bot_votes(self, bot_id: int) -> Coroutine[Any, Any, Iterable[dict]]:
         """Gets your bot's last 1000 votes on Top.gg."""
         return self.request("GET", f"/bots/{bot_id}/votes")
 
@@ -202,7 +203,7 @@ class HTTPClient:
         sort: str,
         search: Dict[str, str],
         fields: Sequence[str],
-    ) -> Coroutine[Any, Any, DataDict]:
+    ) -> Coroutine[Any, Any, dict]:
         """Gets an object of bots on Top.gg."""
         limit = min(limit, 500)
         fields = ", ".join(fields)
@@ -220,11 +221,11 @@ class HTTPClient:
             },
         )
 
-    def get_user_info(self, user_id: int) -> Coroutine[Any, Any, DataDict]:
+    def get_user_info(self, user_id: int) -> Coroutine[Any, Any, dict]:
         """Gets an object of the user on Top.gg."""
         return self.request("GET", f"/users/{user_id}")
 
-    def get_user_vote(self, bot_id: int, user_id: int) -> Coroutine[Any, Any, DataDict]:
+    def get_user_vote(self, bot_id: int, user_id: int) -> Coroutine[Any, Any, dict]:
         """Gets info whether the user has voted for your bot."""
         return self.request("GET", f"/bots/{bot_id}/check", params={"userId": user_id})
 
