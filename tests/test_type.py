@@ -127,7 +127,7 @@ def test_bot_data_fields(bot_data: types.BotData) -> None:
     for attr in bot_data:
         if "id" in attr.lower():
             assert isinstance(bot_data[attr], int) or bot_data[attr] is None
-        elif isinstance(attr, list) and attr in ("owners", "guilds"):
+        elif attr in ("owners", "guilds"):
             for item in bot_data[attr]:
                 assert isinstance(item, int)
         assert bot_data.get(attr) == bot_data[attr] == getattr(bot_data, attr)
