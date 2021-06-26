@@ -1,4 +1,5 @@
-@import 'theme.css';
+/*noinspection CssUnknownTarget*/
+@import "theme.css";
 
 .descname, .descclassname {
     color: black;
