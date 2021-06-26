@@ -4,6 +4,7 @@ git+https://github.com/psf/black
 
 # Unit Testing
 mock
+pytest
 pytest-asyncio
 pytest-mock
 
