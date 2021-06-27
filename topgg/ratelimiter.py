@@ -36,6 +36,12 @@ class AsyncRateLimiter:
     Provides rate limiting for an operation with a configurable number of requests for a time period.
     """
 
+    __lock: asyncio.Lock
+    callback: Optional[Callable[[float], Awaitable[Any]]]
+    max_calls: int
+    period: float
+    calls: collections.deque
+
     def __init__(
         self,
         max_calls: int,
@@ -46,7 +52,7 @@ class AsyncRateLimiter:
             raise ValueError("Rate limiting period should be > 0")
         if max_calls <= 0:
             raise ValueError("Rate limiting number of calls should be > 0")
-        self.calls = collections.deque()  # type: collections.deque
+        self.calls = collections.deque()
 
         self.period = period
         self.max_calls = max_calls
