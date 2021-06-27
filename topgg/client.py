@@ -60,7 +60,7 @@ class DBLClient:
         Your bot's Top.gg API Token.
     autopost: bool
         Whether to automatically post bot's guild count every 30 minutes.
-        This will dispatch :meth:`on_guild_post`.
+        This will dispatch :meth:`on_autopost_success` (or :meth:`on_autopost_error` in case of an error).
     post_shard_count: bool
         Whether to post the shard count on autopost.
         Defaults to False.
