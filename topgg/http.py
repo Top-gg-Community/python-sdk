@@ -82,7 +82,10 @@ class HTTPClient:
         self.token = token
         self.loop = kwargs.get("loop") or asyncio.get_event_loop()
         self.session = kwargs.get("session") or aiohttp.ClientSession(loop=self.loop)
-        self.rate_limiter = AsyncRateLimiter(
+        self.global_rate_limiter = AsyncRateLimiter(
+            max_calls=99, period=1, callback=_ratelimit_handler
+        )
+        self.bot_rate_limiter = AsyncRateLimiter(
             max_calls=59, period=60, callback=_ratelimit_handler
         )
         self.user_agent = (
@@ -103,13 +106,19 @@ class HTTPClient:
             "Authorization": self.token,
         }
 
+        ratelimiters = (
+            self.bot_rate_limiter
+            if url.startswith("/bots")
+            else (self.global_rate_limiter, self.bot_rate_limiter)
+        )
+
         if "json" in kwargs:
             kwargs["data"] = to_json(kwargs.pop("json"))
 
         kwargs["headers"] = headers
 
         for _ in range(2):
-            async with self.rate_limiter:
+            async with ratelimiters:
                 async with self.session.request(method, url, **kwargs) as resp:
                     log.debug(
                         "%s %s with %s has returned %s",
