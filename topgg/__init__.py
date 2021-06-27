@@ -13,7 +13,7 @@ from collections import namedtuple
 __title__ = "topggpy"
 __author__ = "Assanali Mukhanov"
 __license__ = "MIT"
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
 major, minor, micro = (int(i) for i in __version__.split("."))
