@@ -8,6 +8,11 @@ What's New
 
 This page keeps a detailed human friendly rendering of what's new and changed in specific versions.
 
+v1.2.0
+======
+
+* Introduced global ratelimiter along with bot endpoints ratelimiter.
+
 v1.1.0
 ======
 
