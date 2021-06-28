@@ -92,7 +92,6 @@ Using webhook:
     # This example uses topggpy's webhook system.
     # The port must be a number between 1024 and 49151.
 
-    dbl_token = 'Top.gg token'  # set this to your bot's Top.gg token
     bot.topgg_webhook = topgg.WebhookManager(bot).dbl_webhook("/dblwebhook", "password")
     bot.topgg_webhook.run(5000)  # this method can be awaited as well
 
