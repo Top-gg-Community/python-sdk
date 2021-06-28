@@ -24,6 +24,7 @@ with open("requirements.txt") as f:
 
 if on_rtd:
     requirements.append("sphinxcontrib-napoleon")
+    requirements.append("sphinx-rtd-dark-mode")
 
 with open("README.rst") as f:
     readme = f.read()
