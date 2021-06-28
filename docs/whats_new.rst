@@ -12,6 +12,7 @@ v1.2.0
 ======
 
 * Introduced global ratelimiter along with bot endpoints ratelimiter.
+* Follow consistency with typing in :class:`HTTPClient` and :class:`DBLClient` along with updated docstrings (:issue:`55`)
 
 v1.1.0
 ======
