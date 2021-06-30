@@ -28,7 +28,7 @@ import asyncio
 import collections
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Awaitable, Callable, Optional, Type
+from typing import Any, Awaitable, Callable, List, Optional, Type
 
 
 class AsyncRateLimiter:
@@ -86,3 +86,25 @@ class AsyncRateLimiter:
     @property
     def _timespan(self) -> float:
         return self.calls[-1] - self.calls[0]
+
+
+class AsyncRateLimiterManager:
+    rate_limiters: List[AsyncRateLimiter]
+
+    def __init__(self, rate_limiters: List[AsyncRateLimiter]):
+        self.rate_limiters = rate_limiters
+
+    async def __aenter__(self) -> "AsyncRateLimiterManager":
+        [await manager.__aenter__() for manager in self.rate_limiters]
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Type[BaseException],
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ) -> None:
+        [
+            await manager.__aexit__(exc_type, exc_val, exc_tb)
+            for manager in self.rate_limiters
+        ]
