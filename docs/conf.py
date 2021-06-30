@@ -42,7 +42,7 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
-    "sphinx_rtd_dark_mode"
+    "sphinx_rtd_dark_mode",
 ]
 
 on_rtd = os.getenv("READTHEDOCS") == "True"
