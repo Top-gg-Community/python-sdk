@@ -8,18 +8,28 @@ What's New
 
 This page keeps a detailed human friendly rendering of what's new and changed in specific versions.
 
+v1.3.0
+======
+
+*  Introduced `global ratelimiter <https://docs.top.gg/resources/ratelimits/#global-ratelimit>`__ to follow Top.gg global ratelimits
+
+   *  Fixed an :exc:`AttributeError` raised by :meth:`HTTPClient.request`
+
+   * `Resource-specific ratelimit <https://docs.top.gg/resources/ratelimits/#resource-specific-ratelimits>`__ is now actually resource-specific
+
+
 v1.2.0
 ======
 
-* Introduced global ratelimiter along with bot endpoints ratelimiter.
+* Introduced global ratelimiter along with bot endpoints ratelimiter
 * Follow consistency with typing in :class:`HTTPClient` and :class:`DBLClient` along with updated docstrings (:issue:`55`)
 
 v1.1.0
 ======
 
-*  Introduced `data models <models.html>`_.
+*  Introduced `data models <models.html>`__
 
-   * :meth:`DBLClient.get_bot_votes` now returns a list of :class:`BriefUserData` objects.
+   * :meth:`DBLClient.get_bot_votes` now returns a list of :class:`BriefUserData` objects
 
    * :meth:`DBLClient.get_bot_info` now returns a :class:`BotData` object
 
@@ -32,7 +42,7 @@ v1.1.0
 v1.0.1
 ======
 
-* :attr:`WebhookManager.webserver` now instead returns :class:`aiohttp.web.Application` for ease of use.
+* :attr:`WebhookManager.webserver` now instead returns :class:`aiohttp.web.Application` for ease of use
 
 v1.0.0
 ======
