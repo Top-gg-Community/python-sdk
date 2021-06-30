@@ -35,7 +35,7 @@ import aiohttp
 from aiohttp import ClientResponse
 
 from . import __version__, errors
-from .ratelimiter import AsyncRateLimiter
+from .ratelimiter import AsyncRateLimiter, AsyncRateLimiterManager
 
 log = logging.getLogger(__name__)
 
@@ -83,19 +83,27 @@ class HTTPClient:
         self.loop = kwargs.get("loop") or asyncio.get_event_loop()
         self.session = kwargs.get("session") or aiohttp.ClientSession(loop=self.loop)
         self.global_rate_limiter = AsyncRateLimiter(
-            max_calls=99, period=1, callback=_ratelimit_handler
+            max_calls=99, period=1, callback=_rate_limit_handler
         )
         self.bot_rate_limiter = AsyncRateLimiter(
-            max_calls=59, period=60, callback=_ratelimit_handler
+            max_calls=59, period=60, callback=_rate_limit_handler
+        )
+        self.rate_limiters = AsyncRateLimiterManager(
+            [self.global_rate_limiter, self.bot_rate_limiter]
         )
         self.user_agent = (
             f"topggpy (https://github.com/top-gg/python-sdk {__version__}) Python/"
             f"{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
         )
 
-    async def request(self, method: str, url: str, **kwargs: Any) -> dict:
+    async def request(self, method: str, endpoint: str, **kwargs: Any) -> dict:
         """Handles requests to the API."""
-        url = f"{self.BASE}{url}"
+        rate_limiters = (
+            self.rate_limiters
+            if endpoint.startswith("/bots")
+            else self.global_rate_limiter
+        )
+        url = f"{self.BASE}{endpoint}"
 
         if not self.token:
             raise errors.UnauthorizedDetected("Top.gg API token not provided")
@@ -106,19 +114,13 @@ class HTTPClient:
             "Authorization": self.token,
         }
 
-        ratelimiters = (
-            self.bot_rate_limiter
-            if url.startswith("/bots")
-            else (self.global_rate_limiter, self.bot_rate_limiter)
-        )
-
         if "json" in kwargs:
             kwargs["data"] = to_json(kwargs.pop("json"))
 
         kwargs["headers"] = headers
 
         for _ in range(2):
-            async with ratelimiters:
+            async with rate_limiters:
                 async with self.session.request(method, url, **kwargs) as resp:
                     log.debug(
                         "%s %s with %s has returned %s",
@@ -239,7 +241,7 @@ class HTTPClient:
         return self.request("GET", f"/bots/{bot_id}/check", params={"userId": user_id})
 
 
-async def _ratelimit_handler(until: float) -> None:
+async def _rate_limit_handler(until: float) -> None:
     """Handles the displayed message when we are ratelimited."""
     duration = round(until - datetime.utcnow().timestamp())
     mins = duration / 60
