@@ -56,7 +56,7 @@ Event reference
 
 .. function:: on_dsl_vote(data)
 
-    Called when someone votes for your bot on Top.gg.
+    Called when someone votes for your server on Top.gg.
 
     :param data: The data model containing server vote information.
     :type data: :ref:`ServerVoteData`
