@@ -37,6 +37,8 @@ import aiohttp
 import discord
 from aiohttp import web
 
+from .types import BotVoteData, ServerVoteData
+
 if TYPE_CHECKING:
     import asyncio
 
@@ -127,7 +129,7 @@ class WebhookManager:
         auth = request.headers.get("Authorization", "")
         if auth == self._webhooks["dbl"]["auth"]:
             data = await request.json()
-            self.bot.dispatch("dbl_vote", data)
+            self.bot.dispatch("dbl_vote", BotVoteData(**data))
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
 
@@ -135,7 +137,7 @@ class WebhookManager:
         auth = request.headers.get("Authorization", "")
         if auth == self._webhooks["dsl"]["auth"]:
             data = await request.json()
-            self.bot.dispatch("dsl_vote", data)
+            self.bot.dispatch("dsl_vote", ServerVoteData(**data))
             return web.Response(status=200, text="OK")
         return web.Response(status=401, text="Unauthorized")
 
