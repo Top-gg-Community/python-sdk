@@ -8,6 +8,12 @@ What's New
 
 This page keeps a detailed human friendly rendering of what's new and changed in specific versions.
 
+v1.4.0
+======
+
+* The type of data passed to ``on_dbl_vote`` has been changed from :class:`dict` to :class:`BotVoteData`
+* The type of data passed to ``on_dsl_vote`` has been changed :class:`dict` to :class:`ServerVoteData`
+
 v1.3.0
 ======
 
@@ -16,7 +22,6 @@ v1.3.0
    *  Fixed an :exc:`AttributeError` raised by :meth:`HTTPClient.request`
 
    * `Resource-specific ratelimit <https://docs.top.gg/resources/ratelimits/#resource-specific-ratelimits>`__ is now actually resource-specific
-
 
 v1.2.0
 ======
