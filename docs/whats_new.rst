@@ -11,8 +11,8 @@ This page keeps a detailed human friendly rendering of what's new and changed in
 v1.4.0
 ======
 
-* The type of data passed to ``on_dbl_vote`` has been changed from :class:`dict` to :class:`BotVoteData`
-* The type of data passed to ``on_dsl_vote`` has been changed from :class:`dict` to :class:`ServerVoteData`
+* The type of data passed to ``on_dbl_vote`` has been changed from :class:`dict` to :ref:`BotVoteData`
+* The type of data passed to ``on_dsl_vote`` has been changed from :class:`dict` to :ref:`ServerVoteData`
 
 v1.3.0
 ======
