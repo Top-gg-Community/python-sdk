@@ -6,6 +6,7 @@ VT = TypeVar("VT")
 Colors = Dict[str, int]
 Colours = Colors
 
+
 def camel_to_snake(string: str) -> str:
     return "".join(["_" + c.lower() if c.isupper() else c for c in string]).lstrip("_")
 
