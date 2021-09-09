@@ -6,7 +6,6 @@ VT = TypeVar("VT")
 Colors = Dict[str, int]
 Colours = Colors
 
-
 def camel_to_snake(string: str) -> str:
     return "".join(["_" + c.lower() if c.isupper() else c for c in string]).lstrip("_")
 
@@ -147,11 +146,11 @@ class WidgetOptions(DataDict[str, Any]):
         )
 
     @property
-    def colours(self) -> Colours:
+    def colours(self) -> Colors:
         return self.colors
 
     @colours.setter
-    def colours(self, value: Colours) -> None:
+    def colours(self, value: Colors) -> None:
         self.colors = value
 
     def __setitem__(self, key: str, value: Any) -> None:
