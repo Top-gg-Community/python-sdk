@@ -126,7 +126,7 @@ class WidgetOptions(DataDict[str, Any]):
     format: str
     """Format to apply to the widget. Must be either ``png`` and ``svg``. Defaults to ``png``."""
     type: str
-    """Type of a short widget (``status``, ``servers``, ``library``, ``upvotes``, and ``owner``). For large widget, 
+    """Type of a short widget (``status``, ``servers``, ``upvotes``, and ``owner``). For large widget, 
     must be an empty string."""
 
     def __init__(
