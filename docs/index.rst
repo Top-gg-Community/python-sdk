@@ -11,9 +11,6 @@ Welcome to topggpy's documentation!
    :maxdepth: 2
 
    api
-   models
-   webhooks
-   exceptions
    whats_new
 
 Indices and tables

@@ -1,1 +1,1 @@
-discord.py
+aiohttp~=3.8

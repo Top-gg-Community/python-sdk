@@ -8,21 +8,16 @@ A basic wrapper for the Top.gg API.
 :license: MIT, see LICENSE for more details.
 """
 
-from collections import namedtuple
-
 __title__ = "topggpy"
 __author__ = "Assanali Mukhanov"
+__maintainer__ = "Norizon"
 __license__ = "MIT"
-__version__ = "1.4.0"
+__version__ = "2.0.0a"
 
-VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
-major, minor, micro = (int(i) for i in __version__.split("."))
-version_info = VersionInfo(
-    major=major, minor=minor, micro=micro, releaselevel="final", serial=0
-)
-
+from .autopost import AutoPoster
 from .client import DBLClient
+from .data import Data, data
 from .errors import *
 from .http import HTTPClient
-from .types import WidgetOptions
-from .webhook import WebhookManager
+from .types import StatsWrapper, WidgetOptions
+from .webhook import WebhookEndpoint, WebhookManager, WebhookType
