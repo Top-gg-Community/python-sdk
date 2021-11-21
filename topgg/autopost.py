@@ -167,7 +167,7 @@ class AutoPoster(DataContainerMixin):
         if self._task:
             raise errors.TopGGException("the autopost is already running.")
 
-        self._task = task = asyncio.create_task(self._internal_loop())
+        self._task = task = asyncio.ensure_future(self._internal_loop())
         return task
 
     def stop(self) -> None:
