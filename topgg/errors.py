@@ -34,16 +34,12 @@ class TopGGException(Exception):
     Ideally speaking, this could be caught to handle any exceptions thrown from this library.
     """
 
-    pass
-
 
 class ClientException(TopGGException):
     """Exception that's thrown when an operation in the :class:`DBLClient` fails.
 
     These are usually for exceptions that happened due to user input.
     """
-
-    pass
 
 
 class HTTPException(TopGGException):
@@ -75,28 +71,18 @@ class HTTPException(TopGGException):
 class Unauthorized(HTTPException):
     """Exception that's thrown when status code 401 occurs."""
 
-    pass
-
 
 class UnauthorizedDetected(TopGGException):
     """Exception that's thrown when no API Token is provided."""
-
-    pass
 
 
 class Forbidden(HTTPException):
     """Exception that's thrown when status code 403 occurs."""
 
-    pass
-
 
 class NotFound(HTTPException):
     """Exception that's thrown when status code 404 occurs."""
 
-    pass
-
 
 class ServerError(HTTPException):
     """Exception that's thrown when Top.gg returns "Server Error" responses (status codes such as 500 and 503)."""
-
-    pass
