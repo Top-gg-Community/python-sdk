@@ -50,7 +50,7 @@ class DBLClient(DataContainerMixin):
         An `aiohttp session`_ to use for requests to the API.
     """
 
-    __slots__ = ("http", "default_bot_id", "_token", "_is_closed")
+    __slots__ = ("http", "default_bot_id", "_token", "_is_closed", "_autopost")
     http: HTTPClient
 
     def __init__(
@@ -66,6 +66,7 @@ class DBLClient(DataContainerMixin):
         self._is_closed = False
         if session is not None:
             self.http = HTTPClient(token, session=session)
+        self._autopost = None
 
     @property
     def is_closed(self) -> bool:
@@ -341,9 +342,17 @@ class DBLClient(DataContainerMixin):
         """
         Returns a helper instance for auto-posting.
 
+        .. note::
+            The second time you call this method, it'll return the same instance
+            as the one returned from the first call.
+
         Returns
         -------
         autoposter: :obj:`~.autopost.AutoPoster`
             An instance of AutoPoster.
         """
-        return AutoPoster(self)
+        if self._autopost is not None:
+            return self._autopost
+
+        self._autopost = AutoPoster(self)
+        return self._autopost
