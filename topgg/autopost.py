@@ -149,7 +149,7 @@ class AutoPoster(DataContainerMixin):
                 ...
         """
         if callback is not None:
-            self._error = callback  # type: ignore
+            self._error = callback
             return self
 
         return self.on_error
