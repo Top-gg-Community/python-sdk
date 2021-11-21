@@ -336,6 +336,9 @@ class DBLClient(DataContainerMixin):
         if hasattr(self, "http"):
             await self.http.close()
 
+        if self._autopost:
+            self._autopost.cancel()
+
         self._is_closed = True
 
     def autopost(self) -> AutoPoster:
