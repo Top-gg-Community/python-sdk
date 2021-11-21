@@ -1,10 +1,11 @@
 import typing as t
 
 import aiohttp
+import mock
 import pytest
 
 from topgg import WebhookManager, WebhookType
-from topgg.types import BotVoteData, ServerVoteData
+from topgg.errors import TopGGException
 
 auth = "youshallnotpass"
 
@@ -48,3 +49,20 @@ async def test_WebhookManager_validates_auth(
                 assert r.status == result
     finally:
         await webhook_manager.close()
+        assert webhook_manager._is_closed
+
+
+def test_WebhookEndpoint_callback_unset(webhook_manager: WebhookManager):
+    with pytest.raises(
+        TopGGException,
+        match=r"callback\ was\ unset,\ please\ set\ it\ using\ the\ callback\(\)\ method\.",
+    ):
+        webhook_manager.endpoint(WebhookType.BOT).add_to_manager()
+
+
+def test_WebhookEndpoint_route_unset(webhook_manager: WebhookManager):
+    with pytest.raises(
+        TopGGException,
+        match=r"route\ was\ unset,\ please\ set\ it\ using\ the\ route\(\)\ method\.",
+    ):
+        webhook_manager.endpoint(WebhookType.BOT).callback(mock.Mock()).add_to_manager()
