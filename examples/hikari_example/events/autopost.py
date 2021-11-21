@@ -3,11 +3,11 @@ import hikari
 
 
 @attr.define(kw_only=True, weakref_slot=False)
-class AutoPostSuccess(hikari.Event):
+class AutoPostSuccessEvent(hikari.Event):
     app: hikari.GatewayBot
 
 
 @attr.define(kw_only=True, weakref_slot=False)
-class AutoPostError(hikari.Event):
+class AutoPostErrorEvent(hikari.Event):
     app: hikari.GatewayBot
     exception: Exception
