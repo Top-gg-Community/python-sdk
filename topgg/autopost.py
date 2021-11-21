@@ -20,8 +20,6 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from __future__ import annotations
-
 import asyncio
 import datetime
 import sys
@@ -55,12 +53,12 @@ class AutoPoster(DataContainerMixin):
     _stats: CallbackT
     _interval: float
 
-    def __init__(self, client: DBLClient) -> None:
+    def __init__(self, client: "DBLClient") -> None:
         super().__init__()
         self.client = client
         self._data = {**client._data, type(self): self}
         self._interval: float = 900
-        self._task: t.Optional[asyncio.Task[None]] = None
+        self._task: t.Optional["asyncio.Task[None]"] = None
         self._stopping = False
         self._error = self._default_error_handler
 
@@ -75,7 +73,7 @@ class AutoPoster(DataContainerMixin):
         ...
 
     @t.overload
-    def on_success(self, callback: CallbackT) -> AutoPoster:
+    def on_success(self, callback: CallbackT) -> "AutoPoster":
         ...
 
     def on_success(self, callback: t.Any = None) -> t.Any:
@@ -90,7 +88,7 @@ class AutoPoster(DataContainerMixin):
         ...
 
     @t.overload
-    def on_error(self, callback: CallbackT) -> AutoPoster:
+    def on_error(self, callback: CallbackT) -> "AutoPoster":
         ...
 
     def on_error(self, callback: t.Any = None) -> t.Any:
@@ -105,7 +103,7 @@ class AutoPoster(DataContainerMixin):
         ...
 
     @t.overload
-    def stats(self, callback: StatsCallbackT) -> AutoPoster:
+    def stats(self, callback: StatsCallbackT) -> "AutoPoster":
         ...
 
     def stats(self, callback: t.Any = None) -> t.Any:
@@ -123,7 +121,7 @@ class AutoPoster(DataContainerMixin):
     def interval(self, seconds: t.Union[float, datetime.timedelta]) -> None:
         self.set_interval(seconds)
 
-    def set_interval(self, seconds: t.Union[float, datetime.timedelta]) -> AutoPoster:
+    def set_interval(self, seconds: t.Union[float, datetime.timedelta]) -> "AutoPoster":
         if isinstance(seconds, datetime.timedelta):
             seconds = seconds.total_seconds()
 
@@ -160,7 +158,7 @@ class AutoPoster(DataContainerMixin):
         finally:
             self._task = None
 
-    def start(self) -> asyncio.Task[None]:
+    def start(self) -> "asyncio.Task[None]":
         if not hasattr(self, "_stats"):
             raise errors.TopGGException(
                 "you must provide a callback that returns the stats."

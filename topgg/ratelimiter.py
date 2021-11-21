@@ -22,8 +22,6 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from __future__ import annotations
-
 import asyncio
 import collections
 from datetime import datetime
@@ -59,7 +57,7 @@ class AsyncRateLimiter:
         self.callback = callback
         self.__lock = asyncio.Lock()
 
-    async def __aenter__(self) -> AsyncRateLimiter:
+    async def __aenter__(self) -> "AsyncRateLimiter":
         async with self.__lock:
             if len(self.calls) >= self.max_calls:
                 until = datetime.utcnow().timestamp() + self.period - self._timespan
@@ -94,7 +92,7 @@ class AsyncRateLimiterManager:
     def __init__(self, rate_limiters: List[AsyncRateLimiter]):
         self.rate_limiters = rate_limiters
 
-    async def __aenter__(self) -> AsyncRateLimiterManager:
+    async def __aenter__(self) -> "AsyncRateLimiterManager":
         [await manager.__aenter__() for manager in self.rate_limiters]
         return self
 
