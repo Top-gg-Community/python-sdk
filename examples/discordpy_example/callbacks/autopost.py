@@ -10,7 +10,7 @@ async def on_autopost_success(client: discord.Client = topgg.data(discord.Client
     print("Successfully posted!")
 
     # do whatever with client
-    ...
+    client.dispatch("autopost_success")
 
 
 async def on_autopost_error(
@@ -20,7 +20,7 @@ async def on_autopost_error(
     print("Failed to post", exception, file=sys.stderr)
 
     # do whatever with client
-    ...
+    client.dispatch("autopost_error", exception)
 
 
 async def stats(client: discord.Client = topgg.data(discord.Client)):
