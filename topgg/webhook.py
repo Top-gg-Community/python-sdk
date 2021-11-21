@@ -30,6 +30,8 @@ import typing as t
 import aiohttp
 from aiohttp import web
 
+from topgg.errors import TopGGException
+
 from .data import DataContainerMixin
 from .types import BotVoteData, ServerVoteData
 
@@ -142,12 +144,12 @@ class WebhookEndpoint(DataContainerMixin):
 
     def add_to_manager(self) -> WebhookManager:
         if not hasattr(self, "_callback"):
-            raise RuntimeError(
+            raise TopGGException(
                 "callback was unset, please set it using the callback() method."
             )
 
         if not hasattr(self, "_route"):
-            raise RuntimeError(
+            raise TopGGException(
                 "route was unset, please set it using the route() method."
             )
 
