@@ -42,6 +42,7 @@ StatsCallbackT = t.Callable[[], StatsWrapper]
 
 class AutoPoster(DataContainerMixin):
     __slots__ = (
+        "_error",
         "_success",
         "_interval",
         "_task",
@@ -61,8 +62,9 @@ class AutoPoster(DataContainerMixin):
         self._interval: float = 900
         self._task: t.Optional[asyncio.Task[None]] = None
         self._stopping = False
+        self._error = self._default_error_handler
 
-    def _error(self, exception: Exception) -> None:
+    def _default_error_handler(self, exception: Exception) -> None:
         print("Ignoring exception in auto post loop:", file=sys.stderr)
         traceback.print_exception(
             type(exception), exception, exception.__traceback__, file=sys.stderr
@@ -136,24 +138,27 @@ class AutoPoster(DataContainerMixin):
         return self._task is not None and self._task.done()
 
     async def _internal_loop(self) -> None:
-        while 1:
-            stats = await self._invoke_callback(self._stats)
-            try:
-                await self.client.post_guild_count(stats)
-            except Exception as err:
-                await self._invoke_callback(self._error, err)
-                if isinstance(err, errors.Unauthorized):
-                    raise err from None
-            else:
-                on_success = getattr(self, "_success", None)
-                if on_success:
-                    await self._invoke_callback(on_success)
+        try:
+            while 1:
+                stats = await self._invoke_callback(self._stats)
+                try:
+                    await self.client.post_guild_count(stats)
+                except Exception as err:
+                    await self._invoke_callback(self._error, err)
+                    if isinstance(err, errors.Unauthorized):
+                        raise err from None
+                else:
+                    on_success = getattr(self, "_success", None)
+                    if on_success:
+                        await self._invoke_callback(on_success)
 
-            if self._stopping:
-                self._stopping = False
-                return None
+                if self._stopping:
+                    self._stopping = False
+                    return None
 
-            await asyncio.sleep(self.interval)
+                await asyncio.sleep(self.interval)
+        finally:
+            self._task = None
 
     def start(self) -> asyncio.Task[None]:
         if not hasattr(self, "_stats"):
@@ -164,8 +169,8 @@ class AutoPoster(DataContainerMixin):
         if self._task:
             raise errors.TopGGException("the autopost is already running.")
 
-        self._task = asyncio.create_task(self._internal_loop())
-        return self._task
+        self._task = task = asyncio.create_task(self._internal_loop())
+        return task
 
     def stop(self) -> None:
         self._stopping = True
