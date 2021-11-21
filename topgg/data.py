@@ -28,7 +28,6 @@ import typing as t
 from topgg.errors import TopGGException
 
 T = t.TypeVar("T")
-TypeT = t.Type[T]
 DataContainerT = t.TypeVar("DataContainerT", bound="DataContainerMixin")
 
 
@@ -39,8 +38,8 @@ def data(type_: t.Type[T], /) -> T:
 class Data(t.Generic[T]):
     __slots__ = ("type",)
 
-    def __init__(self, type_: TypeT[T], /) -> None:
-        self.type: TypeT[T] = type_
+    def __init__(self, type_: t.Type[T], /) -> None:
+        self.type: t.Type[T] = type_
 
 
 class DataContainerMixin:
@@ -61,7 +60,7 @@ class DataContainerMixin:
         self._data[type_] = data_
         return self
 
-    def get_data(self, type_: TypeT[T], /, default: t.Any = None) -> T:
+    def get_data(self, type_: t.Type[T], /, default: t.Any = None) -> T:
         return self._data.get(type_, default)
 
     async def _invoke_callback(
