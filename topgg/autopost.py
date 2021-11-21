@@ -30,7 +30,6 @@ import typing as t
 
 from topgg import errors
 
-from .data import DataContainerMixin
 from .types import StatsWrapper
 
 if t.TYPE_CHECKING:
@@ -40,7 +39,7 @@ CallbackT = t.Callable[..., t.Any]
 StatsCallbackT = t.Callable[[], StatsWrapper]
 
 
-class AutoPoster(DataContainerMixin):
+class AutoPoster:
     """
     A helper class for autoposting. Takes in a :obj:`~.client.DBLClient` to instantiate.
 
@@ -67,7 +66,6 @@ class AutoPoster(DataContainerMixin):
     def __init__(self, client: "DBLClient") -> None:
         super().__init__()
         self.client = client
-        self._data = {**client._data, type(self): self}
         self._interval: float = 900
         self._task: t.Optional["asyncio.Task[None]"] = None
         self._stopping = False
@@ -236,17 +234,17 @@ class AutoPoster(DataContainerMixin):
     async def _internal_loop(self) -> None:
         try:
             while 1:
-                stats = await self._invoke_callback(self._stats)
+                stats = await self.client._invoke_callback(self._stats)
                 try:
                     await self.client.post_guild_count(stats)
                 except Exception as err:
-                    await self._invoke_callback(self._error, err)
+                    await self.client._invoke_callback(self._error, err)
                     if isinstance(err, errors.Unauthorized):
                         raise err from None
                 else:
                     on_success = getattr(self, "_success", None)
                     if on_success:
-                        await self._invoke_callback(on_success)
+                        await self.client._invoke_callback(on_success)
 
                 if self._stopping:
                     self._stopping = False
@@ -273,7 +271,7 @@ class AutoPoster(DataContainerMixin):
                 "you must provide a callback that returns the stats."
             )
 
-        if self._task:
+        if self.is_running:
             raise errors.TopGGException("the autopost is already running.")
 
         self._task = task = asyncio.ensure_future(self._internal_loop())
@@ -287,8 +285,10 @@ class AutoPoster(DataContainerMixin):
             This differs from :meth:`~.autopost.AutoPoster.cancel`
             because this will stop after posting as opposed to cancel immediately.
         """
+        if not self.is_running:
+            return None
+
         self._stopping = True
-        return None
 
     def cancel(self) -> None:
         """
