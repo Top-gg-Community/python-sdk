@@ -22,6 +22,17 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+__all__ = [
+    "TopGGException",
+    "ClientException",
+    "HTTPException",
+    "Unauthorized",
+    "UnauthorizedDetected",
+    "Forbidden",
+    "NotFound",
+    "ServerError",
+]
+
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
