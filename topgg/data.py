@@ -31,14 +31,14 @@ T = t.TypeVar("T")
 DataContainerT = t.TypeVar("DataContainerT", bound="DataContainerMixin")
 
 
-def data(type_: t.Type[T], /) -> T:
+def data(type_: t.Type[T]) -> T:
     return t.cast(T, Data(type_))
 
 
 class Data(t.Generic[T]):
     __slots__ = ("type",)
 
-    def __init__(self, type_: t.Type[T], /) -> None:
+    def __init__(self, type_: t.Type[T]) -> None:
         self.type: t.Type[T] = type_
 
 
@@ -49,7 +49,7 @@ class DataContainerMixin:
         self._data: t.Dict[t.Type, t.Any] = {type(self): self}
 
     def set_data(
-        self: DataContainerT, data_: t.Any, /, *, override: bool = False
+        self: DataContainerT, data_: t.Any, *, override: bool = False
     ) -> DataContainerT:
         type_ = type(data_)
         if not override and type_ in self._data:
@@ -60,11 +60,11 @@ class DataContainerMixin:
         self._data[type_] = data_
         return self
 
-    def get_data(self, type_: t.Type[T], /, default: t.Any = None) -> T:
+    def get_data(self, type_: t.Type[T], default: t.Any = None) -> T:
         return self._data.get(type_, default)
 
     async def _invoke_callback(
-        self, callback: t.Callable[..., T], /, *args: t.Any, **kwargs: t.Any
+        self, callback: t.Callable[..., T], *args: t.Any, **kwargs: t.Any
     ) -> T:
         parameters: t.Mapping[str, inspect.Parameter]
         try:
@@ -88,5 +88,5 @@ class DataContainerMixin:
 
         return res
 
-    def _resolve_data(self, type_: t.Type[T], /) -> T:
+    def _resolve_data(self, type_: t.Type[T]) -> T:
         return self._data[type_]

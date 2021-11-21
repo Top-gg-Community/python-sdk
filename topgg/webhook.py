@@ -60,7 +60,7 @@ class WebhookManager:
         self.__app = web.Application()
         self._is_closed = False
 
-    def endpoint(self, type_: WebhookType, /) -> WebhookEndpoint:
+    def endpoint(self, type_: WebhookType) -> WebhookEndpoint:
         """Helper method that configures a route that listens to bot votes.
 
         Parameters
@@ -114,28 +114,28 @@ CallbackT = t.Callable[..., t.Any]
 class WebhookEndpoint(DataContainerMixin):
     __slots__ = ("_callback", "manager", "_auth", "_route", "type")
 
-    def __init__(self, type_: WebhookType, /, *, manager: WebhookManager) -> None:
+    def __init__(self, type_: WebhookType, *, manager: WebhookManager) -> None:
         self.type = type_
         self.manager = manager
         self._auth = ""
 
-    def route(self, route_: str, /) -> WebhookEndpoint:
+    def route(self, route_: str) -> WebhookEndpoint:
         self._route = route_
         return self
 
-    def auth(self, auth_: str, /) -> WebhookEndpoint:
+    def auth(self, auth_: str) -> WebhookEndpoint:
         self._auth = auth_
         return self
 
     @t.overload
-    def callback(self, callback_: None, /) -> t.Callable[[CallbackT], CallbackT]:
+    def callback(self, callback_: None) -> t.Callable[[CallbackT], CallbackT]:
         ...
 
     @t.overload
-    def callback(self, callback_: CallbackT, /) -> WebhookEndpoint:
+    def callback(self, callback_: CallbackT) -> WebhookEndpoint:
         ...
 
-    def callback(self, callback_: t.Any = None, /) -> t.Any:
+    def callback(self, callback_: t.Any = None) -> t.Any:
         if callback_ is not None:
             self._callback = callback_
             return self

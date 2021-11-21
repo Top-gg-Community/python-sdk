@@ -71,14 +71,14 @@ class AutoPoster(DataContainerMixin):
         )
 
     @t.overload
-    def on_success(self, callback: None, /) -> t.Callable[[CallbackT], CallbackT]:
+    def on_success(self, callback: None) -> t.Callable[[CallbackT], CallbackT]:
         ...
 
     @t.overload
-    def on_success(self, callback: CallbackT, /) -> AutoPoster:
+    def on_success(self, callback: CallbackT) -> AutoPoster:
         ...
 
-    def on_success(self, callback: t.Any = None, /) -> t.Any:
+    def on_success(self, callback: t.Any = None) -> t.Any:
         if callback is not None:
             self._success = callback
             return self
@@ -86,14 +86,14 @@ class AutoPoster(DataContainerMixin):
         return self.on_success
 
     @t.overload
-    def on_error(self, callback: None, /) -> t.Callable[[CallbackT], CallbackT]:
+    def on_error(self, callback: None) -> t.Callable[[CallbackT], CallbackT]:
         ...
 
     @t.overload
-    def on_error(self, callback: CallbackT, /) -> AutoPoster:
+    def on_error(self, callback: CallbackT) -> AutoPoster:
         ...
 
-    def on_error(self, callback: t.Any = None, /) -> t.Any:
+    def on_error(self, callback: t.Any = None) -> t.Any:
         if callback is not None:
             self._error = callback  # type: ignore
             return self
@@ -101,14 +101,14 @@ class AutoPoster(DataContainerMixin):
         return self.on_error
 
     @t.overload
-    def stats(self, callback: None, /) -> t.Callable[[StatsCallbackT], StatsCallbackT]:
+    def stats(self, callback: None) -> t.Callable[[StatsCallbackT], StatsCallbackT]:
         ...
 
     @t.overload
-    def stats(self, callback: StatsCallbackT, /) -> AutoPoster:
+    def stats(self, callback: StatsCallbackT) -> AutoPoster:
         ...
 
-    def stats(self, callback: t.Any = None, /) -> t.Any:
+    def stats(self, callback: t.Any = None) -> t.Any:
         if callback is not None:
             self._stats = callback
             return self

@@ -73,7 +73,7 @@ class DBLClient(DataContainerMixin):
         if not hasattr(self, "http"):
             self.http = HTTPClient(self._token, session=None)
 
-    def _validate_and_get_bot_id(self, bot_id: t.Optional[int], /) -> int:
+    def _validate_and_get_bot_id(self, bot_id: t.Optional[int]) -> int:
         bot_id = bot_id or self.default_bot_id
         if bot_id is None:
             raise TypeError("bot_id or default_bot_id is unset.")
@@ -95,7 +95,7 @@ class DBLClient(DataContainerMixin):
         return data["is_weekend"]
 
     @t.overload
-    async def post_guild_count(self, stats: types.StatsWrapper, /) -> None:
+    async def post_guild_count(self, stats: types.StatsWrapper) -> None:
         ...
 
     @t.overload
@@ -144,7 +144,7 @@ class DBLClient(DataContainerMixin):
         await self.http.post_guild_count(guild_count, shard_count, shard_id)
 
     async def get_guild_count(
-        self, bot_id: t.Optional[int] = None, /
+        self, bot_id: t.Optional[int] = None
     ) -> types.BotStatsData:
         """This function is a coroutine.
 
@@ -186,7 +186,7 @@ class DBLClient(DataContainerMixin):
         response = await self.http.get_bot_votes(self.default_bot_id)
         return [types.BriefUserData(**user) for user in response]
 
-    async def get_bot_info(self, bot_id: t.Optional[int] = None, /) -> types.BotData:
+    async def get_bot_info(self, bot_id: t.Optional[int] = None) -> types.BotData:
         """This function is a coroutine.
 
         Gets information about a bot from Top.gg.
@@ -247,7 +247,7 @@ class DBLClient(DataContainerMixin):
         ]
         return types.DataDict(**response)
 
-    async def get_user_info(self, user_id: int, /) -> types.UserData:
+    async def get_user_info(self, user_id: int) -> types.UserData:
         """This function is a coroutine.
 
         Gets information about a user on Top.gg.
@@ -266,7 +266,7 @@ class DBLClient(DataContainerMixin):
         response = await self.http.get_user_info(user_id)
         return types.UserData(**response)
 
-    async def get_user_vote(self, user_id: int, /) -> bool:
+    async def get_user_vote(self, user_id: int) -> bool:
         """This function is a coroutine.
 
         Gets information about a user's vote for your bot on Top.gg.
