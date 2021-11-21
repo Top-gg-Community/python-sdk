@@ -104,8 +104,8 @@ def bot_vote_data() -> types.BotVoteData:
 
 
 @pytest.fixture
-def server_vote_data() -> types.ServerVoteData:
-    return types.ServerVoteData(**server_vote_dict)
+def server_vote_data() -> types.GuildVoteData:
+    return types.GuildVoteData(**server_vote_dict)
 
 
 @pytest.fixture

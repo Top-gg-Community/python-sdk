@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
 
-"""
-The MIT License (MIT)
+# The MIT License (MIT)
 
-Copyright (c) 2021 Assanali Mukhanov
+# Copyright (c) 2021 Assanali Mukhanov
 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
-"""
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+__all__ = ["HTTPClient"]
 
 import asyncio
 import json
@@ -37,7 +37,7 @@ from aiohttp import ClientResponse
 from . import __version__, errors
 from .ratelimiter import AsyncRateLimiter, AsyncRateLimiterManager
 
-log = logging.getLogger(__name__)
+_LOGGER = logging.getLogger("topgg.http")
 
 
 async def _json_or_text(
@@ -122,7 +122,7 @@ class HTTPClient:
         for _ in range(2):
             async with rate_limiters:
                 async with self.session.request(method, url, **kwargs) as resp:
-                    log.debug(
+                    _LOGGER.debug(
                         "%s %s with %s has returned %s",
                         method,
                         url,
@@ -141,7 +141,7 @@ class HTTPClient:
                         # sleep a bit
                         retry_after = float(resp.headers.get("Retry-After"))
                         mins = retry_after / 60
-                        log.warning(fmt, retry_after, mins)
+                        _LOGGER.warning(fmt, retry_after, mins)
 
                         # check if it's a global ratelimit (True as only 1 ratelimit atm - /api/bots)
                         # is_global = True
@@ -150,13 +150,13 @@ class HTTPClient:
                         #     self._global_over.clear()
 
                         await asyncio.sleep(retry_after, loop=self.loop)
-                        log.debug("Done sleeping for the ratelimit. Retrying...")
+                        _LOGGER.debug("Done sleeping for the ratelimit. Retrying...")
 
                         # release the global lock now that the
                         # global ratelimit has passed
                         # if is_global:
                         #     self._global_over.set()
-                        log.debug("Global ratelimit is now over.")
+                        _LOGGER.debug("Global ratelimit is now over.")
                         continue
 
                     elif resp.status == 400:
@@ -248,7 +248,7 @@ async def _rate_limit_handler(until: float) -> None:
     fmt = (
         "We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes)."
     )
-    log.warning(fmt, duration, mins)
+    _LOGGER.warning(fmt, duration, mins)
 
 
 def to_json(obj: Any) -> str:

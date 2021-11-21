@@ -1,9 +1,36 @@
-from datetime import datetime
-from typing import Any, Dict, List, MutableMapping, Optional, TypeVar
+# -*- coding: utf-8 -*-
 
-KT = TypeVar("KT")
-VT = TypeVar("VT")
-Colors = Dict[str, int]
+# The MIT License (MIT)
+
+# Copyright (c) 2021 Assanali Mukhanov
+
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+__all__ = ["WidgetOptions", "StatsWrapper"]
+
+import dataclasses
+import typing as t
+from datetime import datetime
+
+KT = t.TypeVar("KT")
+VT = t.TypeVar("VT")
+Colors = t.Dict[str, int]
 Colours = Colors
 
 
@@ -100,7 +127,7 @@ def parse_bot_stats_dict(d: dict) -> dict:
     return data
 
 
-class DataDict(dict, MutableMapping[KT, VT]):
+class DataDict(dict, t.MutableMapping[KT, VT]):
     """Base class used to represent received data from the API.
 
     Every data model subclasses this class.
@@ -111,11 +138,11 @@ class DataDict(dict, MutableMapping[KT, VT]):
         self.__dict__ = self
 
 
-class WidgetOptions(DataDict[str, Any]):
+class WidgetOptions(DataDict[str, t.Any]):
     """Model that represents widget options that are passed to Top.gg widget URL generated via
     :meth:`DBLClient.generate_widget`."""
 
-    id: Optional[int]
+    id: t.Optional[int]
     """ID of a bot to generate the widget for. Must resolve to an ID of a listed bot when converted to a string."""
     colors: Colors
     """A dictionary consisting of a parameter as a key and HEX color (type `int`) as value. ``color`` will be 
@@ -131,12 +158,12 @@ class WidgetOptions(DataDict[str, Any]):
 
     def __init__(
         self,
-        id: Optional[int] = None,
-        format: Optional[str] = None,
-        type: Optional[str] = None,
+        id: t.Optional[int] = None,
+        format: t.Optional[str] = None,
+        type: t.Optional[str] = None,
         noavatar: bool = False,
-        colors: Optional[Colors] = None,
-        colours: Optional[Colors] = None,
+        colors: t.Optional[Colors] = None,
+        colours: t.Optional[Colors] = None,
     ):
         super().__init__(
             id=id or None,
@@ -154,68 +181,109 @@ class WidgetOptions(DataDict[str, Any]):
     def colours(self, value: Colors) -> None:
         self.colors = value
 
-    def __setitem__(self, key: str, value: Any) -> None:
+    def __setitem__(self, key: str, value: t.Any) -> None:
         if key == "colours":
             key = "colors"
         super().__setitem__(key, value)
 
-    def __getitem__(self, item: str) -> Any:
+    def __getitem__(self, item: str) -> t.Any:
         if item == "colours":
             item = "colors"
         return super().__getitem__(item)
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: t.Any = None) -> t.Any:
         """:meta private:"""
         if key == "colours":
             key = "colors"
         return super().get(key, default)
 
 
-class BotData(DataDict[str, Any]):
+class BotData(DataDict[str, t.Any]):
     """Model that contains information about a listed bot on top.gg. The data this model contains can be found `here
     <https://docs.top.gg/api/bot/#bot-structure>`__."""
 
     id: int
-    username: str
-    discriminator: str
-    avatar: Optional[str]
-    def_avatar: str
-    prefix: str
-    shortdesc: str
-    longdesc: Optional[str]
-    tags: List[str]
-    website: Optional[str]
-    support: Optional[str]
-    github: Optional[str]
-    owners: List[int]
-    guilds: List[int]
-    invite: Optional[str]
-    date: datetime
-    certified_bot: bool
-    vanity: Optional[str]
-    points: int
-    monthly_points: int
-    donatebotguildid: int
+    """The ID of the bot."""
 
-    def __init__(self, **kwargs: Any):
+    username: str
+    """The username of the bot."""
+
+    discriminator: str
+    """The discriminator of the bot."""
+
+    avatar: t.Optional[str]
+    """The avatar hash of the bot."""
+
+    def_avatar: str
+    """The avatar hash of the bot's default avatar."""
+
+    prefix: str
+    """The prefix of the bot."""
+
+    shortdesc: str
+    """The brief description of the bot."""
+
+    longdesc: t.Optional[str]
+    """The long description of the bot."""
+
+    tags: t.List[str]
+    """The tags the bot has."""
+
+    website: t.Optional[str]
+    """The website of the bot."""
+
+    support: t.Optional[str]
+    """The invite code of the bot's support server."""
+
+    github: t.Optional[str]
+    """The GitHub URL of the repo of the bot."""
+
+    owners: t.List[int]
+    """The IDs of the owners of the bot."""
+
+    guilds: t.List[int]
+    """The guilds the bot is in."""
+
+    invite: t.Optional[str]
+    """The invite URL of the bot."""
+
+    date: datetime
+    """The time the bot was added."""
+
+    certified_bot: bool
+    """Whether or not the bot is certified."""
+
+    vanity: t.Optional[str]
+    """The vanity URL of the bot."""
+
+    points: int
+    """The amount of the votes the bot has."""
+
+    monthly_points: int
+    """The amount of the votes the bot has this month."""
+
+    donatebotguildid: int
+    """The guild ID for the donatebot setup."""
+
+    def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_dict(kwargs))
 
 
-class BotStatsData(DataDict[str, Any]):
+class BotStatsData(DataDict[str, t.Any]):
     """Model that contains information about a listed bot's guild and shard count."""
 
-    server_count: Optional[int]
+    server_count: t.Optional[int]
     """The amount of servers the bot is in."""
-    shards: List[int]
+    shards: t.List[int]
     """The amount of servers the bot is in per shard."""
-    shard_count: Optional[int]
+    shard_count: t.Optional[int]
     """The amount of shards a bot has."""
 
-    def __init__(self, **kwargs: Any):
+    def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_stats_dict(kwargs))
 
 
-class BriefUserData(DataDict[str, Any]):
+class BriefUserData(DataDict[str, t.Any]):
     """Model that contains brief information about a Top.gg user."""
 
     id: int
@@ -225,7 +293,7 @@ class BriefUserData(DataDict[str, Any]):
     avatar: str
     """The Discord avatar URL of the user."""
 
-    def __init__(self, **kwargs: Any):
+    def __init__(self, **kwargs: t.Any):
         if kwargs["id"].isdigit():
             kwargs["id"] = int(kwargs["id"])
         super().__init__(**kwargs)
@@ -246,26 +314,45 @@ class SocialData(DataDict[str, str]):
     """The GitHub username of the user."""
 
 
-class UserData(DataDict[str, Any]):
+class UserData(DataDict[str, t.Any]):
     """Model that contains information about a top.gg user. The data this model contains can be found `here
     <https://docs.top.gg/api/user/#structure>`__."""
 
     id: int
-    username: str
-    discriminator: str
-    social: SocialData
-    color: str
-    supporter: bool
-    certified_dev: bool
-    mod: bool
-    web_mod: bool
-    admin: bool
+    """The ID of the user."""
 
-    def __init__(self, **kwargs: Any):
+    username: str
+    """The username of the user."""
+
+    discriminator: str
+    """The discriminator of the user."""
+
+    social: SocialData
+    """The social data of the user."""
+
+    color: str
+    """The custom hex color of the user."""
+
+    supporter: bool
+    """Whether or not the user is a supporter."""
+
+    certified_dev: bool
+    """Whether or not the user is a certified dev."""
+
+    mod: bool
+    """Whether or not the user is a Top.gg mod."""
+
+    web_mod: bool
+    """Whether or not the user is a Top.gg web mod."""
+
+    admin: bool
+    """Whether or not the user is a Top.gg admin."""
+
+    def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_user_dict(kwargs))
 
 
-class VoteDataDict(DataDict[str, Any]):
+class VoteDataDict(DataDict[str, t.Any]):
     """Base model that represents received information from Top.gg via webhooks."""
 
     type: str
@@ -273,9 +360,9 @@ class VoteDataDict(DataDict[str, Any]):
     user: int
     """ID of the voter."""
     query: DataDict
-    """Query parameters in :ref:`DataDict`."""
+    """Query parameters in :obj:`~.DataDict`."""
 
-    def __init__(self, **kwargs: Any):
+    def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_vote_dict(kwargs))
 
 
@@ -288,8 +375,23 @@ class BotVoteData(VoteDataDict):
     """Boolean value indicating whether the action was done on a weekend."""
 
 
-class ServerVoteData(VoteDataDict):
-    """Model that contains information about a server vote."""
+class GuildVoteData(VoteDataDict):
+    """Model that contains information about a guild vote."""
 
     guild: int
     """ID of the guild the user voted for."""
+
+
+ServerVoteData = GuildVoteData
+
+
+@dataclasses.dataclass
+class StatsWrapper:
+    guild_count: int
+    """The guild count."""
+
+    shard_count: t.Optional[int] = None
+    """The shard count."""
+
+    shard_id: t.Optional[int] = None
+    """The shard ID the guild count belongs to."""

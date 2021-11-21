@@ -8,11 +8,18 @@ What's New
 
 This page keeps a detailed human friendly rendering of what's new and changed in specific versions.
 
+v2.0.0
+======
+* Introduced new types: :obj:`~.AutoPoster`, :obj:`~.DataContainerMixin`, :obj:`~.WebhookEndpoint`, :obj:`~.WebhookType`
+* `Autopost <api/autopost.html>`__ and `Webhook <api/webhook.html>`__ API breaking changes
+* No longer depends on any Discord API wrapper
+* :obj:`~.GuildVoteData` alias
+
 v1.4.0
 ======
 
-* The type of data passed to ``on_dbl_vote`` has been changed from :class:`dict` to :ref:`BotVoteData`
-* The type of data passed to ``on_dsl_vote`` has been changed from :class:`dict` to :ref:`ServerVoteData`
+* The type of data passed to ``on_dbl_vote`` has been changed from :class:`dict` to :obj:`BotVoteData`
+* The type of data passed to ``on_dsl_vote`` has been changed from :class:`dict` to :obj:`ServerVoteData`
 
 v1.3.0
 ======
@@ -55,7 +62,7 @@ v1.0.0
 * Renamed the module folder from ``dbl`` to ``topgg``
 * Added ``post_shard_count`` argument to :meth:`DBLClient.post_guild_count`
 * Autopost now supports automatic shard posting (:issue:`42`)
-*  Large webhook system rework, read the :ref:`webhooks` section for more
+*  Large webhook system rework, read the :obj:`api/webhook` section for more
 
    * Added support for server webhooks
 

@@ -33,6 +33,7 @@ setup(
     name="topggpy",
     author=f"{metadata.author}, Top.gg",
     author_email="shivaco.osu@gmail.com",
+    maintainer=f"{metadata.maintainer}, Top.gg",
     url="https://github.com/top-gg/python-sdk",
     version=metadata.version,
     packages=find_packages(),

@@ -21,6 +21,8 @@
 import os
 import sys
 
+import alabaster
+
 sys.path.insert(0, os.path.abspath("../"))
 from topgg import __version__ as version
 
@@ -42,7 +44,6 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
-    "sphinx_rtd_dark_mode",
 ]
 
 on_rtd = os.getenv("READTHEDOCS") == "True"
@@ -51,7 +52,7 @@ if on_rtd:
 else:
     extensions.append("sphinx.ext.napoleon")
 
-autodoc_member_order = "bysource"
+autodoc_member_order = "groupwise"
 
 extlinks = {
     "issue": ("https://github.com/top-gg/python-sdk/issues/%s", "GH-"),
@@ -105,23 +106,14 @@ language = None
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ["_build"]
 
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
-
 # -- Options for HTML output ----------------------------------------------
 
+html_theme_options = {"navigation_depth": 2}
+html_theme_path = [alabaster.get_path()]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
-
-html_style = "css/customtheme.css"
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
-html_theme_options = {"collapse_navigation": False}
+html_theme = "insegel"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
