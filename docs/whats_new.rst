@@ -10,8 +10,10 @@ This page keeps a detailed human friendly rendering of what's new and changed in
 
 v2.0.0
 ======
-* Introduced new types: :obj:`AutoPost`, :obj:`Data`, :obj:`DataContainerMixin`, :obj:`WebhookEndpoint`
-* Things no longer depend on a Discord API wrapper
+* Introduced new types: :obj:`~.AutoPoster`, :obj:`~.DataContainerMixin`, :obj:`~.WebhookEndpoint`, :obj:`~.WebhookType`
+* `Autopost <api/autopost.html>`__ and `Webhook <api/webhook.html>`__ API breaking changes
+* No longer depends on any Discord API wrapper
+* :obj:`~.GuildVoteData` alias
 
 v1.4.0
 ======

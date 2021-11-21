@@ -382,6 +382,9 @@ class GuildVoteData(VoteDataDict):
     """ID of the guild the user voted for."""
 
 
+ServerVoteData = GuildVoteData
+
+
 @dataclasses.dataclass
 class StatsWrapper:
     guild_count: int
