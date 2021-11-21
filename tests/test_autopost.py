@@ -32,15 +32,15 @@ async def test_AutoPoster_breaks_autopost_loop_on_401(
         "topgg.DBLClient.post_guild_count", side_effect=Unauthorized(response, {})
     )
 
-    autopost = (
-        DBLClient("", session=session)
-        .autopost()
-        .stats(lambda: StatsWrapper(guild_count=10))
-    )
+    callback = mock.Mock()
+    autopost = DBLClient("", session=session).autopost().stats(callback)
+    assert isinstance(autopost, AutoPoster)
+    assert not isinstance(autopost.stats()(callback), AutoPoster)
 
     with pytest.raises(Unauthorized):
         await autopost.start()
 
+    callback.assert_called_once()
     assert not autopost.is_running
 
 

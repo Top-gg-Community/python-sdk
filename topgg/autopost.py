@@ -111,7 +111,11 @@ class AutoPoster:
             self._success = callback
             return self
 
-        return self.on_success
+        def decorator(callback: CallbackT) -> CallbackT:
+            self._success = callback
+            return callback
+
+        return decorator
 
     @t.overload
     def on_error(self, callback: None) -> t.Callable[[CallbackT], CallbackT]:
@@ -150,7 +154,11 @@ class AutoPoster:
             self._error = callback
             return self
 
-        return self.on_error
+        def decorator(callback: CallbackT) -> CallbackT:
+            self._error = callback
+            return callback
+
+        return decorator
 
     @t.overload
     def stats(self, callback: None) -> t.Callable[[StatsCallbackT], StatsCallbackT]:
@@ -191,7 +199,11 @@ class AutoPoster:
             self._stats = callback
             return self
 
-        return self.stats
+        def decorator(callback: StatsCallbackT) -> StatsCallbackT:
+            self._stats = callback
+            return callback
+
+        return decorator
 
     @property
     def interval(self) -> float:
@@ -229,7 +241,7 @@ class AutoPoster:
     @property
     def is_running(self) -> bool:
         """Whether or not the autopost is running."""
-        return self._task is not None and self._task.done()
+        return self._task is not None and not self._task.done()
 
     async def _internal_loop(self) -> None:
         try:

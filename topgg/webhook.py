@@ -95,7 +95,7 @@ class WebhookManager(DataContainerMixin):
         """
         if endpoint_:
             if not hasattr(endpoint_, "_callback"):
-                raise TopGGException("endpoint missing a callback.")
+                raise TopGGException("endpoint missing callback.")
 
             if not hasattr(endpoint_, "_type"):
                 raise TopGGException("endpoint missing type.")
