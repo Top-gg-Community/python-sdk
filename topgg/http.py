@@ -35,7 +35,7 @@ from aiohttp import ClientResponse
 from . import __version__, errors
 from .ratelimiter import AsyncRateLimiter, AsyncRateLimiterManager
 
-log = logging.getLogger(__name__)
+_LOGGER = logging.getLogger("topgg.http")
 
 
 async def _json_or_text(
@@ -120,7 +120,7 @@ class HTTPClient:
         for _ in range(2):
             async with rate_limiters:
                 async with self.session.request(method, url, **kwargs) as resp:
-                    log.debug(
+                    _LOGGER.debug(
                         "%s %s with %s has returned %s",
                         method,
                         url,
@@ -139,7 +139,7 @@ class HTTPClient:
                         # sleep a bit
                         retry_after = float(resp.headers.get("Retry-After"))
                         mins = retry_after / 60
-                        log.warning(fmt, retry_after, mins)
+                        _LOGGER.warning(fmt, retry_after, mins)
 
                         # check if it's a global ratelimit (True as only 1 ratelimit atm - /api/bots)
                         # is_global = True
@@ -148,13 +148,13 @@ class HTTPClient:
                         #     self._global_over.clear()
 
                         await asyncio.sleep(retry_after, loop=self.loop)
-                        log.debug("Done sleeping for the ratelimit. Retrying...")
+                        _LOGGER.debug("Done sleeping for the ratelimit. Retrying...")
 
                         # release the global lock now that the
                         # global ratelimit has passed
                         # if is_global:
                         #     self._global_over.set()
-                        log.debug("Global ratelimit is now over.")
+                        _LOGGER.debug("Global ratelimit is now over.")
                         continue
 
                     elif resp.status == 400:
@@ -246,7 +246,7 @@ async def _rate_limit_handler(until: float) -> None:
     fmt = (
         "We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes)."
     )
-    log.warning(fmt, duration, mins)
+    _LOGGER.warning(fmt, duration, mins)
 
 
 def to_json(obj: Any) -> str:

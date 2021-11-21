@@ -22,7 +22,6 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import logging
 import typing as t
 
 import aiohttp
@@ -31,8 +30,6 @@ from . import errors, types
 from .autopost import AutoPoster
 from .data import DataContainerMixin
 from .http import HTTPClient
-
-log = logging.getLogger("topgg.client")
 
 
 class DBLClient(DataContainerMixin):
