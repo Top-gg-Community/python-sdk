@@ -202,7 +202,7 @@ class AutoPoster(DataContainerMixin):
 
     @interval.setter
     def interval(self, seconds: t.Union[float, datetime.timedelta]) -> None:
-        """Alias to :meth:`~.autopost.AutoPoster.set_interval`"""
+        """Alias to :meth:`~.autopost.AutoPoster.set_interval`."""
         self.set_interval(seconds)
 
     def set_interval(self, seconds: t.Union[float, datetime.timedelta]) -> "AutoPoster":
@@ -212,10 +212,11 @@ class AutoPoster(DataContainerMixin):
         Parameters
         ----------
         seconds: :obj:`float` or :obj:`datetime.timedelta`
+            The interval.
 
         Raises
         ------
-        :obj:`ValueError`:
+        :obj:`ValueError`
             If the provided interval is less than 900 seconds.
         """
         if isinstance(seconds, datetime.timedelta):
@@ -264,7 +265,7 @@ class AutoPoster(DataContainerMixin):
 
         Raises
         ------
-        :obj:`~.errors.TopGGException`:
+        :obj:`~.errors.TopGGException`
             If there's no callback provided or the autopost is already running.
         """
         if not hasattr(self, "_stats"):
