@@ -203,26 +203,67 @@ class BotData(DataDict[str, t.Any]):
     <https://docs.top.gg/api/bot/#bot-structure>`__."""
 
     id: int
+    """The ID of the bot."""
+
     username: str
+    """The username of the bot."""
+
     discriminator: str
+    """The discriminator of the bot."""
+
     avatar: t.Optional[str]
+    """The avatar hash of the bot."""
+
     def_avatar: str
+    """The avatar hash of the bot's default avatar."""
+
     prefix: str
+    """The prefix of the bot."""
+
     shortdesc: str
+    """The brief description of the bot."""
+
     longdesc: t.Optional[str]
+    """The long description of the bot."""
+
     tags: t.List[str]
+    """The tags the bot has."""
+
     website: t.Optional[str]
+    """The website of the bot."""
+
     support: t.Optional[str]
+    """The invite code of the bot's support server."""
+
     github: t.Optional[str]
+    """The GitHub URL of the repo of the bot."""
+
     owners: t.List[int]
+    """The IDs of the owners of the bot."""
+
     guilds: t.List[int]
+    """The guilds the bot is in."""
+
     invite: t.Optional[str]
+    """The invite URL of the bot."""
+
     date: datetime
+    """The time the bot was added."""
+
     certified_bot: bool
+    """Whether or not the bot is certified."""
+
     vanity: t.Optional[str]
+    """The vanity URL of the bot."""
+
     points: int
+    """The amount of the votes the bot has."""
+
     monthly_points: int
+    """The amount of the votes the bot has this month."""
+
     donatebotguildid: int
+    """The guild ID for the donatebot setup."""
 
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_dict(kwargs))
@@ -278,15 +319,34 @@ class UserData(DataDict[str, t.Any]):
     <https://docs.top.gg/api/user/#structure>`__."""
 
     id: int
+    """The ID of the user."""
+
     username: str
+    """The username of the user."""
+
     discriminator: str
+    """The discriminator of the user."""
+
     social: SocialData
+    """The social data of the user."""
+
     color: str
+    """The custom hex color of the user."""
+
     supporter: bool
+    """Whether or not the user is a supporter."""
+
     certified_dev: bool
+    """Whether or not the user is a certified dev."""
+
     mod: bool
+    """Whether or not the user is a Top.gg mod."""
+
     web_mod: bool
+    """Whether or not the user is a Top.gg web mod."""
+
     admin: bool
+    """Whether or not the user is a Top.gg admin."""
 
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_user_dict(kwargs))
@@ -315,8 +375,8 @@ class BotVoteData(VoteDataDict):
     """Boolean value indicating whether the action was done on a weekend."""
 
 
-class ServerVoteData(VoteDataDict):
-    """Model that contains information about a server vote."""
+class GuildVoteData(VoteDataDict):
+    """Model that contains information about a guild vote."""
 
     guild: int
     """ID of the guild the user voted for."""

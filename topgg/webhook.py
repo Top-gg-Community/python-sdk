@@ -33,7 +33,7 @@ from aiohttp import web
 from topgg.errors import TopGGException
 
 from .data import DataContainerMixin
-from .types import BotVoteData, ServerVoteData
+from .types import BotVoteData, GuildVoteData
 
 
 class WebhookType(enum.Enum):
@@ -61,7 +61,7 @@ class WebhookManager:
         self._is_closed = False
 
     def endpoint(self, type_: WebhookType) -> "WebhookEndpoint":
-        """Helper method that configures a route that listens to bot votes.
+        """Helper method that returns a WebhookEndpoint object.
 
         Parameters
         ----------
@@ -70,7 +70,7 @@ class WebhookManager:
 
         Returns
         -------
-        Modified version of the object: WebhookManager
+        An instance of WebhookEndpoint: WebhookEndpoint
         """
         if not isinstance(type_, WebhookType):
             raise TypeError("provided type must be of WebhookType enum.")
@@ -112,6 +112,17 @@ CallbackT = t.Callable[..., t.Any]
 
 
 class WebhookEndpoint(DataContainerMixin):
+    """
+    A helper class to setup webhook endpoint.
+
+    Parameters
+    ----------
+    type_: WebhookType
+        The type of the webhook.
+    manager: WebhookManager
+        The WebhookManager instance to register the endpoint to.
+    """
+
     __slots__ = ("_callback", "manager", "_auth", "_route", "type")
 
     def __init__(self, type_: WebhookType, *, manager: WebhookManager) -> None:
@@ -120,10 +131,34 @@ class WebhookEndpoint(DataContainerMixin):
         self._auth = ""
 
     def route(self, route_: str) -> "WebhookEndpoint":
+        """
+        Sets the route of this endpoint.
+
+        Parameters
+        ----------
+        route_: str
+            The route of this endpoint.
+
+        Returns
+        -------
+        self: WebhookEndpoint
+        """
         self._route = route_
         return self
 
     def auth(self, auth_: str) -> "WebhookEndpoint":
+        """
+        Sets the auth of this endpoint.
+
+        Parameters
+        ----------
+        auth_: str
+            The auth of this endpoint.
+
+        Returns
+        -------
+        self: WebhookEndpoint
+        """
         self._auth = auth_
         return self
 
@@ -136,6 +171,40 @@ class WebhookEndpoint(DataContainerMixin):
         ...
 
     def callback(self, callback_: t.Any = None) -> t.Any:
+        """
+        Registers a vote callback, called whenever this endpoint receives POST requests.
+        The callback can be either sync or async.
+        This method can be used as a decorator or a decorator factory.
+
+        Example
+        -------
+        .. code-block:: python
+
+            import topgg
+
+            webhook_manager = WebhookManager()
+            endpoint = (
+                webhook_manager
+                .endpoint(topgg.WebhookType.BOT)
+                .route("/dblwebhook")
+                .auth("youshallnotpass")
+            )
+
+            # The following are valid.
+            endpoint.callback(lambda vote_data: print("Receives a vote!", vote_data))
+
+            # Used as decorator, the decorated function will become the AutoPoster object.
+            @endpoint.callback
+            def endpoint():
+                ...
+
+            # Used as decorator factory, the decorated function will still be the function itself.
+            @endpoint.callback()
+            def on_vote():
+                ...
+
+            endpoint.add_to_manager()
+        """
         if callback_ is not None:
             self._callback = callback_
             return self
@@ -143,6 +212,18 @@ class WebhookEndpoint(DataContainerMixin):
         return self.callback
 
     def add_to_manager(self) -> WebhookManager:
+        """
+        Adds this endpoint to the webhook manager.
+
+        Returns
+        -------
+        webhook manager: WebhookManager
+
+        Raises
+        ------
+        :obj:`errors.TopGGException`:
+            If the callback / the route was unset.
+        """
         if not hasattr(self, "_callback"):
             raise TopGGException(
                 "callback was unset, please set it using the callback() method."
@@ -162,7 +243,7 @@ class WebhookEndpoint(DataContainerMixin):
             data = await request.json()
             await self._invoke_callback(
                 self._callback,
-                (BotVoteData if self.type is WebhookType.BOT else ServerVoteData)(
+                (BotVoteData if self.type is WebhookType.BOT else GuildVoteData)(
                     **data
                 ),
             )

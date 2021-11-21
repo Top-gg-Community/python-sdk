@@ -2,6 +2,6 @@
 Auto-post API Reference
 #######################
 
-.. automodule:; topgg.autopost
+.. automodule:: topgg.autopost
     :members:
     :inherited-members:

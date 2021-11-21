@@ -20,7 +20,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__all__ = ["Data", "data"]
+__all__ = ["data", "DataContainerMixin"]
 
 import inspect
 import typing as t
@@ -32,6 +32,33 @@ DataContainerT = t.TypeVar("DataContainerT", bound="DataContainerMixin")
 
 
 def data(type_: t.Type[T]) -> T:
+    """
+    Represents the injected data. This should be set as the parameter's default value.
+
+    Parameters
+    ----------
+    type_: :obj:`Type[T]`
+        The type of the injected data.
+
+    Returns
+    -------
+    data: The injected data of type T.
+
+    Example
+    -------
+    .. code-block:: python
+
+        import topgg
+
+        # In this example, we fetch the stats from a Discord client instance.
+        client = Client(...)
+        dblclient = topgg.DBLClient(TOKEN).set_data(client)
+        autopost: topgg.AutoPoster = dblclient.autopost()
+
+        @autopost.stats()
+        def get_stats(client: Client = topgg.data(Client)):
+            return topgg.StatsWrapper(guild_count=len(client.guilds), shard_count=len(client.shards))
+    """
     return t.cast(T, Data(type_))
 
 
@@ -43,6 +70,13 @@ class Data(t.Generic[T]):
 
 
 class DataContainerMixin:
+    """
+    A class that holds data.
+
+    This is useful for injecting some data so that they're available
+    as arguments in your functions.
+    """
+
     __slots__ = ("_data",)
 
     def __init__(self) -> None:
@@ -51,6 +85,21 @@ class DataContainerMixin:
     def set_data(
         self: DataContainerT, data_: t.Any, *, override: bool = False
     ) -> DataContainerT:
+        """
+        Sets data to be available in your functions.
+
+        Parameters
+        ----------
+        data_: :obj:`Any`
+            The data to be injected.
+        override: :obj:`bool`
+            Whether or not to override another instance that already exists.
+
+        Raises
+        ------
+        :obj:`~.errors.TopGGException`
+            If override is False and another instance of the same type exists.
+        """
         type_ = type(data_)
         if not override and type_ in self._data:
             raise TopGGException(
@@ -60,7 +109,16 @@ class DataContainerMixin:
         self._data[type_] = data_
         return self
 
-    def get_data(self, type_: t.Type[T], default: t.Any = None) -> T:
+    @t.overload
+    def get_data(self, type_: t.Type[T]) -> t.Optional[T]:
+        ...
+
+    @t.overload
+    def get_data(self, type_: t.Type[T], default: t.Any = None) -> t.Any:
+        ...
+
+    def get_data(self, type_: t.Any, default: t.Any = None) -> t.Any:
+        """Gets the injected data."""
         return self._data.get(type_, default)
 
     async def _invoke_callback(
