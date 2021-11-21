@@ -69,14 +69,14 @@ class WebhookManager(DataContainerMixin):
         self._is_running = False
 
     @t.overload
-    def endpoint(self, endpoint_: t.Literal[None] = None) -> "BoundWebhookEndpoint":
+    def endpoint(self, endpoint_: None = None) -> "BoundWebhookEndpoint":
         ...
 
     @t.overload
     def endpoint(self, endpoint_: "WebhookEndpoint") -> "WebhookManager":
         ...
 
-    def endpoint(self, endpoint_: t.Optional["WebhookEndpoint"]) -> t.Any:
+    def endpoint(self, endpoint_: t.Optional["WebhookEndpoint"] = None) -> t.Any:
         """Helper method that returns a WebhookEndpoint object.
 
         Parameters
@@ -320,8 +320,8 @@ class BoundWebhookEndpoint(WebhookEndpoint):
 
     __slots__ = ("manager",)
 
-    def __init__(self, type_: WebhookType, *, manager: WebhookManager):
-        super().__init__(type_)
+    def __init__(self, manager: WebhookManager):
+        super().__init__()
         self.manager = manager
 
     def add_to_manager(self) -> WebhookManager:

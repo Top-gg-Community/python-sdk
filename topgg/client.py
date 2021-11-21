@@ -66,7 +66,7 @@ class DBLClient(DataContainerMixin):
         self._is_closed = False
         if session is not None:
             self.http = HTTPClient(token, session=session)
-        self._autopost = None
+        self._autopost: t.Optional[AutoPoster] = None
 
     @property
     def is_closed(self) -> bool:
