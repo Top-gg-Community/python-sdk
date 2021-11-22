@@ -3,6 +3,7 @@ import hikari
 import topgg
 
 
+# this can be async too!
 @topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, "youshallnotpass")
 async def endpoint(
     vote_data: topgg.BotVoteData, app: hikari.GatewayBot = topgg.data(hikari.GatewayBot)

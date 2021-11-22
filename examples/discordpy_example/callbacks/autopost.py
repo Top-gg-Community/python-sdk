@@ -5,23 +5,30 @@ import discord
 import topgg
 
 
-async def on_autopost_success(client: discord.Client = topgg.data(discord.Client)):
+# these functions can be async too!
+def on_autopost_success(
+    # client: discord.Client = topgg.data(discord.Client)
+):
     # will be called whenever it successfully posting
     print("Successfully posted!")
 
     # do whatever with client
-    client.dispatch("autopost_success")
+    # you can dispatch your own event for more callbacks
+    # client.dispatch("autopost_success")
 
 
-async def on_autopost_error(
-    exception: Exception, client: discord.Client = topgg.data(discord.Client)
+def on_autopost_error(
+    exception: Exception,
+    # uncomment this if you want to get access to client
+    # client: discord.Client = topgg.data(discord.Client),
 ):
     # will be called whenever it failed posting
     print("Failed to post", exception, file=sys.stderr)
 
     # do whatever with client
-    client.dispatch("autopost_error", exception)
+    # you can dispatch your own event for more callbacks
+    # client.dispatch("autopost_error", exception)
 
 
-async def stats(client: discord.Client = topgg.data(discord.Client)):
+def stats(client: discord.Client = topgg.data(discord.Client)):
     return topgg.StatsWrapper(guild_count=len(client.guilds))

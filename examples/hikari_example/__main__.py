@@ -28,7 +28,7 @@ async def on_started(event: hikari.StartedEvent):
 
 
 @app.listen()
-async def on_stopping(event: hikari.StoppingEvent):
+async def on_stopping(_: hikari.StoppingEvent):
     await dblclient.close()
     await webhook_manager.close()
 

@@ -23,12 +23,15 @@ async def on_ready():
     # if it's ready, then the event loop's run,
     # hence it's safe starting the autopost here
     if not autoposter.is_running:
-        # don't await unless you want to wait the autopost loop to get finished
+        # don't await unless you want to wait for the autopost loop to get finished
         autoposter.start()
 
     # we can also start the webhook here
     if not webhook_manager.is_running:
         await webhook_manager.start(6000)
 
+
+# TODO: find a way to figure out when the bot shuts down
+# so we can close the client and the webhook manager
 
 client.run("TOKEN")
