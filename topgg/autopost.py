@@ -43,10 +43,13 @@ class AutoPoster:
     """
     A helper class for autoposting. Takes in a :obj:`~.client.DBLClient` to instantiate.
 
-    Parameters
-    ----------
-    client: :obj:`~.client.DBLClient`
-        An instance of DBLClient.
+    Note:
+        You should not instantiate this unless you know what you're doing.
+        Generally, you'd better use the :meth:`~.client.DBLClient.autopost` method.
+
+    Args:
+        client (:obj:`~.client.DBLClient`)
+            An instance of DBLClient.
     """
 
     __slots__ = (
@@ -88,25 +91,25 @@ class AutoPoster:
     def on_success(self, callback: t.Any = None) -> t.Any:
         """
         Registers an autopost success callback. The callback can be either sync or async.
+
         The callback is not required to take in arguments, but you can have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
-        Example
-        -------
-        .. code-block:: python
+        :Example:
+            .. code-block:: python
 
-            # The following are valid.
-            autopost = dblclient.autopost().on_success(lambda: print("Success!"))
+                # The following are valid.
+                autopost = dblclient.autopost().on_success(lambda: print("Success!"))
 
-            # Used as decorator, the decorated function will become the AutoPoster object.
-            @autopost.on_success
-            def autopost():
-                ...
+                # Used as decorator, the decorated function will become the AutoPoster object.
+                @autopost.on_success
+                def autopost():
+                    ...
 
-            # Used as decorator factory, the decorated function will still be the function itself.
-            @autopost.on_success()
-            def on_success():
-                ...
+                # Used as decorator factory, the decorated function will still be the function itself.
+                @autopost.on_success()
+                def on_success():
+                    ...
         """
         if callback is not None:
             self._success = callback
@@ -129,29 +132,29 @@ class AutoPoster:
     def on_error(self, callback: t.Any = None) -> t.Any:
         """
         Registers an autopost error callback. The callback can be either sync or async.
+
         The callback is expected to take in the exception being raised, you can also
         have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
-        .. note::
+        Note:
             If you don't provide an error callback, the default error handler will be called.
 
-        Example
-        -------
-        .. code-block:: python
+        :Example:
+            .. code-block:: python
 
-            # The following are valid.
-            autopost = dblclient.autopost().on_error(lambda exc: print("Failed posting stats!", exc))
+                # The following are valid.
+                autopost = dblclient.autopost().on_error(lambda exc: print("Failed posting stats!", exc))
 
-            # Used as decorator, the decorated function will become the AutoPoster object.
-            @autopost.on_error
-            def autopost(exc: Exception):
-                ...
+                # Used as decorator, the decorated function will become the AutoPoster object.
+                @autopost.on_error
+                def autopost(exc: Exception):
+                    ...
 
-            # Used as decorator factory, the decorated function will still be the function itself.
-            @autopost.on_error()
-            def on_error(exc: Exception):
-                ...
+                # Used as decorator factory, the decorated function will still be the function itself.
+                @autopost.on_error()
+                def on_error(exc: Exception):
+                    ...
         """
         if callback is not None:
             self._error = callback
@@ -174,31 +177,31 @@ class AutoPoster:
     def stats(self, callback: t.Any = None) -> t.Any:
         """
         Registers a function that returns an instance of :obj:`~.types.StatsWrapper`.
+
         The callback can be either sync or async.
         The callback is not required to take in arguments, but you can have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
-        Example
-        -------
-        .. code-block:: python
+        :Example:
+            .. code-block:: python
 
-            import topgg
+                import topgg
 
-            # In this example, we fetch the stats from a Discord client instance.
-            client = Client(...)
-            dblclient = topgg.DBLClient(TOKEN).set_data(client)
-            autopost = (
-                dblclient
-                .autopost()
-                .on_success(lambda: print("Successfully posted the stats!")
-            )
+                # In this example, we fetch the stats from a Discord client instance.
+                client = Client(...)
+                dblclient = topgg.DBLClient(TOKEN).set_data(client)
+                autopost = (
+                    dblclient
+                    .autopost()
+                    .on_success(lambda: print("Successfully posted the stats!")
+                )
 
-            @autopost.stats()
-            def get_stats(client: Client = topgg.data(Client)):
-                return topgg.StatsWrapper(guild_count=len(client.guilds), shard_count=len(client.shards))
+                @autopost.stats()
+                def get_stats(client: Client = topgg.data(Client)):
+                    return topgg.StatsWrapper(guild_count=len(client.guilds), shard_count=len(client.shards))
 
-            # somewhere after the event loop has started
-            autopost.start()
+                # somewhere after the event loop has started
+                autopost.start()
         """
         if callback is not None:
             self._stats = callback
@@ -224,15 +227,13 @@ class AutoPoster:
         """
         Sets the interval between posting stats.
 
-        Parameters
-        ----------
-        seconds: :obj:`float` or :obj:`datetime.timedelta`
-            The interval.
+        Args:
+            seconds (:obj:`typing.Union` [ :obj:`float`, :obj:`datetime.timedelta` ])
+                The interval.
 
-        Raises
-        ------
-        :obj:`ValueError`
-            If the provided interval is less than 900 seconds.
+        Raises:
+            :obj:`ValueError`
+                If the provided interval is less than 900 seconds.
         """
         if isinstance(seconds, datetime.timedelta):
             seconds = seconds.total_seconds()
@@ -275,13 +276,12 @@ class AutoPoster:
         """
         Starts the autoposting loop.
 
-        .. note::
+        Note:
             This method must be called when the event loop has already running!
 
-        Raises
-        ------
-        :obj:`~.errors.TopGGException`
-            If there's no callback provided or the autopost is already running.
+        Raises:
+            :obj:`~.errors.TopGGException`
+                If there's no callback provided or the autopost is already running.
         """
         if not hasattr(self, "_stats"):
             raise errors.TopGGException(
@@ -298,9 +298,9 @@ class AutoPoster:
         """
         Stops the autoposting loop.
 
-        .. note::
+        Note:
             This differs from :meth:`~.autopost.AutoPoster.cancel`
-            because this will stop after posting as opposed to cancel immediately.
+            because this will post once before stopping as opposed to cancel immediately.
         """
         if not self.is_running:
             return None
@@ -311,7 +311,7 @@ class AutoPoster:
         """
         Cancels the autoposting loop.
 
-        .. note::
+        Note:
             This differs from :meth:`~.autopost.AutoPoster.stop`
             because this will stop the loop right away.
         """

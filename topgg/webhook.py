@@ -42,6 +42,8 @@ from topgg.errors import TopGGException
 from .data import DataContainerMixin
 from .types import BotVoteData, GuildVoteData
 
+T = t.TypeVar("T", bound="WebhookEndpoint")
+
 
 class WebhookType(enum.Enum):
     """An enum that represents the type of an endpoint."""
@@ -55,7 +57,7 @@ class WebhookType(enum.Enum):
 
 class WebhookManager(DataContainerMixin):
     """
-    This class is used as a manager for the Top.gg webhook.
+    A class for managing Top.gg webhooks.
     """
 
     __app: web.Application
@@ -79,19 +81,18 @@ class WebhookManager(DataContainerMixin):
     def endpoint(self, endpoint_: t.Optional["WebhookEndpoint"] = None) -> t.Any:
         """Helper method that returns a WebhookEndpoint object.
 
-        Parameters
-        ----------
-        endpoint_: Optional[WebhookEndpoint]
-            The endpoint to add.
+        Args:
+            `endpoint_` (:obj:`typing.Optional` [ :obj:`WebhookEndpoint` ])
+                The endpoint to add.
 
-        Returns
-        -------
-        An instance of WebhookManager if endpoint was provided, otherwise BoundWebhookEndpoint.
+        Returns:
+            :obj:`typing.Union` [ :obj:`WebhookManager`, :obj:`BoundWebhookEndpoint` ]:
+                An instance of :obj:`WebhookManager` if endpoint was provided,
+                otherwise :obj:`BoundWebhookEndpoint`.
 
-        Raises
-        ------
-        :obj:`~.errors.TopGGException`
-            If the endpoint is lacking attributes.
+        Raises:
+            :obj:`~.errors.TopGGException`
+                If the endpoint is lacking attributes.
         """
         if endpoint_:
             if not hasattr(endpoint_, "_callback"):
@@ -116,10 +117,9 @@ class WebhookManager(DataContainerMixin):
     async def start(self, port: int) -> None:
         """Runs the webhook.
 
-        Parameters
-        ----------
-        port: int
-            The port to run the webhook on.
+        Args:
+            port (int)
+                The port to run the webhook on.
         """
         runner = web.AppRunner(self.__app)
         await runner.setup()
@@ -136,10 +136,9 @@ class WebhookManager(DataContainerMixin):
     def app(self) -> web.Application:
         """Returns the internal web application that handles webhook requests.
 
-        Returns
-        --------
-        :class:`aiohttp.web.Application`
-            The internal web application.
+        Returns:
+            :class:`aiohttp.web.Application`:
+                The internal web application.
         """
         return self.__app
 
@@ -171,11 +170,6 @@ CallbackT = t.Callable[..., t.Any]
 class WebhookEndpoint:
     """
     A helper class to setup webhook endpoint.
-
-    Parameters
-    ----------
-    type_: WebhookType
-        The type of the webhook.
     """
 
     __slots__ = ("_callback", "_auth", "_route", "_type")
@@ -186,49 +180,43 @@ class WebhookEndpoint:
     def __call__(self, *args: t.Any, **kwargs: t.Any) -> t.Any:
         return self._callback(*args, **kwargs)
 
-    def type(self, type_: WebhookType) -> "WebhookEndpoint":
+    def type(self: T, type_: WebhookType) -> T:
         """Sets the type of this endpoint.
 
-        Parameters
-        ----------
-        type_: WebhookType
-            The type of the endpoint.
+        Args:
+            `type_` (:obj:`WebhookType`)
+                The type of the endpoint.
 
-        Returns
-        -------
-        self: WebhookEndpoint
+        Returns:
+            :obj:`WebhookEndpoint`
         """
         self._type = type_
         return self
 
-    def route(self, route_: str) -> "WebhookEndpoint":
+    def route(self: T, route_: str) -> T:
         """
         Sets the route of this endpoint.
 
-        Parameters
-        ----------
-        route_: str
-            The route of this endpoint.
+        Args:
+            `route_` (str)
+                The route of this endpoint.
 
-        Returns
-        -------
-        self: WebhookEndpoint
+        Returns:
+            :obj:`WebhookEndpoint`
         """
         self._route = route_
         return self
 
-    def auth(self, auth_: str) -> "WebhookEndpoint":
+    def auth(self: T, auth_: str) -> T:
         """
         Sets the auth of this endpoint.
 
-        Parameters
-        ----------
-        auth_: str
-            The auth of this endpoint.
+        Args:
+            `auth_` (str)
+                The auth of this endpoint.
 
-        Returns
-        -------
-        self: WebhookEndpoint
+        Returns:
+            :obj:`WebhookEndpoint`
         """
         self._auth = auth_
         return self
@@ -238,43 +226,43 @@ class WebhookEndpoint:
         ...
 
     @t.overload
-    def callback(self, callback_: CallbackT) -> "WebhookEndpoint":
+    def callback(self: T, callback_: CallbackT) -> T:
         ...
 
     def callback(self, callback_: t.Any = None) -> t.Any:
         """
         Registers a vote callback, called whenever this endpoint receives POST requests.
+
         The callback can be either sync or async.
         This method can be used as a decorator or a decorator factory.
 
-        Example
-        -------
-        .. code-block:: python
+        :Example:
+            .. code-block:: python
 
-            import topgg
+                import topgg
 
-            webhook_manager = topgg.WebhookManager()
-            endpoint = (
-                topgg.WebhookEndpoint()
-                .type(topgg.WebhookType.BOT)
-                .route("/dblwebhook")
-                .auth("youshallnotpass")
-            )
+                webhook_manager = topgg.WebhookManager()
+                endpoint = (
+                    topgg.WebhookEndpoint()
+                    .type(topgg.WebhookType.BOT)
+                    .route("/dblwebhook")
+                    .auth("youshallnotpass")
+                )
 
-            # The following are valid.
-            endpoint.callback(lambda vote_data: print("Receives a vote!", vote_data))
+                # The following are valid.
+                endpoint.callback(lambda vote_data: print("Receives a vote!", vote_data))
 
-            # Used as decorator, the decorated function will become the WebhookEndpoint object.
-            @endpoint.callback
-            def endpoint(vote_data: topgg.BotVoteData):
-                ...
+                # Used as decorator, the decorated function will become the WebhookEndpoint object.
+                @endpoint.callback
+                def endpoint(vote_data: topgg.BotVoteData):
+                    ...
 
-            # Used as decorator factory, the decorated function will still be the function itself.
-            @endpoint.callback()
-            def on_vote(vote_data: topgg.BotVoteData):
-                ...
+                # Used as decorator factory, the decorated function will still be the function itself.
+                @endpoint.callback()
+                def on_vote(vote_data: topgg.BotVoteData):
+                    ...
 
-            webhook_manager.endpoint(endpoint)
+                webhook_manager.endpoint(endpoint)
         """
         if callback_ is not None:
             self._callback = callback_
@@ -286,36 +274,36 @@ class WebhookEndpoint:
 class BoundWebhookEndpoint(WebhookEndpoint):
     """
     A WebhookEndpoint with a WebhookManager bound to it.
+
     You can instantiate this object using the :meth:`WebhookManager.endpoint` method.
 
-    Example
-    -------
-    .. code-block:: python
+    :Example:
+        .. code-block:: python
 
-        import topgg
+            import topgg
 
-        webhook_manager = (
-            topgg.WebhookManager()
-            .endpoint()
-            .type(topgg.WebhookType.BOT)
-            .route("/dblwebhook")
-            .auth("youshallnotpass")
-        )
+            webhook_manager = (
+                topgg.WebhookManager()
+                .endpoint()
+                .type(topgg.WebhookType.BOT)
+                .route("/dblwebhook")
+                .auth("youshallnotpass")
+            )
 
-        # The following are valid.
-        endpoint.callback(lambda vote_data: print("Receives a vote!", vote_data))
+            # The following are valid.
+            endpoint.callback(lambda vote_data: print("Receives a vote!", vote_data))
 
-        # Used as decorator, the decorated function will become the BoundWebhookEndpoint object.
-        @endpoint.callback
-        def endpoint(vote_data: topgg.BotVoteData):
-            ...
+            # Used as decorator, the decorated function will become the BoundWebhookEndpoint object.
+            @endpoint.callback
+            def endpoint(vote_data: topgg.BotVoteData):
+                ...
 
-        # Used as decorator factory, the decorated function will still be the function itself.
-        @endpoint.callback()
-        def on_vote(vote_data: topgg.BotVoteData):
-            ...
+            # Used as decorator factory, the decorated function will still be the function itself.
+            @endpoint.callback()
+            def on_vote(vote_data: topgg.BotVoteData):
+                ...
 
-        endpoint.add_to_manager()
+            endpoint.add_to_manager()
     """
 
     __slots__ = ("manager",)
@@ -328,14 +316,12 @@ class BoundWebhookEndpoint(WebhookEndpoint):
         """
         Adds this endpoint to the webhook manager.
 
-        Returns
-        -------
-        webhook manager: WebhookManager
+        Returns:
+            :obj:`WebhookManager`
 
-        Raises
-        ------
-        :obj:`errors.TopGGException`:
-            If the object lacks attributes.
+        Raises:
+            :obj:`errors.TopGGException`:
+                If the object lacks attributes.
         """
         self.manager.endpoint(self)
         return self.manager
@@ -347,33 +333,30 @@ def endpoint(
     """
     A decorator factory for instantiating WebhookEndpoint.
 
-    Parameters
-    ----------
-    route: str
-        The route for the endpoint.
-    type: WebhookType
-        The type of the endpoint.
-    auth: str
-        The auth for the endpoint.
+    Args:
+        route (str)
+            The route for the endpoint.
+        type (WebhookType)
+            The type of the endpoint.
+        auth (str)
+            The auth for the endpoint.
 
-    Returns
-    -------
-    decorator: t.Callable[[t.Callable[..., t.Any]], WebhookEndpoint]
-        The actual decorator.
+    Returns:
+        :obj:`typing.Callable` [[ :obj:`typing.Callable` [..., :obj:`typing.Any` ]], :obj:`WebhookEndpoint` ]:
+            The actual decorator.
 
-    Example
-    -------
-    .. code-block:: python
+    :Example:
+        .. code-block:: python
 
-        import topgg
+            import topgg
 
-        @topgg.endpoint("/dblwebhook", WebhookType.BOT, "youshallnotpass")
-        async def on_vote(
-            vote_data: topgg.BotVoteData,
-            # database here is an injected data
-            database: Database = topgg.data(Database),
-        ):
-            ...
+            @topgg.endpoint("/dblwebhook", WebhookType.BOT, "youshallnotpass")
+            async def on_vote(
+                vote_data: topgg.BotVoteData,
+                # database here is an injected data
+                database: Database = topgg.data(Database),
+            ):
+                ...
     """
 
     def decorator(func: t.Callable[..., t.Any]) -> WebhookEndpoint:

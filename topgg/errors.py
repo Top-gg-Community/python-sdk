@@ -47,7 +47,7 @@ class TopGGException(Exception):
 
 
 class ClientException(TopGGException):
-    """Exception that's thrown when an operation in the :class:`DBLClient` fails.
+    """Exception that's thrown when an operation in the :class:`~.DBLClient` fails.
 
     These are usually for exceptions that happened due to user input.
     """
@@ -56,12 +56,11 @@ class ClientException(TopGGException):
 class HTTPException(TopGGException):
     """Exception that's thrown when an HTTP request operation fails.
 
-    Attributes
-    ----------
-    response: :class:`aiohttp.ClientResponse`
-        The response of the failed HTTP request.
-    text: str
-        The text of the error. Could be an empty string.
+    Attributes:
+        response (:class:`aiohttp.ClientResponse`)
+            The response of the failed HTTP request.
+        text (str)
+            The text of the error. Could be an empty string.
     """
 
     def __init__(self, response: "ClientResponse", message: Union[dict, str]) -> None:

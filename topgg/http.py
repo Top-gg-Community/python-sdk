@@ -43,18 +43,6 @@ _LOGGER = logging.getLogger("topgg.http")
 async def _json_or_text(
     response: ClientResponse,
 ) -> Union[dict, str]:
-    """
-
-    Parameters
-    ----------
-    response: ClientResponse
-        The received aiohttp response object.
-
-    Returns
-    -------
-    body: Union[dict, str]
-        Response body in either JSON or string.
-    """
     text = await response.text()
     if response.headers["Content-Type"] == "application/json; charset=utf-8":
         return json.loads(text)
@@ -67,14 +55,15 @@ class HTTPClient:
     .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
 
-    Parameters
-    ----------
-    token:
-        A Top.gg API Token.
-    **session: `aiohttp session`_
-        The `aiohttp session`_ used for requests to the API.
-    **loop: `event loop`_
-        An `event loop`_ used for asynchronous operations.
+    Args:
+        token (str)
+            A Top.gg API Token.
+
+    Keyword Arguments:
+        session: `aiohttp session`_
+            The `aiohttp session`_ used for requests to the API.
+        loop: `event loop`_
+            An `event loop`_ used for asynchronous operations.
     """
 
     def __init__(self, token: str, **kwargs: Any) -> None:

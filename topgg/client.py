@@ -36,18 +36,19 @@ from .http import HTTPClient
 
 class DBLClient(DataContainerMixin):
     """Represents a client connection that connects to Top.gg.
+
     This class is used to interact with the Top.gg API.
 
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
 
-    Parameters
-    ----------
-    token: str
-        Your bot's Top.gg API Token.
-    default_bot_id: Optional[int]
-        The default bot_id. You can override this by passing it when calling a method.
-    session: :class:`aiohttp.ClientSession`
-        An `aiohttp session`_ to use for requests to the API.
+    Args:
+        token (:obj:`str`): Your bot's Top.gg API Token.
+
+    Keyword Args:
+        default_bot_id (:obj:`typing.Optional` [ :obj:`int` ])
+            The default bot_id. You can override this by passing it when calling a method.
+        session (:class:`aiohttp.ClientSession`)
+            An `aiohttp session`_ to use for requests to the API.
     """
 
     __slots__ = ("http", "default_bot_id", "_token", "_is_closed", "_autopost")
@@ -79,19 +80,15 @@ class DBLClient(DataContainerMixin):
     def _validate_and_get_bot_id(self, bot_id: t.Optional[int]) -> int:
         bot_id = bot_id or self.default_bot_id
         if bot_id is None:
-            raise TypeError("bot_id or default_bot_id is unset.")
+            raise errors.ClientException("bot_id or default_bot_id is unset.")
 
         return bot_id
 
     async def get_weekend_status(self) -> bool:
-        """This function is a coroutine.
+        """Gets weekend status from Top.gg.
 
-        Gets weekend status from Top.gg.
-
-        Returns
-        -------
-        weekend status: bool
-            The boolean value of weekend status.
+        Returns:
+            :obj:`bool`: The boolean value of weekend status.
         """
         await self._ensure_session()
         data = await self.http.get_weekend_status()
@@ -119,23 +116,29 @@ class DBLClient(DataContainerMixin):
         shard_count: t.Any = None,
         shard_id: t.Any = None,
     ) -> None:
-        """This function is a coroutine.
-
-        Posts your bot's guild count and shards info to Top.gg.
+        """Posts your bot's guild count and shards info to Top.gg.
 
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
-        Parameters
-        ----------
-        stats: :obj:`~.types.StatsWrapper`
-            An instance of StatsWrapper containing guild_count, shard_count, and shard_id.
-        guild_count: Optional[Union[int, List[int]]]
-            Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
-            If not specified, length of provided client's property `.guilds` will be posted.
-        shard_count: Optional[int]
-            The total number of shards.
-        shard_id: Optional[int]
-            The index of the current shard. Top.gg uses `0 based indexing`_ for shards.
+        Warning:
+            You can't provide both args and kwargs at once.
+
+        Args:
+            stats (:obj:`~.types.StatsWrapper`)
+                An instance of StatsWrapper containing guild_count, shard_count, and shard_id.
+
+        Keyword Arguments:
+            guild_count (:obj:`typing.Optional` [:obj:`typing.Union` [ :obj:`int`, :obj:`list` [ :obj:`int` ]]])
+                Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
+                If not specified, length of provided client's property `.guilds` will be posted.
+            shard_count (:obj:`.typing.Optional` [ :obj:`int` ])
+                The total number of shards.
+            shard_id (:obj:`.typing.Optional` [ :obj:`int` ])
+                The index of the current shard. Top.gg uses `0 based indexing`_ for shards.
+
+        Raises:
+            TypeError
+                If no argument is provided.
         """
         if stats:
             guild_count = stats.guild_count
@@ -149,19 +152,19 @@ class DBLClient(DataContainerMixin):
     async def get_guild_count(
         self, bot_id: t.Optional[int] = None
     ) -> types.BotStatsData:
-        """This function is a coroutine.
+        """Gets a bot's guild count and shard info from Top.gg.
 
-        Gets a bot's guild count and shard info from Top.gg.
+        Args:
+            bot_id (int)
+                ID of the bot you want to look up. Defaults to the provided Client object.
 
-        Parameters
-        ----------
-        bot_id: int
-            ID of the bot you want to look up. Defaults to the provided Client object.
+        Returns:
+            :obj:`~.types.BotStatsData`:
+                The guild count and shards of a bot on Top.gg.
 
-        Returns
-        -------
-        stats: :obj:`~.types.BotStatsData`
-            The guild count and shards of a bot on Top.gg.
+        Raises:
+            :obj:`~.errors.ClientException`
+                If neither bot_id or default_bot_id was set.
         """
         bot_id = self._validate_and_get_bot_id(bot_id)
         await self._ensure_session()
@@ -169,17 +172,18 @@ class DBLClient(DataContainerMixin):
         return types.BotStatsData(**response)
 
     async def get_bot_votes(self) -> t.List[types.BriefUserData]:
-        """This function is a coroutine.
+        """Gets information about last 1000 votes for your bot on Top.gg.
 
-        Gets information about last 1000 votes for your bot on Top.gg.
-
-        .. note::
+        Note:
             This API endpoint is only available to the bot's owner.
 
-        Returns
-        -------
-        users: List[:obj:`~.types.BriefUserData`]
-            Users who voted for your bot.
+        Returns:
+            :obj:`list` [ :obj:`~.types.BriefUserData` ]:
+                Users who voted for your bot.
+
+        Raises:
+            :obj:`~.errors.ClientException`
+                If default_bot_id isn't provided when constructing the client.
         """
         if not self.default_bot_id:
             raise errors.ClientException(
@@ -194,16 +198,18 @@ class DBLClient(DataContainerMixin):
 
         Gets information about a bot from Top.gg.
 
-        Parameters
-        ----------
-        bot_id: int
-            ID of the bot to look up. Defaults to the provided Client object.
+        Args:
+            bot_id (int)
+                ID of the bot to look up. Defaults to the provided Client object.
 
-        Returns
-        -------
-        bot info: :obj:`~.types.BotData`
-            Information on the bot you looked up. Returned data can be found
-            `here <https://docs.top.gg/api/bot/#bot-structure>`_.
+        Returns:
+            :obj:`~.types.BotData`:
+                Information on the bot you looked up. Returned data can be found
+                `here <https://docs.top.gg/api/bot/#bot-structure>`_.
+
+        Raises:
+            :obj:`~.errors.ClientException`
+                If neither bot_id or default_bot_id was set.
         """
         bot_id = self._validate_and_get_bot_id(bot_id)
         await self._ensure_session()
@@ -222,23 +228,21 @@ class DBLClient(DataContainerMixin):
 
         Gets information about listed bots on Top.gg.
 
-        Parameters
-        ----------
-        limit: int
-            The number of results to look up. Defaults to 50. Max 500 allowed.
-        offset: int
-            The amount of bots to skip. Defaults to 0.
-        sort: str
-            The field to sort by. Prefix with ``-`` to reverse the order.
-        search: Dict[str, Any]
-            The search data.
-        fields: List[str]
-            Fields to output.
+        Args:
+            limit (int)
+                The number of results to look up. Defaults to 50. Max 500 allowed.
+            offset (int)
+                The amount of bots to skip. Defaults to 0.
+            sort (str)
+                The field to sort by. Prefix with ``-`` to reverse the order.
+            search (:obj:`dict` [ :obj:`str`, :obj:`typing.Any` ])
+                The search data.
+            fields (:obj:`list` [ :obj:`str` ])
+                Fields to output.
 
-        Returns
-        -------
-        bots: :obj:`~.types.DataDict`
-            Info on bots that match the search query on Top.gg.
+        Returns:
+            :obj:`~.types.DataDict`:
+                Info on bots that match the search query on Top.gg.
         """
         sort = sort or ""
         search = search or {}
@@ -255,34 +259,31 @@ class DBLClient(DataContainerMixin):
 
         Gets information about a user on Top.gg.
 
-        Parameters
-        ----------
-        user_id: int
-            ID of the user to look up.
+        Args:
+            user_id (int)
+                ID of the user to look up.
 
-        Returns
-        -------
-        user data: :obj:`~.types.UserData`
-            Information about a Top.gg user.
+        Returns:
+            :obj:`~.types.UserData`:
+                Information about a Top.gg user.
         """
         await self._ensure_session()
         response = await self.http.get_user_info(user_id)
         return types.UserData(**response)
 
     async def get_user_vote(self, user_id: int) -> bool:
-        """This function is a coroutine.
+        """Gets information about a user's vote for your bot on Top.gg.
 
-        Gets information about a user's vote for your bot on Top.gg.
+        Args:
+            user_id (int)
+                ID of the user.
 
-        Parameters
-        ----------
-        user_id: int
-            ID of the user.
+        Returns:
+            :obj:`bool`: Info about the user's vote.
 
-        Returns
-        -------
-        vote status: bool
-            Info about the user's vote.
+        Raises:
+            :obj:`~.errors.ClientException`
+                If default_bot_id isn't provided when constructing the client.
         """
         if not self.default_bot_id:
             raise errors.ClientException(
@@ -297,18 +298,21 @@ class DBLClient(DataContainerMixin):
         """
         Generates a Top.gg widget from the provided :obj:`~.types.WidgetOptions` object.
 
-        Parameters
-        ----------
-        options: :obj:`~.types.WidgetOptions`
-            A :obj:`~.types.WidgetOptions` object containing widget parameters.
+        Keyword Arguments:
+            options (:obj:`~.types.WidgetOptions`)
+                A :obj:`~.types.WidgetOptions` object containing widget parameters.
 
-        Returns
-        -------
-        widget: str
-            Generated widget URL.
+        Returns:
+            str: Generated widget URL.
+
+        Raises:
+            :obj:`~.errors.ClientException`
+                If bot_id or default_bot_id is unset.
+            TypeError:
+                If options passed is not of type WidgetOptions.
         """
         if not isinstance(options, types.WidgetOptions):
-            raise errors.ClientException(
+            raise TypeError(
                 "options argument passed to generate_widget must be of type WidgetOptions"
             )
 
@@ -326,10 +330,7 @@ class DBLClient(DataContainerMixin):
         return url
 
     async def close(self) -> None:
-        """This function is a coroutine.
-
-        Closes all connections.
-        """
+        """Closes all connections."""
         if self.is_closed:
             return
 
@@ -342,17 +343,14 @@ class DBLClient(DataContainerMixin):
         self._is_closed = True
 
     def autopost(self) -> AutoPoster:
-        """
-        Returns a helper instance for auto-posting.
+        """Returns a helper instance for auto-posting.
 
-        .. note::
+        Note:
             The second time you call this method, it'll return the same instance
             as the one returned from the first call.
 
-        Returns
-        -------
-        autoposter: :obj:`~.autopost.AutoPoster`
-            An instance of AutoPoster.
+        Returns:
+            :obj:`~.autopost.AutoPoster`: An instance of AutoPoster.
         """
         if self._autopost is not None:
             return self._autopost
