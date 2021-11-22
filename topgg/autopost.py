@@ -88,6 +88,7 @@ class AutoPoster:
     def on_success(self, callback: t.Any = None) -> t.Any:
         """
         Registers an autopost success callback. The callback can be either sync or async.
+        The callback is not required to take in arguments, but you can have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
         Example
@@ -128,6 +129,8 @@ class AutoPoster:
     def on_error(self, callback: t.Any = None) -> t.Any:
         """
         Registers an autopost error callback. The callback can be either sync or async.
+        The callback is expected to take in the exception being raised, you can also
+        have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
         .. note::
@@ -170,7 +173,9 @@ class AutoPoster:
 
     def stats(self, callback: t.Any = None) -> t.Any:
         """
-        Registers a function that returns an instance of :obj:`~.types.StatsWrapper`. The callback can be either sync or async.
+        Registers a function that returns an instance of :obj:`~.types.StatsWrapper`.
+        The callback can be either sync or async.
+        The callback is not required to take in arguments, but you can have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
         Example
