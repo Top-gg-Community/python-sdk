@@ -5,7 +5,7 @@ import hikari
 
 import topgg
 
-from ..events.autopost import AutoPostError, AutoPostSuccess
+from ..events.autopost import AutoPostErrorEvent, AutoPostSuccessEvent
 
 _LOGGER = logging.getLogger("callbacks.autopost")
 
@@ -17,7 +17,7 @@ async def on_autopost_success(
     _LOGGER.info("Successfully posted!")
 
     # do whatever with app
-    app.dispatch(AutoPostSuccess(app=app))
+    app.dispatch(AutoPostSuccessEvent(app=app))
 
 
 async def on_autopost_error(
@@ -27,7 +27,7 @@ async def on_autopost_error(
     _LOGGER.error("Failed to post...", exc_info=exception)
 
     # do whatever with app
-    app.dispatch(AutoPostError(app=app, exception=exception))
+    app.dispatch(AutoPostErrorEvent(app=app, exception=exception))
 
 
 async def stats(app: hikari.GatewayBot = topgg.data(hikari.GatewayBot)):
