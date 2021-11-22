@@ -8,10 +8,11 @@ What's New
 
 This page keeps a detailed human friendly rendering of what's new and changed in specific versions.
 
-v2.0.0
-======
-* Introduced new types: :obj:`~.AutoPoster`, :obj:`~.DataContainerMixin`, :obj:`~.WebhookEndpoint`, :obj:`~.WebhookType`
-* `Autopost <api/autopost.html>`__ and `Webhook <api/webhook.html>`__ API breaking changes
+v2.0.0a
+=======
+* :obj:`~.DBLClient` now doesn't take in ``discord.Client`` instance
+* Introduced new `autopost <api/autopost.html>`__ and `data injection <api/data.html>`__ API
+* `Webhook <api/webhook.html>`__ API breaking changes
 * No longer depends on any Discord API wrapper
 * :obj:`~.GuildVoteData` alias
 
