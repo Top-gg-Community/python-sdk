@@ -30,24 +30,28 @@ import typing as t
 
 from topgg import errors
 
-from .data import DataContainerMixin
 from .types import StatsWrapper
 
 if t.TYPE_CHECKING:
+    import asyncio
+
     from .client import DBLClient
 
 CallbackT = t.Callable[..., t.Any]
 StatsCallbackT = t.Callable[[], StatsWrapper]
 
 
-class AutoPoster(DataContainerMixin):
+class AutoPoster:
     """
     A helper class for autoposting. Takes in a :obj:`~.client.DBLClient` to instantiate.
 
-    Parameters
-    ----------
-    client: :obj:`~.client.DBLClient`
-        An instance of DBLClient.
+    Note:
+        You should not instantiate this unless you know what you're doing.
+        Generally, you'd better use the :meth:`~.client.DBLClient.autopost` method.
+
+    Args:
+        client (:obj:`~.client.DBLClient`)
+            An instance of DBLClient.
     """
 
     __slots__ = (
@@ -63,15 +67,14 @@ class AutoPoster(DataContainerMixin):
     _success: CallbackT
     _stats: CallbackT
     _interval: float
+    _task: t.Optional["asyncio.Task[None]"]
 
     def __init__(self, client: "DBLClient") -> None:
         super().__init__()
         self.client = client
-        self._data = {**client._data, type(self): self}
         self._interval: float = 900
-        self._task: t.Optional["asyncio.Task[None]"] = None
-        self._stopping = False
         self._error = self._default_error_handler
+        self._refresh_state()
 
     def _default_error_handler(self, exception: Exception) -> None:
         print("Ignoring exception in auto post loop:", file=sys.stderr)
@@ -90,30 +93,35 @@ class AutoPoster(DataContainerMixin):
     def on_success(self, callback: t.Any = None) -> t.Any:
         """
         Registers an autopost success callback. The callback can be either sync or async.
+
+        The callback is not required to take in arguments, but you can have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
-        Example
-        -------
-        .. code-block:: python
+        :Example:
+            .. code-block:: python
 
-            # The following are valid.
-            autopost = dblclient.autopost().on_success(lambda: print("Success!"))
+                # The following are valid.
+                autopost = dblclient.autopost().on_success(lambda: print("Success!"))
 
-            # Used as decorator, the decorated function will become the AutoPoster object.
-            @autopost.on_success
-            def autopost():
-                ...
+                # Used as decorator, the decorated function will become the AutoPoster object.
+                @autopost.on_success
+                def autopost():
+                    ...
 
-            # Used as decorator factory, the decorated function will still be the function itself.
-            @autopost.on_success()
-            def on_success():
-                ...
+                # Used as decorator factory, the decorated function will still be the function itself.
+                @autopost.on_success()
+                def on_success():
+                    ...
         """
         if callback is not None:
             self._success = callback
             return self
 
-        return self.on_success
+        def decorator(callback: CallbackT) -> CallbackT:
+            self._success = callback
+            return callback
+
+        return decorator
 
     @t.overload
     def on_error(self, callback: None) -> t.Callable[[CallbackT], CallbackT]:
@@ -126,33 +134,39 @@ class AutoPoster(DataContainerMixin):
     def on_error(self, callback: t.Any = None) -> t.Any:
         """
         Registers an autopost error callback. The callback can be either sync or async.
+
+        The callback is expected to take in the exception being raised, you can also
+        have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
-        .. note::
+        Note:
             If you don't provide an error callback, the default error handler will be called.
 
-        Example
-        -------
-        .. code-block:: python
+        :Example:
+            .. code-block:: python
 
-            # The following are valid.
-            autopost = dblclient.autopost().on_error(lambda exc: print("Failed posting stats!", exc))
+                # The following are valid.
+                autopost = dblclient.autopost().on_error(lambda exc: print("Failed posting stats!", exc))
 
-            # Used as decorator, the decorated function will become the AutoPoster object.
-            @autopost.on_error
-            def autopost(exc: Exception):
-                ...
+                # Used as decorator, the decorated function will become the AutoPoster object.
+                @autopost.on_error
+                def autopost(exc: Exception):
+                    ...
 
-            # Used as decorator factory, the decorated function will still be the function itself.
-            @autopost.on_error()
-            def on_error(exc: Exception):
-                ...
+                # Used as decorator factory, the decorated function will still be the function itself.
+                @autopost.on_error()
+                def on_error(exc: Exception):
+                    ...
         """
         if callback is not None:
             self._error = callback
             return self
 
-        return self.on_error
+        def decorator(callback: CallbackT) -> CallbackT:
+            self._error = callback
+            return callback
+
+        return decorator
 
     @t.overload
     def stats(self, callback: None) -> t.Callable[[StatsCallbackT], StatsCallbackT]:
@@ -164,36 +178,42 @@ class AutoPoster(DataContainerMixin):
 
     def stats(self, callback: t.Any = None) -> t.Any:
         """
-        Registers a function that returns an instance of :obj:`~.types.StatsWrapper`. The callback can be either sync or async.
+        Registers a function that returns an instance of :obj:`~.types.StatsWrapper`.
+
+        The callback can be either sync or async.
+        The callback is not required to take in arguments, but you can have injected :obj:`~.data.data`.
         This method can be used as a decorator or a decorator factory.
 
-        Example
-        -------
-        .. code-block:: python
+        :Example:
+            .. code-block:: python
 
-            import topgg
+                import topgg
 
-            # In this example, we fetch the stats from a Discord client instance.
-            client = Client(...)
-            dblclient = topgg.DBLClient(TOKEN).set_data(client)
-            autopost = (
-                dblclient
-                .autopost()
-                .on_success(lambda: print("Successfully posted the stats!")
-            )
+                # In this example, we fetch the stats from a Discord client instance.
+                client = Client(...)
+                dblclient = topgg.DBLClient(TOKEN).set_data(client)
+                autopost = (
+                    dblclient
+                    .autopost()
+                    .on_success(lambda: print("Successfully posted the stats!")
+                )
 
-            @autopost.stats()
-            def get_stats(client: Client = topgg.data(Client)):
-                return topgg.StatsWrapper(guild_count=len(client.guilds), shard_count=len(client.shards))
+                @autopost.stats()
+                def get_stats(client: Client = topgg.data(Client)):
+                    return topgg.StatsWrapper(guild_count=len(client.guilds), shard_count=len(client.shards))
 
-            # somewhere after the event loop has started
-            autopost.start()
+                # somewhere after the event loop has started
+                autopost.start()
         """
         if callback is not None:
             self._stats = callback
             return self
 
-        return self.stats
+        def decorator(callback: StatsCallbackT) -> StatsCallbackT:
+            self._stats = callback
+            return callback
+
+        return decorator
 
     @property
     def interval(self) -> float:
@@ -209,15 +229,13 @@ class AutoPoster(DataContainerMixin):
         """
         Sets the interval between posting stats.
 
-        Parameters
-        ----------
-        seconds: :obj:`float` or :obj:`datetime.timedelta`
-            The interval.
+        Args:
+            seconds (:obj:`typing.Union` [ :obj:`float`, :obj:`datetime.timedelta` ])
+                The interval.
 
-        Raises
-        ------
-        :obj:`ValueError`
-            If the provided interval is less than 900 seconds.
+        Raises:
+            :obj:`ValueError`
+                If the provided interval is less than 900 seconds.
         """
         if isinstance(seconds, datetime.timedelta):
             seconds = seconds.total_seconds()
@@ -231,70 +249,79 @@ class AutoPoster(DataContainerMixin):
     @property
     def is_running(self) -> bool:
         """Whether or not the autopost is running."""
-        return self._task is not None and self._task.done()
+        return self._task is not None and not self._task.done()
+
+    def _refresh_state(self) -> None:
+        self._task = None
+        self._stopping = False
+
+    def _fut_done_callback(self, future: "asyncio.Future" = None):
+        self._refresh_state()
+        future.exception()
 
     async def _internal_loop(self) -> None:
         try:
             while 1:
-                stats = await self._invoke_callback(self._stats)
+                stats = await self.client._invoke_callback(self._stats)
                 try:
                     await self.client.post_guild_count(stats)
                 except Exception as err:
-                    await self._invoke_callback(self._error, err)
+                    await self.client._invoke_callback(self._error, err)
                     if isinstance(err, errors.Unauthorized):
                         raise err from None
                 else:
                     on_success = getattr(self, "_success", None)
                     if on_success:
-                        await self._invoke_callback(on_success)
+                        await self.client._invoke_callback(on_success)
 
                 if self._stopping:
-                    self._stopping = False
                     return None
 
                 await asyncio.sleep(self.interval)
         finally:
-            self._task = None
+            self._refresh_state()
 
     def start(self) -> "asyncio.Task[None]":
         """
         Starts the autoposting loop.
 
-        .. note::
+        Note:
             This method must be called when the event loop has already running!
 
-        Raises
-        ------
-        :obj:`~.errors.TopGGException`
-            If there's no callback provided or the autopost is already running.
+        Raises:
+            :obj:`~.errors.TopGGException`
+                If there's no callback provided or the autopost is already running.
         """
         if not hasattr(self, "_stats"):
             raise errors.TopGGException(
                 "you must provide a callback that returns the stats."
             )
 
-        if self._task:
+        if self.is_running:
             raise errors.TopGGException("the autopost is already running.")
 
         self._task = task = asyncio.ensure_future(self._internal_loop())
+        task.add_done_callback(self._fut_done_callback)
         return task
 
     def stop(self) -> None:
         """
         Stops the autoposting loop.
 
-        .. note::
+        Note:
             This differs from :meth:`~.autopost.AutoPoster.cancel`
-            because this will stop after posting as opposed to cancel immediately.
+            because this will post once before stopping as opposed to cancel immediately.
         """
+        if not self.is_running:
+            return None
+
         self._stopping = True
-        return None
 
     def cancel(self) -> None:
         """
         Cancels the autoposting loop.
 
-        .. note::
+        Note:
             This differs from :meth:`~.autopost.AutoPoster.stop`
             because this will stop the loop right away.
         """
@@ -302,5 +329,5 @@ class AutoPoster(DataContainerMixin):
             return
 
         self._task.cancel()
-        self._task = None
+        self._refresh_state()
         return None

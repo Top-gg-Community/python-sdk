@@ -19,5 +19,8 @@ from .client import *
 from .data import *
 from .errors import *
 from .http import *
+
+# can't be added to __all__ since they'd clash with automodule
 from .types import *
+from .types import BotVoteData, GuildVoteData
 from .webhook import *

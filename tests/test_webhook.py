@@ -14,12 +14,14 @@ auth = "youshallnotpass"
 def webhook_manager() -> WebhookManager:
     return (
         WebhookManager()
-        .endpoint(WebhookType.BOT)
+        .endpoint()
+        .type(WebhookType.BOT)
         .auth(auth)
         .route("/dbl")
         .callback(print)
         .add_to_manager()
-        .endpoint(WebhookType.GUILD)
+        .endpoint()
+        .type(WebhookType.GUILD)
         .auth(auth)
         .route("/dsl")
         .callback(print)
@@ -49,20 +51,30 @@ async def test_WebhookManager_validates_auth(
                 assert r.status == result
     finally:
         await webhook_manager.close()
-        assert webhook_manager._is_closed
+        assert not webhook_manager.is_running
 
 
 def test_WebhookEndpoint_callback_unset(webhook_manager: WebhookManager):
     with pytest.raises(
         TopGGException,
-        match=r"callback\ was\ unset,\ please\ set\ it\ using\ the\ callback\(\)\ method\.",
+        match="endpoint missing callback.",
     ):
-        webhook_manager.endpoint(WebhookType.BOT).add_to_manager()
+        webhook_manager.endpoint().add_to_manager()
 
 
 def test_WebhookEndpoint_route_unset(webhook_manager: WebhookManager):
     with pytest.raises(
         TopGGException,
-        match=r"route\ was\ unset,\ please\ set\ it\ using\ the\ route\(\)\ method\.",
+        match="endpoint missing type.",
     ):
-        webhook_manager.endpoint(WebhookType.BOT).callback(mock.Mock()).add_to_manager()
+        webhook_manager.endpoint().callback(mock.Mock()).add_to_manager()
+
+
+def test_WebhookEndpoint_type_unset(webhook_manager: WebhookManager):
+    with pytest.raises(
+        TopGGException,
+        match="endpoint missing route.",
+    ):
+        webhook_manager.endpoint().callback(mock.Mock()).type(
+            WebhookType.BOT
+        ).add_to_manager()
