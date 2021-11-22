@@ -33,6 +33,8 @@ from topgg import errors
 from .types import StatsWrapper
 
 if t.TYPE_CHECKING:
+    import asyncio
+
     from .client import DBLClient
 
 CallbackT = t.Callable[..., t.Any]
@@ -65,14 +67,14 @@ class AutoPoster:
     _success: CallbackT
     _stats: CallbackT
     _interval: float
+    _task: t.Optional["asyncio.Task[None]"]
 
     def __init__(self, client: "DBLClient") -> None:
         super().__init__()
         self.client = client
         self._interval: float = 900
-        self._task: t.Optional["asyncio.Task[None]"] = None
-        self._stopping = False
         self._error = self._default_error_handler
+        self._refresh_state()
 
     def _default_error_handler(self, exception: Exception) -> None:
         print("Ignoring exception in auto post loop:", file=sys.stderr)
@@ -249,6 +251,14 @@ class AutoPoster:
         """Whether or not the autopost is running."""
         return self._task is not None and not self._task.done()
 
+    def _refresh_state(self) -> None:
+        self._task = None
+        self._stopping = False
+
+    def _fut_done_callback(self, future: "asyncio.Future" = None):
+        self._refresh_state()
+        future.exception()
+
     async def _internal_loop(self) -> None:
         try:
             while 1:
@@ -265,12 +275,11 @@ class AutoPoster:
                         await self.client._invoke_callback(on_success)
 
                 if self._stopping:
-                    self._stopping = False
                     return None
 
                 await asyncio.sleep(self.interval)
         finally:
-            self._task = None
+            self._refresh_state()
 
     def start(self) -> "asyncio.Task[None]":
         """
@@ -292,6 +301,7 @@ class AutoPoster:
             raise errors.TopGGException("the autopost is already running.")
 
         self._task = task = asyncio.ensure_future(self._internal_loop())
+        task.add_done_callback(self._fut_done_callback)
         return task
 
     def stop(self) -> None:
@@ -319,5 +329,5 @@ class AutoPoster:
             return
 
         self._task.cancel()
-        self._task = None
+        self._refresh_state()
         return None
