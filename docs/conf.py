@@ -44,13 +44,8 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
 ]
-
-on_rtd = os.getenv("READTHEDOCS") == "True"
-if on_rtd:
-    extensions.append("sphinxcontrib.napoleon")
-else:
-    extensions.append("sphinx.ext.napoleon")
 
 autodoc_member_order = "groupwise"
 
@@ -66,8 +61,6 @@ intersphinx_mapping = {
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
-
-default_dark_mode = False
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
