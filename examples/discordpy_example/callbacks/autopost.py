@@ -7,6 +7,7 @@ import topgg
 
 # these functions can be async too!
 def on_autopost_success(
+    # uncomment this if you want to get access to client
     # client: discord.Client = topgg.data(discord.Client)
 ):
     # will be called whenever it successfully posting
