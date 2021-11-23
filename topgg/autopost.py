@@ -23,7 +23,6 @@
 __all__ = ["AutoPoster"]
 
 import asyncio
-import contextlib
 import datetime
 import sys
 import traceback
@@ -258,8 +257,9 @@ class AutoPoster:
 
     def _fut_done_callback(self, future: "asyncio.Future" = None):
         self._refresh_state()
-        with contextlib.suppress(asyncio.CancelledError):
-            future.exception()
+        if future.cancelled():
+            return
+        future.exception()
 
     async def _internal_loop(self) -> None:
         try:
