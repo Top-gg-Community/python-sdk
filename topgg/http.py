@@ -70,7 +70,9 @@ class HTTPClient:
         self.BASE = "https://top.gg/api"
         self.token = token
         self.loop = kwargs.get("loop") or asyncio.get_event_loop()
-        self.session = kwargs.get("session") or aiohttp.ClientSession(loop=self.loop)
+        session = kwargs.get("session")
+        self._own_session = session is None
+        self.session = session or aiohttp.ClientSession(loop=self.loop)
         self.global_rate_limiter = AsyncRateLimiter(
             max_calls=99, period=1, callback=_rate_limit_handler
         )
@@ -163,7 +165,8 @@ class HTTPClient:
         raise errors.HTTPException(resp, data)
 
     async def close(self) -> None:
-        await self.session.close()
+        if self._own_session:
+            await self.session.close()
 
     async def post_guild_count(
         self,
