@@ -74,6 +74,9 @@ class DBLClient(DataContainerMixin):
         return self._is_closed
 
     async def _ensure_session(self) -> None:
+        if self.is_closed:
+            raise errors.ClientException("client has been closed.")
+
         if not hasattr(self, "http"):
             self.http = HTTPClient(self._token, session=None)
 
