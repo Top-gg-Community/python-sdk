@@ -12,7 +12,7 @@ __title__ = "topggpy"
 __author__ = "Assanali Mukhanov"
 __maintainer__ = "Norizon"
 __license__ = "MIT"
-__version__ = "2.0.0a"
+__version__ = "2.0.0a1"
 
 from .autopost import *
 from .client import *
