@@ -25,6 +25,7 @@
 __all__ = [
     "TopGGException",
     "ClientException",
+    "ClientStateException",
     "HTTPException",
     "Unauthorized",
     "UnauthorizedDetected",
@@ -51,6 +52,10 @@ class ClientException(TopGGException):
 
     These are usually for exceptions that happened due to user input.
     """
+
+
+class ClientStateException(ClientException):
+    """Exception that's thrown when an operation happens in a closed :obj:`~.DBLClient` instance."""
 
 
 class HTTPException(TopGGException):
