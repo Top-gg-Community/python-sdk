@@ -49,6 +49,8 @@ class DBLClient(DataContainerMixin):
             The default bot_id. You can override this by passing it when calling a method.
         session (:class:`aiohttp.ClientSession`)
             An `aiohttp session`_ to use for requests to the API.
+        **kwargs:
+            Arbitrary kwargs to be passed to :class:`aiohttp.ClientSession` if session was not provided.
     """
 
     __slots__ = ("http", "default_bot_id", "_token", "_is_closed", "_autopost")
@@ -60,6 +62,7 @@ class DBLClient(DataContainerMixin):
         *,
         default_bot_id: t.Optional[int] = None,
         session: t.Optional[aiohttp.ClientSession] = None,
+        **kwargs: t.Any,
     ) -> None:
         super().__init__()
         self._token = token
@@ -74,6 +77,9 @@ class DBLClient(DataContainerMixin):
         return self._is_closed
 
     async def _ensure_session(self) -> None:
+        if self.is_closed:
+            raise errors.ClientStateException("client has been closed.")
+
         if not hasattr(self, "http"):
             self.http = HTTPClient(self._token, session=None)
 
@@ -89,6 +95,10 @@ class DBLClient(DataContainerMixin):
 
         Returns:
             :obj:`bool`: The boolean value of weekend status.
+
+        Raises:
+            :obj:`~.errors.ClientStateException`
+                If the client has been closed.
         """
         await self._ensure_session()
         data = await self.http.get_weekend_status()
@@ -139,6 +149,8 @@ class DBLClient(DataContainerMixin):
         Raises:
             TypeError
                 If no argument is provided.
+            :obj:`~.errors.ClientStateException`
+                If the client has been closed.
         """
         if stats:
             guild_count = stats.guild_count
@@ -165,6 +177,8 @@ class DBLClient(DataContainerMixin):
         Raises:
             :obj:`~.errors.ClientException`
                 If neither bot_id or default_bot_id was set.
+            :obj:`~.errors.ClientStateException`
+                If the client has been closed.
         """
         bot_id = self._validate_and_get_bot_id(bot_id)
         await self._ensure_session()
@@ -184,6 +198,8 @@ class DBLClient(DataContainerMixin):
         Raises:
             :obj:`~.errors.ClientException`
                 If default_bot_id isn't provided when constructing the client.
+            :obj:`~.errors.ClientStateException`
+                If the client has been closed.
         """
         if not self.default_bot_id:
             raise errors.ClientException(
@@ -210,6 +226,8 @@ class DBLClient(DataContainerMixin):
         Raises:
             :obj:`~.errors.ClientException`
                 If neither bot_id or default_bot_id was set.
+            :obj:`~.errors.ClientStateException`
+                If the client has been closed.
         """
         bot_id = self._validate_and_get_bot_id(bot_id)
         await self._ensure_session()
@@ -243,6 +261,10 @@ class DBLClient(DataContainerMixin):
         Returns:
             :obj:`~.types.DataDict`:
                 Info on bots that match the search query on Top.gg.
+
+        Raises:
+            :obj:`~.errors.ClientStateException`
+                If the client has been closed.
         """
         sort = sort or ""
         search = search or {}
@@ -266,6 +288,10 @@ class DBLClient(DataContainerMixin):
         Returns:
             :obj:`~.types.UserData`:
                 Information about a Top.gg user.
+
+        Raises:
+            :obj:`~.errors.ClientStateException`
+                If the client has been closed.
         """
         await self._ensure_session()
         response = await self.http.get_user_info(user_id)
@@ -284,6 +310,8 @@ class DBLClient(DataContainerMixin):
         Raises:
             :obj:`~.errors.ClientException`
                 If default_bot_id isn't provided when constructing the client.
+            :obj:`~.errors.ClientStateException`
+                If the client has been closed.
         """
         if not self.default_bot_id:
             raise errors.ClientException(
