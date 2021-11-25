@@ -35,14 +35,17 @@ import typing as t
 
 import aiohttp
 from aiohttp import web
-from aiohttp.typedefs import Handler
 
 from topgg.errors import TopGGException
 
 from .data import DataContainerMixin
 from .types import BotVoteData, GuildVoteData
 
+if t.TYPE_CHECKING:
+    from aiohttp.web import Request, StreamResponse
+
 T = t.TypeVar("T", bound="WebhookEndpoint")
+_HandlerT = t.Callable[["Request"], t.Awaitable["StreamResponse"]]
 
 
 class WebhookType(enum.Enum):
@@ -149,7 +152,7 @@ class WebhookManager(DataContainerMixin):
 
     def _get_handler(
         self, type_: WebhookType, auth: str, callback: t.Callable[..., t.Any]
-    ) -> Handler:
+    ) -> _HandlerT:
         async def _handler(request: aiohttp.web.Request) -> web.Response:
             if request.headers.get("Authorization", "") != auth:
                 return web.Response(status=401, text="Unauthorized")
