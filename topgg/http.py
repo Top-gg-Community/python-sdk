@@ -52,7 +52,6 @@ async def _json_or_text(
 class HTTPClient:
     """Represents an HTTP client sending HTTP requests to the Top.gg API.
 
-    .. _event loop: https://docs.python.org/3/library/asyncio-eventloops.html
     .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
 
     Args:
@@ -62,17 +61,17 @@ class HTTPClient:
     Keyword Arguments:
         session: `aiohttp session`_
             The `aiohttp session`_ used for requests to the API.
-        loop: `event loop`_
-            An `event loop`_ used for asynchronous operations.
+        **kwargs:
+            Arbitrary kwargs to be passed to :class:`aiohttp.ClientSession`.
     """
 
-    def __init__(self, token: str, **kwargs: Any) -> None:
+    def __init__(
+        self, token: str, *, session: aiohttp.ClientSession = None, **kwargs: Any
+    ) -> None:
         self.BASE = "https://top.gg/api"
         self.token = token
-        self.loop = kwargs.get("loop") or asyncio.get_event_loop()
-        session = kwargs.get("session")
         self._own_session = session is None
-        self.session = session or aiohttp.ClientSession(loop=self.loop)
+        self.session = session or aiohttp.ClientSession(**kwargs)
         self.global_rate_limiter = AsyncRateLimiter(
             max_calls=99, period=1, callback=_rate_limit_handler
         )
@@ -140,7 +139,7 @@ class HTTPClient:
                         # if is_global:
                         #     self._global_over.clear()
 
-                        await asyncio.sleep(retry_after, loop=self.loop)
+                        await asyncio.sleep(retry_after)
                         _LOGGER.debug("Done sleeping for the ratelimit. Retrying...")
 
                         # release the global lock now that the

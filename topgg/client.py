@@ -49,6 +49,8 @@ class DBLClient(DataContainerMixin):
             The default bot_id. You can override this by passing it when calling a method.
         session (:class:`aiohttp.ClientSession`)
             An `aiohttp session`_ to use for requests to the API.
+        **kwargs:
+            Arbitrary kwargs to be passed to :class:`aiohttp.ClientSession` if session was not provided.
     """
 
     __slots__ = ("http", "default_bot_id", "_token", "_is_closed", "_autopost")
@@ -60,6 +62,7 @@ class DBLClient(DataContainerMixin):
         *,
         default_bot_id: t.Optional[int] = None,
         session: t.Optional[aiohttp.ClientSession] = None,
+        **kwargs: t.Any,
     ) -> None:
         super().__init__()
         self._token = token
