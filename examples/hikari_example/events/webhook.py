@@ -19,21 +19,13 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-
-# import discord
+import attr
+import hikari
 
 import topgg
 
 
-# this can be async too!
-@topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, "youshallnotpass")
-def endpoint(
-    vote_data: topgg.BotVoteData,
-    # uncomment this if you want to get access to client
-    # client: discord.Client = topgg.data(discord.Client),
-):
-    # this function will be called whenever someone votes for your bot.
-    print("Received a vote!", vote_data)
-
-    # do anything with client here
-    # client.dispatch("dbl_vote", vote_data)
+@attr.define(kw_only=True, weakref_slot=False)
+class BotUpvoteEvent(hikari.Event):
+    app: hikari.GatewayBot
+    data: topgg.BotVoteData
