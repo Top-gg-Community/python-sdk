@@ -45,7 +45,7 @@ def on_autopost_error(
     # client: discord.Client = topgg.data(discord.Client),
 ):
     # will be called whenever it failed posting
-    print("Failed to post", exception, file=sys.stderr)
+    print("Failed to post:", exception, file=sys.stderr)
 
     # do whatever with client
     # you can dispatch your own event for more callbacks

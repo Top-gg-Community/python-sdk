@@ -19,16 +19,26 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-import hikari
+
+import logging
 
 import topgg
 
+# import hikari
+
+
+# from ..events import BotUpvoteEvent
+
+_LOGGER = logging.getLogger("callbacks.webhook")
 
 # this can be async too!
 @topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, "youshallnotpass")
 async def endpoint(
-    vote_data: topgg.BotVoteData, app: hikari.GatewayBot = topgg.data(hikari.GatewayBot)
+    vote_data: topgg.BotVoteData,
+    # uncomment this if you want to get access to app
+    # app: hikari.GatewayBot = topgg.data(hikari.GatewayBot),
 ):
-    # do anything with app here.
     # this function will be called whenever someone votes for your bot.
-    raise NotImplementedError
+    _LOGGER.info("Receives a vote! %s", vote_data)
+    # do anything with app here.
+    # app.dispatch(BotUpvoteEvent(app=app, data=vote_data))
