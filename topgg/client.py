@@ -97,7 +97,7 @@ class DBLClient(DataContainerMixin):
             :obj:`bool`: The boolean value of weekend status.
 
         Raises:
-            :obj:`~.errors.ClientStateException
+            :obj:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         await self._ensure_session()
@@ -149,7 +149,7 @@ class DBLClient(DataContainerMixin):
         Raises:
             TypeError
                 If no argument is provided.
-            :obj:`~.errors.ClientStateException
+            :obj:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         if stats:
@@ -177,7 +177,7 @@ class DBLClient(DataContainerMixin):
         Raises:
             :obj:`~.errors.ClientException`
                 If neither bot_id or default_bot_id was set.
-            :obj:`~.errors.ClientStateException
+            :obj:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         bot_id = self._validate_and_get_bot_id(bot_id)
@@ -198,7 +198,7 @@ class DBLClient(DataContainerMixin):
         Raises:
             :obj:`~.errors.ClientException`
                 If default_bot_id isn't provided when constructing the client.
-            :obj:`~.errors.ClientStateException
+            :obj:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         if not self.default_bot_id:
@@ -226,7 +226,7 @@ class DBLClient(DataContainerMixin):
         Raises:
             :obj:`~.errors.ClientException`
                 If neither bot_id or default_bot_id was set.
-            :obj:`~.errors.ClientStateException
+            :obj:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         bot_id = self._validate_and_get_bot_id(bot_id)
@@ -263,7 +263,7 @@ class DBLClient(DataContainerMixin):
                 Info on bots that match the search query on Top.gg.
 
         Raises:
-            :obj:`~.errors.ClientStateException
+            :obj:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         sort = sort or ""
@@ -290,7 +290,7 @@ class DBLClient(DataContainerMixin):
                 Information about a Top.gg user.
 
         Raises:
-            :obj:`~.errors.ClientStateException
+            :obj:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         await self._ensure_session()
@@ -310,7 +310,7 @@ class DBLClient(DataContainerMixin):
         Raises:
             :obj:`~.errors.ClientException`
                 If default_bot_id isn't provided when constructing the client.
-            :obj:`~.errors.ClientStateException
+            :obj:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         if not self.default_bot_id:
