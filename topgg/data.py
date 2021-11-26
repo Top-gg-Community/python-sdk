@@ -113,6 +113,11 @@ class DataContainerMixin:
                 f"{type_} already exists. If you wish to override it, pass True into the override parameter."
             )
 
+        # exclude the type itself and object
+        for sup in type_.mro()[1:-1]:
+            if sup in self._lookup_cache:
+                self._lookup_cache[sup] = data_
+
         self._data[type_] = data_
         return self
 

@@ -70,3 +70,9 @@ def test_data_container_get_data_by_subclass(data_container: DataContainerMixin)
     assert isinstance(data, _Int)
     assert data == 200
     assert int in data_container._lookup_cache
+
+
+def test_data_container_override_lookup_cache(data_container: DataContainerMixin):
+    assert data_container.get_data(int) is not None
+    data_container.set_data(_Int(300), override=True)
+    assert data_container.get_data(int) == 300
