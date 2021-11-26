@@ -255,7 +255,7 @@ class AutoPoster:
         self._task = None
         self._stopping = False
 
-    def _fut_done_callback(self, future: "asyncio.Future" = None):
+    def _fut_done_callback(self, future: "asyncio.Future") -> None:
         self._refresh_state()
         if future.cancelled():
             return
