@@ -66,12 +66,16 @@ class HTTPClient:
     """
 
     def __init__(
-        self, token: str, *, session: aiohttp.ClientSession = None, **kwargs: Any
+        self,
+        token: str,
+        *,
+        session: Optional[aiohttp.ClientSession] = None,
+        **kwargs: Any,
     ) -> None:
         self.BASE = "https://top.gg/api"
         self.token = token
         self._own_session = session is None
-        self.session = session or aiohttp.ClientSession(**kwargs)
+        self.session: aiohttp.ClientSession = session or aiohttp.ClientSession(**kwargs)
         self.global_rate_limiter = AsyncRateLimiter(
             max_calls=99, period=1, callback=_rate_limit_handler
         )
@@ -110,7 +114,7 @@ class HTTPClient:
         kwargs["headers"] = headers
 
         for _ in range(2):
-            async with rate_limiters:
+            async with rate_limiters:  # type: ignore
                 async with self.session.request(method, url, **kwargs) as resp:
                     _LOGGER.debug(
                         "%s %s with %s has returned %s",
@@ -129,7 +133,7 @@ class HTTPClient:
                         fmt = "We are being ratelimited. Retrying in %.2f seconds (%.3f minutes)."
 
                         # sleep a bit
-                        retry_after = float(resp.headers.get("Retry-After"))
+                        retry_after = float(resp.headers["Retry-After"])
                         mins = retry_after / 60
                         _LOGGER.warning(fmt, retry_after, mins)
 
