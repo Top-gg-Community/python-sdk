@@ -1,2 +1,4 @@
 sphinx
 insegel
+sphinxcontrib-napoleon
+sphinx-rtd-dark-mode
