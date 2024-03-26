@@ -5,7 +5,7 @@ import pytest
 from aiohttp import ClientSession
 from pytest_mock import MockerFixture
 
-from topgg import DBLClient, StatsWrapper
+from topgg import DBLClient
 from topgg.autopost import AutoPoster
 from topgg.errors import ServerError, TopGGException, Unauthorized
 
