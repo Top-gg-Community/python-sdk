@@ -27,7 +27,7 @@ Install from source
 
 .. code:: bash
 
-    pip3 install git+https://github.com/top-gg/python-sdk/
+    pip3 install git+https://github.com/top-gg-community/python-sdk/
 
 Documentation
 -------------

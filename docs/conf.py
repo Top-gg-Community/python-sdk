@@ -50,7 +50,7 @@ extensions = [
 autodoc_member_order = "groupwise"
 
 extlinks = {
-    "issue": ("https://github.com/top-gg/python-sdk/issues/%s", "GH-"),
+    "issue": ("https://github.com/top-gg-community/python-sdk/issues/%s", "GH-"),
 }
 
 intersphinx_mapping = {

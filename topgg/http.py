@@ -86,7 +86,7 @@ class HTTPClient:
             [self.global_rate_limiter, self.bot_rate_limiter]
         )
         self.user_agent = (
-            f"topggpy (https://github.com/top-gg/python-sdk {__version__}) Python/"
+            f"topggpy (https://github.com/top-gg-community/python-sdk {__version__}) Python/"
             f"{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
         )
 
