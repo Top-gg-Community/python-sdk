@@ -4,7 +4,7 @@ Top.gg Python Library
 
 .. image:: https://img.shields.io/pypi/v/topggpy.svg
    :target: https://pypi.python.org/pypi/topggpy
-   :alt: View on PyPi
+   :alt: View on PyPI
 .. image:: https://img.shields.io/pypi/pyversions/topggpy.svg
    :target: https://pypi.python.org/pypi/topggpy
    :alt: v1.0.0
