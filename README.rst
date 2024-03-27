@@ -17,17 +17,9 @@ A simple API wrapper for `Top.gg <https://top.gg/>`_ written in Python, supporti
 Installation
 ------------
 
-Install via pip (recommended)
-
 .. code:: bash
 
     pip3 install topggpy
-
-Install from source
-
-.. code:: bash
-
-    pip3 install git+https://github.com/top-gg-community/python-sdk/
 
 Documentation
 -------------
