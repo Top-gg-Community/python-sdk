@@ -7,7 +7,7 @@ version = "2.0.1"
 description = "A simple API wrapper for Top.gg written in Python."
 readme = "README.rst"
 license = { text = "MIT" }
-authors = [{ name = "Assanali Mukhanov" }, { name = "Norizon" }, { name = "Top.gg" }]
+authors = [{ name = "null8626" }, { name = "Top.gg" }]
 keywords = ["discord", "bot", "topgg", "top.gg"]
 dependencies = ["aiohttp>=3.9.0"]
 classifiers = [

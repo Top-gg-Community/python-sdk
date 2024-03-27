@@ -5,12 +5,12 @@ Top.gg Python API Wrapper
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 A basic wrapper for the Top.gg API.
 :copyright: (c) 2021 Assanali Mukhanov & Top.gg
+:copyright: (c) 2024 null & Top.gg
 :license: MIT, see LICENSE for more details.
 """
 
 __title__ = "topggpy"
-__author__ = "Assanali Mukhanov"
-__maintainer__ = "Norizon"
+__author__ = "null8626"
 __license__ = "MIT"
 __version__ = "2.0.1"
 
