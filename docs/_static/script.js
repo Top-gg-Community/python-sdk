@@ -10,10 +10,8 @@ document.addEventListener('load', () => {
   }
 })
 
-const findChildrenWithName = (elem, name) => [...elem.children].find(child => child.nodeName === name)
-
 for (const label of document.querySelectorAll('.sidebar-container label')) {
-  const link = findChildrenWithName(label.parentElement, 'A')
+  const link = [...label.parentElement.children].find(child => child.nodeName === 'A')
 
   link.addEventListener('click', event => {
     event.preventDefault()

@@ -50,6 +50,8 @@ intersphinx_mapping = {
 redirects = {
     "repository": "https://github.com/top-gg-community/python-sdk",
     "support": "https://discord.gg/dbl",
+    "api/index": "autopost.html",
+    "examples/index": "discord_py.html",
     "examples/discord_py": "https://github.com/Top-gg-Community/python-sdk/tree/master/examples/discordpy_example",
     "examples/hikari": "https://github.com/Top-gg-Community/python-sdk/tree/master/examples/hikari_example",
 }
