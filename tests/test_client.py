@@ -50,6 +50,7 @@ async def test_DBLClient_post_guild_count_with_no_args():
     [
         (topgg.DBLClient.get_guild_count, {}),
         (topgg.DBLClient.get_bot_info, {}),
+        (topgg.DBLClient.get_weekend_status, {}),
         (
             topgg.DBLClient.generate_widget,
             {
