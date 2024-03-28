@@ -39,7 +39,6 @@ autoposter: topgg.AutoPoster = (
 @client.event
 async def on_ready():
     assert client.user is not None
-    dblclient.default_bot_id = client.user.id
 
     # if it's ready, then the event loop's run,
     # hence it's safe starting the autopost here

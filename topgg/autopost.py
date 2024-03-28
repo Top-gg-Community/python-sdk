@@ -78,17 +78,13 @@ class AutoPoster:
 
     def _default_error_handler(self, exception: Exception) -> None:
         print("Ignoring exception in auto post loop:", file=sys.stderr)
-        traceback.print_exception(
-            type(exception), exception, exception.__traceback__, file=sys.stderr
-        )
+        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
 
     @t.overload
-    def on_success(self, callback: None) -> t.Callable[[CallbackT], CallbackT]:
-        ...
+    def on_success(self, callback: None) -> t.Callable[[CallbackT], CallbackT]: ...
 
     @t.overload
-    def on_success(self, callback: CallbackT) -> "AutoPoster":
-        ...
+    def on_success(self, callback: CallbackT) -> "AutoPoster": ...
 
     def on_success(self, callback: t.Any = None) -> t.Any:
         """
@@ -103,15 +99,15 @@ class AutoPoster:
                 # The following are valid.
                 autopost = dblclient.autopost().on_success(lambda: print("Success!"))
 
+
                 # Used as decorator, the decorated function will become the AutoPoster object.
                 @autopost.on_success
-                def autopost():
-                    ...
+                def autopost(): ...
+
 
                 # Used as decorator factory, the decorated function will still be the function itself.
                 @autopost.on_success()
-                def on_success():
-                    ...
+                def on_success(): ...
         """
         if callback is not None:
             self._success = callback
@@ -124,12 +120,10 @@ class AutoPoster:
         return decorator
 
     @t.overload
-    def on_error(self, callback: None) -> t.Callable[[CallbackT], CallbackT]:
-        ...
+    def on_error(self, callback: None) -> t.Callable[[CallbackT], CallbackT]: ...
 
     @t.overload
-    def on_error(self, callback: CallbackT) -> "AutoPoster":
-        ...
+    def on_error(self, callback: CallbackT) -> "AutoPoster": ...
 
     def on_error(self, callback: t.Any = None) -> t.Any:
         """
@@ -148,15 +142,15 @@ class AutoPoster:
                 # The following are valid.
                 autopost = dblclient.autopost().on_error(lambda exc: print("Failed posting stats!", exc))
 
+
                 # Used as decorator, the decorated function will become the AutoPoster object.
                 @autopost.on_error
-                def autopost(exc: Exception):
-                    ...
+                def autopost(exc: Exception): ...
+
 
                 # Used as decorator factory, the decorated function will still be the function itself.
                 @autopost.on_error()
-                def on_error(exc: Exception):
-                    ...
+                def on_error(exc: Exception): ...
         """
         if callback is not None:
             self._error = callback
@@ -169,12 +163,10 @@ class AutoPoster:
         return decorator
 
     @t.overload
-    def stats(self, callback: None) -> t.Callable[[StatsCallbackT], StatsCallbackT]:
-        ...
+    def stats(self, callback: None) -> t.Callable[[StatsCallbackT], StatsCallbackT]: ...
 
     @t.overload
-    def stats(self, callback: StatsCallbackT) -> "AutoPoster":
-        ...
+    def stats(self, callback: StatsCallbackT) -> "AutoPoster": ...
 
     def stats(self, callback: t.Any = None) -> t.Any:
         """
@@ -295,9 +287,7 @@ class AutoPoster:
                 If there's no callback provided or the autopost is already running.
         """
         if not hasattr(self, "_stats"):
-            raise errors.TopGGException(
-                "you must provide a callback that returns the stats."
-            )
+            raise errors.TopGGException("you must provide a callback that returns the stats.")
 
         if self.is_running:
             raise errors.TopGGException("the autopost is already running.")

@@ -40,7 +40,6 @@ autoposter: topgg.AutoPoster = (
 async def on_started(event: hikari.StartedEvent):
     me: hikari.OwnUser = event.app.get_me()
     assert me is not None
-    dblclient.default_bot_id = me.id
 
     # since StartedEvent is a lifetime event
     # this event will only get dispatched once

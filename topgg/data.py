@@ -52,6 +52,7 @@ def data(type_: t.Type[T]) -> T:
             dblclient = topgg.DBLClient(TOKEN).set_data(client)
             autopost: topgg.AutoPoster = dblclient.autopost()
 
+
             @autopost.stats()
             def get_stats(client: Client = topgg.data(Client)):
                 return topgg.StatsWrapper(guild_count=len(client.guilds), shard_count=len(client.shards))
@@ -79,9 +80,7 @@ class DataContainerMixin:
     def __init__(self) -> None:
         self._data: t.Dict[t.Type, t.Any] = {type(self): self}
 
-    def set_data(
-        self: DataContainerT, data_: t.Any, *, override: bool = False
-    ) -> DataContainerT:
+    def set_data(self: DataContainerT, data_: t.Any, *, override: bool = False) -> DataContainerT:
         """
         Sets data to be available in your functions.
 
@@ -105,20 +104,16 @@ class DataContainerMixin:
         return self
 
     @t.overload
-    def get_data(self, type_: t.Type[T]) -> t.Optional[T]:
-        ...
+    def get_data(self, type_: t.Type[T]) -> t.Optional[T]: ...
 
     @t.overload
-    def get_data(self, type_: t.Type[T], default: t.Any = None) -> t.Any:
-        ...
+    def get_data(self, type_: t.Type[T], default: t.Any = None) -> t.Any: ...
 
     def get_data(self, type_: t.Any, default: t.Any = None) -> t.Any:
         """Gets the injected data."""
         return self._data.get(type_, default)
 
-    async def _invoke_callback(
-        self, callback: t.Callable[..., T], *args: t.Any, **kwargs: t.Any
-    ) -> T:
+    async def _invoke_callback(self, callback: t.Callable[..., T], *args: t.Any, **kwargs: t.Any) -> T:
         parameters: t.Mapping[str, inspect.Parameter]
         try:
             parameters = inspect.signature(callback).parameters
@@ -128,8 +123,7 @@ class DataContainerMixin:
         signatures: t.Dict[str, Data] = {
             k: v.default
             for k, v in parameters.items()
-            if v.kind is inspect.Parameter.POSITIONAL_OR_KEYWORD
-            and isinstance(v.default, Data)
+            if v.kind is inspect.Parameter.POSITIONAL_OR_KEYWORD and isinstance(v.default, Data)
         }
 
         for k, v in signatures.items():
