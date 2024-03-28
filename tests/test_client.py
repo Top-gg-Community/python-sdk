@@ -56,8 +56,12 @@ async def test_closed_DBLClient_raises_exception():
 
 
 @pytest.mark.asyncio
-async def test_closed_DBLClient_bot_id():
+async def test_DBLClient_bot_id():
+    client = topgg.DBLClient(MOCK_TOKEN)
+    assert not client.is_closed
     assert client.bot_id == 1026525568344264724
+    await client.close()
+    assert client.is_closed
 
 
 @pytest.mark.asyncio
