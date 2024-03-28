@@ -202,7 +202,10 @@ class HTTPClient:
         search: Dict[str, str],
         fields: Sequence[str],
     ) -> Coroutine[Any, Any, dict]:
-        """This function is now deprecated."""
+        """
+        Warning:
+            This function is deprecated.
+        """
 
         warnings.warn("get_bots is now deprecated.", DeprecationWarning)
 

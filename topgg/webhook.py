@@ -87,7 +87,7 @@ class WebhookManager(DataContainerMixin):
                 The endpoint to add.
 
         Returns:
-            Union[:obj:`WebhookManager`, :obj:`BoundWebhookEndpoint` ]:
+            Union[:obj:`WebhookManager`, :obj:`BoundWebhookEndpoint`]:
                 An instance of :obj:`WebhookManager` if endpoint was provided,
                 otherwise :obj:`BoundWebhookEndpoint`.
 

@@ -184,7 +184,7 @@ class DBLClient(DataContainerMixin):
             This API endpoint is only available to the bot's owner.
 
         Returns:
-            List[:obj:`~.types.BriefUserData` ]:
+            List[:obj:`~.types.BriefUserData`]:
                 Users who voted for your bot.
 
         Raises:
@@ -225,7 +225,10 @@ class DBLClient(DataContainerMixin):
         search: t.Optional[t.Dict[str, t.Any]] = None,
         fields: t.Optional[t.List[str]] = None,
     ) -> types.DataDict[str, t.Any]:
-        """This function is deprecated."""
+        """
+        Warning:
+            This function is deprecated.
+        """
 
         warnings.warn("get_bots is now deprecated.", DeprecationWarning)
 
