@@ -228,9 +228,9 @@ class DBLClient(DataContainerMixin):
         fields: t.Optional[t.List[str]] = None,
     ) -> types.DataDict[str, t.Any]:
         """This function is deprecated."""
-        
+
         warnings.warn("get_bots is now deprecated.", DeprecationWarning)
-        
+
         sort = sort or ""
         search = search or {}
         fields = fields or []

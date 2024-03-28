@@ -203,9 +203,9 @@ class HTTPClient:
         fields: Sequence[str],
     ) -> Coroutine[Any, Any, dict]:
         """This function is now deprecated."""
-        
+
         warnings.warn("get_bots is now deprecated.", DeprecationWarning)
-        
+
         limit = min(limit, 500)
         fields = ", ".join(fields)
         search = " ".join([f"{field}: {value}" for field, value in search.items()])

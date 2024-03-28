@@ -45,20 +45,6 @@ async def test_DBLClient_post_guild_count_with_no_args():
         await client.post_guild_count()
 
 
-@pytest.mark.parametrize(
-    "method, kwargs",
-    [
-        (topgg.DBLClient.get_guild_count, {}),
-        (topgg.DBLClient.get_bot_info, {}),
-        (topgg.DBLClient.get_weekend_status, {}),
-        (
-            topgg.DBLClient.generate_widget,
-            {
-                "options": topgg.types.WidgetOptions(),
-            },
-        ),
-    ],
-)
 @pytest.mark.asyncio
 async def test_closed_DBLClient_raises_exception():
     client = topgg.DBLClient(MOCK_TOKEN)
