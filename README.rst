@@ -12,7 +12,7 @@ Top.gg Python Library
    :target: https://topggpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-A simple API wrapper for `Top.gg <https://top.gg/>`_ written in Python, supporting discord.py.
+A simple API wrapper for `Top.gg <https://top.gg/>`_ written in Python.
 
 Installation
 ------------
@@ -31,7 +31,6 @@ Features
 
 * POST server count
 * GET bot info, server count, upvote info
-* GET all bots
 * GET user info
 * GET widgets (large and small) including custom ones. See `docs.top.gg <https://docs.top.gg/>`_ for more info.
 * GET weekend status
