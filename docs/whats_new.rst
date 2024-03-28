@@ -1,7 +1,3 @@
-.. currentmodule:: topgg
-
-.. _whats_new:
-
 ##########
 What's new
 ##########

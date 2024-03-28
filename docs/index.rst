@@ -50,6 +50,7 @@ Additional information
    :hidden:
 
    api
+   examples
    whats_new
    repository
    support

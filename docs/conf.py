@@ -47,7 +47,12 @@ intersphinx_mapping = {
     "aiohttp": ("https://docs.aiohttp.org/en/stable/", None),
 }
 
-redirects = {"repository": "https://github.com/top-gg-community/python-sdk", "support": "https://discord.gg/dbl"}
+redirects = {
+    "repository": "https://github.com/top-gg-community/python-sdk",
+    "support": "https://discord.gg/dbl",
+    "examples/discord_py": "https://github.com/Top-gg-Community/python-sdk/tree/master/examples/discordpy_example",
+    "examples/hikari": "https://github.com/Top-gg-Community/python-sdk/tree/master/examples/hikari_example",
+}
 
 releases_github_path = "top-gg-community/python-sdk"
 source_suffix = ".rst"
@@ -61,6 +66,7 @@ release = version
 language = "en"
 exclude_patterns = ["_build"]
 
+html_js_files = ["script.js"]
 html_css_files = [
     "style.css",
     "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto+Mono&display=swap",
