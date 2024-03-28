@@ -10,9 +10,9 @@ Top.gg Python Library
 .. image:: https://img.shields.io/pypi/v/topggpy.svg
    :target: https://pypi.python.org/pypi/topggpy
    :alt: View on PyPI
-.. image:: https://readthedocs.org/projects/topggpy/badge/?version=latest
+.. image:: https://img.shields.io/pypi/dm/topggpy?style=flat-square
    :target: https://topggpy.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+   :alt: Monthly PyPI downloads
 
 A simple API wrapper for `Top.gg <https://top.gg/>`_ written in Python.
 
