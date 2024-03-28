@@ -71,9 +71,7 @@ class DBLClient(DataContainerMixin):
 
         try:
             encoded_json = re.sub(r"[^a-zA-Z0-9\+\/]+", "", token.split(".")[1])
-            missing_padding = len(encoded_json) % 4
-            if missing_padding:
-                encoded_json += "=" * (4 - missing_padding)
+            encoded_json += "=" * (4 - (len(encoded_json) % 4))
 
             self.bot_id = int(json.loads(base64.b64decode(encoded_json))["id"])
         except:
