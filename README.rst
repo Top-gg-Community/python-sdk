@@ -21,7 +21,7 @@ Installation
 Documentation
 -------------
 
-Documentation can be found `here <https://topggpy.rtfd.io>`_
+Documentation can be found `here <https://topggpy.readthedocs.io/en/latest/>`_
 
 Features
 --------

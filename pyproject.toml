@@ -30,6 +30,7 @@ classifiers = [
 requires-python = ">=3.8"
 
 [project.urls]
-Homepage = "https://topggpy.readthedocs.io/en/stable/"
-Documentation = "https://topggpy.readthedocs.io/en/stable/"
+Documentation = "https://topggpy.readthedocs.io/en/latest/"
+"Release notes" = "https://topggpy.readthedocs.io/en/latest/whats_new.html"
 Repository = "https://github.com/top-gg-community/python-sdk"
+"Support server" = "https://discord.gg/dbl"
