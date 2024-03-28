@@ -10,6 +10,9 @@ from topgg.autopost import AutoPoster
 from topgg.errors import ServerError, TopGGException, Unauthorized
 
 
+MOCK_TOKEN = "amogus.eyJpZCI6IjEwMjY1MjU1NjgzNDQyNjQ3MjQiLCJib3QiOnRydWUsImlhdCI6MTY5OTk4NDYyM30.amogus"
+
+
 @pytest.fixture
 def session() -> ClientSession:
     return mock.Mock(ClientSession)
@@ -17,7 +20,7 @@ def session() -> ClientSession:
 
 @pytest.fixture
 def autopost(session: ClientSession) -> AutoPoster:
-    return AutoPoster(DBLClient("", session=session))
+    return AutoPoster(DBLClient(MOCK_TOKEN, session=session))
 
 
 @pytest.mark.asyncio
@@ -29,7 +32,7 @@ async def test_AutoPoster_breaks_autopost_loop_on_401(mocker: MockerFixture, ses
     mocker.patch("topgg.DBLClient.post_guild_count", side_effect=Unauthorized(response, {}))
 
     callback = mock.Mock()
-    autopost = DBLClient("", session=session).autopost().stats(callback)
+    autopost = DBLClient(MOCK_TOKEN, session=session).autopost().stats(callback)
     assert isinstance(autopost, AutoPoster)
     assert not isinstance(autopost.stats()(callback), AutoPoster)
 
