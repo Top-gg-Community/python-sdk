@@ -21,7 +21,7 @@ Installation
 
 .. code:: bash
 
-    pip3 install topggpy
+    pip install topggpy
 
 Features
 --------
