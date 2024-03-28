@@ -83,16 +83,16 @@ class WebhookManager(DataContainerMixin):
         """Helper method that returns a WebhookEndpoint object.
 
         Args:
-            `endpoint_` (:obj:`typing.Optional` [ :obj:`WebhookEndpoint` ])
+            `endpoint_` (Optional[:obj:`WebhookEndpoint`])
                 The endpoint to add.
 
         Returns:
-            :obj:`typing.Union` [ :obj:`WebhookManager`, :obj:`BoundWebhookEndpoint` ]:
+            Union[:obj:`WebhookManager`, :obj:`BoundWebhookEndpoint` ]:
                 An instance of :obj:`WebhookManager` if endpoint was provided,
                 otherwise :obj:`BoundWebhookEndpoint`.
 
         Raises:
-            :obj:`~.errors.TopGGException`
+            :exc:`~.errors.TopGGException`
                 If the endpoint is lacking attributes.
         """
         if endpoint_:
@@ -328,7 +328,7 @@ def endpoint(route: str, type: WebhookType, auth: str = "") -> t.Callable[[t.Cal
             The auth for the endpoint.
 
     Returns:
-        :obj:`typing.Callable` [[ :obj:`typing.Callable` [..., :obj:`typing.Any` ]], :obj:`WebhookEndpoint` ]:
+        Callable[[Callable[..., Any]], :obj:`WebhookEndpoint`]:
             The actual decorator.
 
     :Example:

@@ -1,4 +1,3 @@
+furo
 sphinx
-insegel
-sphinxcontrib-napoleon
-sphinx-rtd-dark-mode
+sphinx-reredirects

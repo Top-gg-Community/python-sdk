@@ -100,7 +100,7 @@ class DBLClient(DataContainerMixin):
             :obj:`bool`: The boolean value of weekend status.
 
         Raises:
-            :obj:`~.errors.ClientStateException`
+            :exc:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         await self._ensure_session()
@@ -139,18 +139,18 @@ class DBLClient(DataContainerMixin):
                 An instance of StatsWrapper containing guild_count, shard_count, and shard_id.
 
         Keyword Arguments:
-            guild_count (:obj:`typing.Optional` [:obj:`typing.Union` [ :obj:`int`, :obj:`list` [ :obj:`int` ]]])
+            guild_count (Optional[Union[:obj:`int`, List[:obj:`int`]]])
                 Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
                 If not specified, length of provided client's property `.guilds` will be posted.
-            shard_count (:obj:`.typing.Optional` [ :obj:`int` ])
+            shard_count (Optional[:obj:`int`])
                 The total number of shards.
-            shard_id (:obj:`.typing.Optional` [ :obj:`int` ])
+            shard_id (Optional[:obj:`int`])
                 The index of the current shard. Top.gg uses `0 based indexing`_ for shards.
 
         Raises:
             TypeError
                 If no argument is provided.
-            :obj:`~.errors.ClientStateException`
+            :exc:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         if stats:
@@ -170,7 +170,7 @@ class DBLClient(DataContainerMixin):
                 The guild count and shards of a bot on Top.gg.
 
         Raises:
-            :obj:`~.errors.ClientStateException`
+            :exc:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         await self._ensure_session()
@@ -184,11 +184,11 @@ class DBLClient(DataContainerMixin):
             This API endpoint is only available to the bot's owner.
 
         Returns:
-            :obj:`list` [ :obj:`~.types.BriefUserData` ]:
+            List[:obj:`~.types.BriefUserData` ]:
                 Users who voted for your bot.
 
         Raises:
-            :obj:`~.errors.ClientStateException`
+            :exc:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         await self._ensure_session()
@@ -210,7 +210,7 @@ class DBLClient(DataContainerMixin):
                 `here <https://docs.top.gg/api/bot/#bot-structure>`_.
 
         Raises:
-            :obj:`~.errors.ClientStateException`
+            :exc:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         await self._ensure_session()
@@ -251,7 +251,7 @@ class DBLClient(DataContainerMixin):
                 Information about a Top.gg user.
 
         Raises:
-            :obj:`~.errors.ClientStateException`
+            :exc:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         await self._ensure_session()
@@ -269,7 +269,7 @@ class DBLClient(DataContainerMixin):
             :obj:`bool`: Info about the user's vote.
 
         Raises:
-            :obj:`~.errors.ClientStateException`
+            :exc:`~.errors.ClientStateException`
                 If the client has been closed.
         """
         await self._ensure_session()

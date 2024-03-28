@@ -1,7 +1,7 @@
 .. currentmodule:: topgg
 
 #############
-API Reference
+API reference
 #############
 
 The following section outlines the API of topggpy.

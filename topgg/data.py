@@ -36,7 +36,7 @@ def data(type_: t.Type[T]) -> T:
     Represents the injected data. This should be set as the parameter's default value.
 
     Args:
-        `type_` (:obj:`type` [ :obj:`T` ])
+        `type_` (:obj:`type` [ :obj:`T`])
             The type of the injected data.
 
     Returns:
@@ -85,13 +85,13 @@ class DataContainerMixin:
         Sets data to be available in your functions.
 
         Args:
-            `data_` (:obj:`typing.Any`)
+            `data_` (Any)
                 The data to be injected.
             override (:obj:`bool`)
                 Whether or not to override another instance that already exists.
 
         Raises:
-            :obj:`~.errors.TopGGException`
+            :exc:`~.errors.TopGGException`
                 If override is False and another instance of the same type exists.
         """
         type_ = type(data_)

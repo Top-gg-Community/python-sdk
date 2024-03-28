@@ -184,15 +184,13 @@ class AutoPoster:
                 # In this example, we fetch the stats from a Discord client instance.
                 client = Client(...)
                 dblclient = topgg.DBLClient(TOKEN).set_data(client)
-                autopost = (
-                    dblclient
-                    .autopost()
-                    .on_success(lambda: print("Successfully posted the stats!")
-                )
+                autopost = dblclient.autopost().on_success(lambda: print("Successfully posted the stats!"))
+
 
                 @autopost.stats()
                 def get_stats(client: Client = topgg.data(Client)):
                     return topgg.StatsWrapper(guild_count=len(client.guilds), shard_count=len(client.shards))
+
 
                 # somewhere after the event loop has started
                 autopost.start()
@@ -222,11 +220,11 @@ class AutoPoster:
         Sets the interval between posting stats.
 
         Args:
-            seconds (:obj:`typing.Union` [ :obj:`float`, :obj:`datetime.timedelta` ])
+            seconds (Union[:obj:`float`, :obj:`datetime.timedelta`])
                 The interval.
 
         Raises:
-            :obj:`ValueError`
+            ValueError
                 If the provided interval is less than 900 seconds.
         """
         if isinstance(seconds, datetime.timedelta):
@@ -283,7 +281,7 @@ class AutoPoster:
             This method must be called when the event loop has already running!
 
         Raises:
-            :obj:`~.errors.TopGGException`
+            :exc:`~.errors.TopGGException`
                 If there's no callback provided or the autopost is already running.
         """
         if not hasattr(self, "_stats"):
