@@ -71,6 +71,8 @@ class WebhookManager(DataContainerMixin):
 
     def __init__(self) -> None:
         super().__init__()
+
+        self.__app = None
         self._is_running = False
 
     @t.overload
@@ -145,6 +147,7 @@ class WebhookManager(DataContainerMixin):
 
     async def close(self) -> None:
         """Stops the webhook."""
+
         await self._webserver.stop()
         await self.__app.shutdown()
         self._is_running = False
