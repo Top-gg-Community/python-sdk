@@ -3,6 +3,7 @@
 # The MIT License (MIT)
 
 # Copyright (c) 2021 Assanali Mukhanov
+# Copyright (c) 2024 null8626
 
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -70,7 +71,6 @@ class WebhookManager(DataContainerMixin):
 
     def __init__(self) -> None:
         super().__init__()
-        self.__app = web.Application()
         self._is_running = False
 
     @t.overload
@@ -120,6 +120,8 @@ class WebhookManager(DataContainerMixin):
             port (int)
                 The port to run the webhook on.
         """
+
+        self.__app = web.Application()
         runner = web.AppRunner(self.__app)
         await runner.setup()
         self._webserver = web.TCPSite(runner, "0.0.0.0", port)
@@ -144,6 +146,7 @@ class WebhookManager(DataContainerMixin):
     async def close(self) -> None:
         """Stops the webhook."""
         await self._webserver.stop()
+        await self.__app.shutdown()
         self._is_running = False
 
     def _get_handler(self, type_: WebhookType, auth: str, callback: t.Callable[..., t.Any]) -> _HandlerT:
