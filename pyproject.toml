@@ -9,7 +9,7 @@ readme = "README.rst"
 license = { text = "MIT" }
 authors = [{ name = "null8626" }, { name = "Top.gg" }]
 keywords = ["discord", "bot", "topgg", "top.gg"]
-dependencies = ["aiohttp>=3.9.0"]
+dependencies = ["aiohttp>=3.9.5"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "License :: OSI Approved :: MIT License",
