@@ -27,7 +27,6 @@ __all__ = ["DBLClient"]
 
 import base64
 import json
-import re
 import typing as t
 import warnings
 
@@ -70,7 +69,7 @@ class DBLClient(DataContainerMixin):
         self._token = token
 
         try:
-            encoded_json = re.sub(r"[^a-zA-Z0-9\+\/]+", "", token.split(".")[1])
+            encoded_json = token.split(".")[1]
             encoded_json += "=" * (4 - (len(encoded_json) % 4))
 
             self.bot_id = int(json.loads(base64.b64decode(encoded_json))["id"])
