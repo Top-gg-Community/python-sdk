@@ -7,3 +7,4 @@ docs/_templates
 .idea/
 **/__pycache__/
 .coverage
+.ruff_cache/
