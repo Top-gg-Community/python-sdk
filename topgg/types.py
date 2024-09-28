@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # The MIT License (MIT)
 
 # Copyright (c) 2021 Assanali Mukhanov
@@ -22,7 +20,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__all__ = ["WidgetOptions", "StatsWrapper"]
+__all__ = ("WidgetOptions", "StatsWrapper")
 
 import dataclasses
 import typing as t

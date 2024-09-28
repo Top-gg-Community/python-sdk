@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # The MIT License (MIT)
 
 # Copyright (c) 2021 Assanali Mukhanov
@@ -23,7 +21,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__all__ = ["DBLClient"]
+__all__ = ("DBLClient",)
 
 import base64
 import json

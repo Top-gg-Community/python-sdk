@@ -20,7 +20,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__all__ = ["data", "DataContainerMixin"]
+__all__ = ("data", "DataContainerMixin",)
 
 import inspect
 import typing as t

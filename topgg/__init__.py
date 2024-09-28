@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Top.gg Python API Wrapper
 ~~~~~~~~~~~~~~~~~~~~~~~~~
