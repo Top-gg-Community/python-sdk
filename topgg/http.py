@@ -29,7 +29,7 @@ import logging
 import sys
 import warnings
 from datetime import datetime
-from typing import Any, Coroutine, Dict, Iterable, List, Optional, Sequence, Union, cast
+from typing import Any, Coroutine, Dict, Iterable, List, Optional, Sequence, Union, cast, Tuple
 
 import aiohttp
 from aiohttp import ClientResponse
@@ -49,6 +49,9 @@ async def _json_or_text(
     return text
 
 
+BASE = "https://top.gg/api"
+
+
 class HTTPClient:
     """Represents an HTTP client sending HTTP requests to the Top.gg API.
 
@@ -65,6 +68,16 @@ class HTTPClient:
             Arbitrary kwargs to be passed to :class:`aiohttp.ClientSession`.
     """
 
+    __slots__: Tuple[str, ...] = (
+        "token",
+        "_own_session",
+        "session",
+        "global_rate_limiter",
+        "bot_rate_limiter",
+        "rate_limiters",
+        "user_agent",
+    )
+
     def __init__(
         self,
         token: str,
@@ -72,7 +85,6 @@ class HTTPClient:
         session: Optional[aiohttp.ClientSession] = None,
         **kwargs: Any,
     ) -> None:
-        self.BASE = "https://top.gg/api"
         self.token = token
         self._own_session = session is None
         self.session: aiohttp.ClientSession = session or aiohttp.ClientSession(**kwargs)
@@ -87,7 +99,7 @@ class HTTPClient:
     async def request(self, method: str, endpoint: str, **kwargs: Any) -> dict:
         """Handles requests to the API."""
         rate_limiters = self.rate_limiters if endpoint.startswith("/bots") else self.global_rate_limiter
-        url = f"{self.BASE}{endpoint}"
+        url = BASE + endpoint
 
         if not self.token:
             raise errors.UnauthorizedDetected("Top.gg API token not provided")

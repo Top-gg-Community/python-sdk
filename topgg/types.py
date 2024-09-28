@@ -140,6 +140,8 @@ class WidgetOptions(DataDict[str, t.Any]):
     """Model that represents widget options that are passed to Top.gg widget URL generated via
     :meth:`DBLClient.generate_widget`."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     id: t.Optional[int]
     """ID of a bot to generate the widget for. Must resolve to an ID of a listed bot when converted to a string."""
     colors: Colors
@@ -199,6 +201,8 @@ class WidgetOptions(DataDict[str, t.Any]):
 class BotData(DataDict[str, t.Any]):
     """Model that contains information about a listed bot on top.gg. The data this model contains can be found `here
     <https://docs.top.gg/api/bot/#bot-structure>`__."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     id: int
     """The ID of the bot."""
@@ -270,6 +274,8 @@ class BotData(DataDict[str, t.Any]):
 class BotStatsData(DataDict[str, t.Any]):
     """Model that contains information about a listed bot's guild and shard count."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     server_count: t.Optional[int]
     """The amount of servers the bot is in."""
     shards: t.List[int]
@@ -283,6 +289,8 @@ class BotStatsData(DataDict[str, t.Any]):
 
 class BriefUserData(DataDict[str, t.Any]):
     """Model that contains brief information about a Top.gg user."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     id: int
     """The Discord ID of the user."""
@@ -300,6 +308,8 @@ class BriefUserData(DataDict[str, t.Any]):
 class SocialData(DataDict[str, str]):
     """Model that contains social information about a top.gg user."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     youtube: str
     """The YouTube channel ID of the user."""
     reddit: str
@@ -315,6 +325,8 @@ class SocialData(DataDict[str, str]):
 class UserData(DataDict[str, t.Any]):
     """Model that contains information about a top.gg user. The data this model contains can be found `here
     <https://docs.top.gg/api/user/#structure>`__."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     id: int
     """The ID of the user."""
@@ -353,6 +365,8 @@ class UserData(DataDict[str, t.Any]):
 class VoteDataDict(DataDict[str, t.Any]):
     """Base model that represents received information from Top.gg via webhooks."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     type: str
     """Type of the action (``upvote`` or ``test``)."""
     user: int
@@ -367,6 +381,8 @@ class VoteDataDict(DataDict[str, t.Any]):
 class BotVoteData(VoteDataDict):
     """Model that contains information about a bot vote."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     bot: int
     """ID of the bot the user voted for."""
     is_weekend: bool
@@ -375,6 +391,8 @@ class BotVoteData(VoteDataDict):
 
 class GuildVoteData(VoteDataDict):
     """Model that contains information about a guild vote."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     guild: int
     """ID of the guild the user voted for."""

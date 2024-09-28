@@ -53,7 +53,8 @@ class DBLClient(DataContainerMixin):
             Arbitrary kwargs to be passed to :class:`aiohttp.ClientSession` if session was not provided.
     """
 
-    __slots__ = ("http", "bot_id", "_token", "_is_closed", "_autopost")
+    __slots__: t.Tuple[str, ...] = ("http", "bot_id", "_token", "_is_closed", "_autopost")
+
     http: HTTPClient
 
     def __init__(

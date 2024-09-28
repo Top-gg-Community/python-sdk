@@ -24,13 +24,15 @@ import asyncio
 import collections
 from datetime import datetime
 from types import TracebackType
-from typing import Any, Awaitable, Callable, List, Optional, Type
+from typing import Any, Awaitable, Callable, List, Optional, Type, Tuple
 
 
 class AsyncRateLimiter:
     """
     Provides rate limiting for an operation with a configurable number of requests for a time period.
     """
+
+    __slots__: Tuple[str, ...] = ("__lock", "callback", "max_calls", "period", "calls")
 
     __lock: asyncio.Lock
     callback: Optional[Callable[[float], Awaitable[Any]]]
@@ -85,6 +87,8 @@ class AsyncRateLimiter:
 
 
 class AsyncRateLimiterManager:
+    __slots__: Tuple[str, ...] = ("rate_limiters",)
+
     rate_limiters: List[AsyncRateLimiter]
 
     def __init__(self, rate_limiters: List[AsyncRateLimiter]):

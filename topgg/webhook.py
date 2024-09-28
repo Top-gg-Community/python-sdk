@@ -50,6 +50,8 @@ _HandlerT = t.Callable[["Request"], t.Awaitable["StreamResponse"]]
 class WebhookType(enum.Enum):
     """An enum that represents the type of an endpoint."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     BOT = enum.auto()
     """Marks the endpoint as a bot webhook."""
 
@@ -62,10 +64,11 @@ class WebhookManager(DataContainerMixin):
     A class for managing Top.gg webhooks.
     """
 
+    __slots__: t.Tuple[str, ...] = ("__app", "_webserver", "_is_running")
+
     __app: web.Application
     _webserver: web.TCPSite
-    _is_closed: bool
-    __slots__ = ("__app", "_webserver", "_is_running")
+    _is_running: bool
 
     def __init__(self) -> None:
         super().__init__()
@@ -173,7 +176,7 @@ class WebhookEndpoint:
     A helper class to setup webhook endpoint.
     """
 
-    __slots__ = ("_callback", "_auth", "_route", "_type")
+    __slots__: t.Tuple[str, ...] = ("_callback", "_auth", "_route", "_type")
 
     def __init__(self) -> None:
         self._auth = ""
@@ -298,7 +301,7 @@ class BoundWebhookEndpoint(WebhookEndpoint):
             endpoint.add_to_manager()
     """
 
-    __slots__ = ("manager",)
+    __slots__: t.Tuple[str, ...] = ("manager",)
 
     def __init__(self, manager: WebhookManager):
         super().__init__()

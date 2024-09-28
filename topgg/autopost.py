@@ -54,7 +54,7 @@ class AutoPoster:
             An instance of DBLClient.
     """
 
-    __slots__ = (
+    __slots__: t.Tuple[str, ...] = (
         "_error",
         "_success",
         "_interval",

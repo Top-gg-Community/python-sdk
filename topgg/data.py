@@ -20,7 +20,10 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__all__ = ("data", "DataContainerMixin",)
+__all__ = (
+    "data",
+    "DataContainerMixin",
+)
 
 import inspect
 import typing as t
@@ -61,7 +64,7 @@ def data(type_: t.Type[T]) -> T:
 
 
 class Data(t.Generic[T]):
-    __slots__ = ("type",)
+    __slots__: t.Tuple[str, ...] = ("type",)
 
     def __init__(self, type_: t.Type[T]) -> None:
         self.type: t.Type[T] = type_
@@ -75,7 +78,7 @@ class DataContainerMixin:
     as arguments in your functions.
     """
 
-    __slots__ = ("_data",)
+    __slots__: t.Tuple[str, ...] = ("_data",)
 
     def __init__(self) -> None:
         self._data: t.Dict[t.Type, t.Any] = {type(self): self}
