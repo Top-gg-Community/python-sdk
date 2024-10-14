@@ -143,7 +143,7 @@ class WebhookManager(DataContainerMixin):
         """Returns the internal web application that handles webhook requests.
 
         Returns:
-            :class:`aiohttp.web.Application`:
+            :class:`~aiohttp.web.Application`:
                 The internal web application.
         """
         return self.__app

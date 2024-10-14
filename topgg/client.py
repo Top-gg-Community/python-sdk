@@ -49,10 +49,10 @@ class DBLClient(DataContainerMixin):
         token (:obj:`str`): Your bot's Top.gg API Token.
 
     Keyword Args:
-        session (:class:`aiohttp.ClientSession`)
+        session (:class:`~aiohttp.ClientSession`)
             An `aiohttp session`_ to use for requests to the API.
         **kwargs:
-            Arbitrary kwargs to be passed to :class:`aiohttp.ClientSession` if session was not provided.
+            Arbitrary kwargs to be passed to :class:`~aiohttp.ClientSession` if session was not provided.
     """
 
     __slots__: t.Tuple[str, ...] = ("http", "bot_id", "_token", "_is_closed", "_autopost")
