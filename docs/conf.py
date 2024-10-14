@@ -43,13 +43,13 @@ extlinks = {
 
 intersphinx_mapping = {
     "py": ("https://docs.python.org/3", None),
-    "discord": ("https://discordpy.readthedocs.io/en/latest/", None),
     "aiohttp": ("https://docs.aiohttp.org/en/stable/", None),
 }
 
 redirects = {
     "repository": "https://github.com/top-gg-community/python-sdk",
     "support": "https://discord.gg/dbl",
+    "raw-api-reference": "https://docs.top.gg/docs/",
     "api/index": "autopost.html",
     "examples/index": "discord_py.html",
     "examples/discord_py": "https://github.com/Top-gg-Community/python-sdk/tree/master/examples/discordpy_example",

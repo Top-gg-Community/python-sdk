@@ -51,3 +51,4 @@ Additional information
    whats_new
    repository
    support
+   raw-api-reference
