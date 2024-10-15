@@ -374,7 +374,7 @@ class VoteDataDict(DataDict[str, t.Any]):
     user: int
     """ID of the voter."""
     query: DataDict
-    """Query parameters in :obj:`~.DataDict`."""
+    """Query parameters in :obj:`.DataDict`."""
 
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_vote_dict(kwargs))

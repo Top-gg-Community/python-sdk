@@ -48,14 +48,14 @@ class TopGGException(Exception):
 
 
 class ClientException(TopGGException):
-    """Exception that's thrown when an operation in the :class:`~.DBLClient` fails.
+    """Exception that's thrown when an operation in the :class:`.DBLClient` fails.
 
     These are usually for exceptions that happened due to user input.
     """
 
 
 class ClientStateException(ClientException):
-    """Exception that's thrown when an operation happens in a closed :obj:`~.DBLClient` instance."""
+    """Exception that's thrown when an operation happens in a closed :obj:`.DBLClient` instance."""
 
 
 class HTTPException(TopGGException):
