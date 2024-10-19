@@ -1,35 +1,37 @@
-# -*- coding: utf-8 -*-
+"""
+The MIT License (MIT)
 
-# The MIT License (MIT)
+Copyright (c) 2021 Assanali Mukhanov
+Copyright (c) 2024 null8626
 
-# Copyright (c) 2021 Assanali Mukhanov
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
 
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+"""
 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-
-__all__ = ["HTTPClient"]
+__all__ = ("HTTPClient",)
 
 import asyncio
 import json
 import logging
 import sys
+import warnings
 from datetime import datetime
-from typing import Any, Coroutine, Dict, Iterable, List, Optional, Sequence, Union, cast
+from typing import Any, Coroutine, Dict, Iterable, List, Optional, Sequence, Union, cast, Tuple
 
 import aiohttp
 from aiohttp import ClientResponse
@@ -49,6 +51,9 @@ async def _json_or_text(
     return text
 
 
+BASE = "https://top.gg/api"
+
+
 class HTTPClient:
     """Represents an HTTP client sending HTTP requests to the Top.gg API.
 
@@ -65,6 +70,16 @@ class HTTPClient:
             Arbitrary kwargs to be passed to :class:`aiohttp.ClientSession`.
     """
 
+    __slots__: Tuple[str, ...] = (
+        "token",
+        "_own_session",
+        "session",
+        "global_rate_limiter",
+        "bot_rate_limiter",
+        "rate_limiters",
+        "user_agent",
+    )
+
     def __init__(
         self,
         token: str,
@@ -72,32 +87,21 @@ class HTTPClient:
         session: Optional[aiohttp.ClientSession] = None,
         **kwargs: Any,
     ) -> None:
-        self.BASE = "https://top.gg/api"
         self.token = token
         self._own_session = session is None
         self.session: aiohttp.ClientSession = session or aiohttp.ClientSession(**kwargs)
-        self.global_rate_limiter = AsyncRateLimiter(
-            max_calls=99, period=1, callback=_rate_limit_handler
-        )
-        self.bot_rate_limiter = AsyncRateLimiter(
-            max_calls=59, period=60, callback=_rate_limit_handler
-        )
-        self.rate_limiters = AsyncRateLimiterManager(
-            [self.global_rate_limiter, self.bot_rate_limiter]
-        )
+        self.global_rate_limiter = AsyncRateLimiter(max_calls=99, period=1, callback=_rate_limit_handler)
+        self.bot_rate_limiter = AsyncRateLimiter(max_calls=59, period=60, callback=_rate_limit_handler)
+        self.rate_limiters = AsyncRateLimiterManager([self.global_rate_limiter, self.bot_rate_limiter])
         self.user_agent = (
-            f"topggpy (https://github.com/top-gg/python-sdk {__version__}) Python/"
+            f"topggpy (https://github.com/top-gg-community/python-sdk {__version__}) Python/"
             f"{sys.version_info[0]}.{sys.version_info[1]} aiohttp/{aiohttp.__version__}"
         )
 
     async def request(self, method: str, endpoint: str, **kwargs: Any) -> dict:
         """Handles requests to the API."""
-        rate_limiters = (
-            self.rate_limiters
-            if endpoint.startswith("/bots")
-            else self.global_rate_limiter
-        )
-        url = f"{self.BASE}{endpoint}"
+        rate_limiters = self.rate_limiters if endpoint.startswith("/bots") else self.global_rate_limiter
+        url = BASE + endpoint
 
         if not self.token:
             raise errors.UnauthorizedDetected("Top.gg API token not provided")
@@ -210,7 +214,13 @@ class HTTPClient:
         search: Dict[str, str],
         fields: Sequence[str],
     ) -> Coroutine[Any, Any, dict]:
-        """Gets an object of bots on Top.gg."""
+        """
+        Warning:
+            This function is deprecated.
+        """
+
+        warnings.warn("get_bots is now deprecated.", DeprecationWarning)
+
         limit = min(limit, 500)
         fields = ", ".join(fields)
         search = " ".join([f"{field}: {value}" for field, value in search.items()])
@@ -240,9 +250,7 @@ async def _rate_limit_handler(until: float) -> None:
     """Handles the displayed message when we are ratelimited."""
     duration = round(until - datetime.utcnow().timestamp())
     mins = duration / 60
-    fmt = (
-        "We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes)."
-    )
+    fmt = "We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes)."
     _LOGGER.warning(fmt, duration, mins)
 
 
