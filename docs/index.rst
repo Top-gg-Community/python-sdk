@@ -48,7 +48,7 @@ Additional information
 
    api/index.rst
    examples/index.rst
-   whats_new
+   whats-new
+   support-server
    repository
-   support
    raw-api-reference
