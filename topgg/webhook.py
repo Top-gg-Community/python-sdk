@@ -75,7 +75,7 @@ class WebhookManager(DataContainerMixin):
     def __init__(self) -> None:
         super().__init__()
 
-        self.__app = None
+        self.__app = web.Application()
         self._is_running = False
 
     @t.overload
@@ -126,7 +126,6 @@ class WebhookManager(DataContainerMixin):
                 The port to run the webhook on.
         """
 
-        self.__app = web.Application()
         runner = web.AppRunner(self.__app)
         await runner.setup()
         self._webserver = web.TCPSite(runner, "0.0.0.0", port)
