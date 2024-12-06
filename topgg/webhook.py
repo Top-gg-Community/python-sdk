@@ -1,34 +1,35 @@
-# -*- coding: utf-8 -*-
+"""
+The MIT License (MIT)
 
-# The MIT License (MIT)
+Copyright (c) 2021 Assanali Mukhanov
+Copyright (c) 2024 null8626
 
-# Copyright (c) 2021 Assanali Mukhanov
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
 
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+"""
 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-
-__all__ = [
+__all__ = (
     "endpoint",
     "BoundWebhookEndpoint",
     "WebhookEndpoint",
     "WebhookManager",
     "WebhookType",
-]
+)
 
 import enum
 import typing as t
@@ -51,6 +52,8 @@ _HandlerT = t.Callable[["Request"], t.Awaitable["StreamResponse"]]
 class WebhookType(enum.Enum):
     """An enum that represents the type of an endpoint."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     BOT = enum.auto()
     """Marks the endpoint as a bot webhook."""
 
@@ -63,38 +66,38 @@ class WebhookManager(DataContainerMixin):
     A class for managing Top.gg webhooks.
     """
 
+    __slots__: t.Tuple[str, ...] = ("__app", "_webserver", "_is_running")
+
     __app: web.Application
     _webserver: web.TCPSite
-    _is_closed: bool
-    __slots__ = ("__app", "_webserver", "_is_running")
+    _is_running: bool
 
     def __init__(self) -> None:
         super().__init__()
+
         self.__app = web.Application()
         self._is_running = False
 
     @t.overload
-    def endpoint(self, endpoint_: None = None) -> "BoundWebhookEndpoint":
-        ...
+    def endpoint(self, endpoint_: None = None) -> "BoundWebhookEndpoint": ...
 
     @t.overload
-    def endpoint(self, endpoint_: "WebhookEndpoint") -> "WebhookManager":
-        ...
+    def endpoint(self, endpoint_: "WebhookEndpoint") -> "WebhookManager": ...
 
     def endpoint(self, endpoint_: t.Optional["WebhookEndpoint"] = None) -> t.Any:
         """Helper method that returns a WebhookEndpoint object.
 
         Args:
-            `endpoint_` (:obj:`typing.Optional` [ :obj:`WebhookEndpoint` ])
+            `endpoint_` (Optional[:obj:`WebhookEndpoint`])
                 The endpoint to add.
 
         Returns:
-            :obj:`typing.Union` [ :obj:`WebhookManager`, :obj:`BoundWebhookEndpoint` ]:
+            Union[:obj:`WebhookManager`, :obj:`BoundWebhookEndpoint`]:
                 An instance of :obj:`WebhookManager` if endpoint was provided,
                 otherwise :obj:`BoundWebhookEndpoint`.
 
         Raises:
-            :obj:`~.errors.TopGGException`
+            :exc:`~.errors.TopGGException`
                 If the endpoint is lacking attributes.
         """
         if endpoint_:
@@ -109,9 +112,7 @@ class WebhookManager(DataContainerMixin):
 
             self.app.router.add_post(
                 endpoint_._route,
-                self._get_handler(
-                    endpoint_._type, endpoint_._auth, endpoint_._callback
-                ),
+                self._get_handler(endpoint_._type, endpoint_._auth, endpoint_._callback),
             )
             return self
 
@@ -124,6 +125,7 @@ class WebhookManager(DataContainerMixin):
             port (int)
                 The port to run the webhook on.
         """
+
         runner = web.AppRunner(self.__app)
         await runner.setup()
         self._webserver = web.TCPSite(runner, "0.0.0.0", port)
@@ -140,19 +142,19 @@ class WebhookManager(DataContainerMixin):
         """Returns the internal web application that handles webhook requests.
 
         Returns:
-            :class:`aiohttp.web.Application`:
+            :class:`~aiohttp.web.Application`:
                 The internal web application.
         """
         return self.__app
 
     async def close(self) -> None:
         """Stops the webhook."""
+
         await self._webserver.stop()
+        await self.__app.shutdown()
         self._is_running = False
 
-    def _get_handler(
-        self, type_: WebhookType, auth: str, callback: t.Callable[..., t.Any]
-    ) -> _HandlerT:
+    def _get_handler(self, type_: WebhookType, auth: str, callback: t.Callable[..., t.Any]) -> _HandlerT:
         async def _handler(request: aiohttp.web.Request) -> web.Response:
             if request.headers.get("Authorization", "") != auth:
                 return web.Response(status=401, text="Unauthorized")
@@ -175,7 +177,7 @@ class WebhookEndpoint:
     A helper class to setup webhook endpoint.
     """
 
-    __slots__ = ("_callback", "_auth", "_route", "_type")
+    __slots__: t.Tuple[str, ...] = ("_callback", "_auth", "_route", "_type")
 
     def __init__(self) -> None:
         self._auth = ""
@@ -225,12 +227,10 @@ class WebhookEndpoint:
         return self
 
     @t.overload
-    def callback(self, callback_: None) -> t.Callable[[CallbackT], CallbackT]:
-        ...
+    def callback(self, callback_: None) -> t.Callable[[CallbackT], CallbackT]: ...
 
     @t.overload
-    def callback(self: T, callback_: CallbackT) -> T:
-        ...
+    def callback(self: T, callback_: CallbackT) -> T: ...
 
     def callback(self, callback_: t.Any = None) -> t.Any:
         """
@@ -245,25 +245,21 @@ class WebhookEndpoint:
                 import topgg
 
                 webhook_manager = topgg.WebhookManager()
-                endpoint = (
-                    topgg.WebhookEndpoint()
-                    .type(topgg.WebhookType.BOT)
-                    .route("/dblwebhook")
-                    .auth("youshallnotpass")
-                )
+                endpoint = topgg.WebhookEndpoint().type(topgg.WebhookType.BOT).route("/dblwebhook").auth("youshallnotpass")
 
                 # The following are valid.
                 endpoint.callback(lambda vote_data: print("Receives a vote!", vote_data))
 
+
                 # Used as decorator, the decorated function will become the WebhookEndpoint object.
                 @endpoint.callback
-                def endpoint(vote_data: topgg.BotVoteData):
-                    ...
+                def endpoint(vote_data: topgg.BotVoteData): ...
+
 
                 # Used as decorator factory, the decorated function will still be the function itself.
                 @endpoint.callback()
-                def on_vote(vote_data: topgg.BotVoteData):
-                    ...
+                def on_vote(vote_data: topgg.BotVoteData): ...
+
 
                 webhook_manager.endpoint(endpoint)
         """
@@ -286,30 +282,27 @@ class BoundWebhookEndpoint(WebhookEndpoint):
             import topgg
 
             webhook_manager = (
-                topgg.WebhookManager()
-                .endpoint()
-                .type(topgg.WebhookType.BOT)
-                .route("/dblwebhook")
-                .auth("youshallnotpass")
+                topgg.WebhookManager().endpoint().type(topgg.WebhookType.BOT).route("/dblwebhook").auth("youshallnotpass")
             )
 
             # The following are valid.
             endpoint.callback(lambda vote_data: print("Receives a vote!", vote_data))
 
+
             # Used as decorator, the decorated function will become the BoundWebhookEndpoint object.
             @endpoint.callback
-            def endpoint(vote_data: topgg.BotVoteData):
-                ...
+            def endpoint(vote_data: topgg.BotVoteData): ...
+
 
             # Used as decorator factory, the decorated function will still be the function itself.
             @endpoint.callback()
-            def on_vote(vote_data: topgg.BotVoteData):
-                ...
+            def on_vote(vote_data: topgg.BotVoteData): ...
+
 
             endpoint.add_to_manager()
     """
 
-    __slots__ = ("manager",)
+    __slots__: t.Tuple[str, ...] = ("manager",)
 
     def __init__(self, manager: WebhookManager):
         super().__init__()
@@ -330,9 +323,7 @@ class BoundWebhookEndpoint(WebhookEndpoint):
         return self.manager
 
 
-def endpoint(
-    route: str, type: WebhookType, auth: str = ""
-) -> t.Callable[[t.Callable[..., t.Any]], WebhookEndpoint]:
+def endpoint(route: str, type: WebhookType, auth: str = "") -> t.Callable[[t.Callable[..., t.Any]], WebhookEndpoint]:
     """
     A decorator factory for instantiating WebhookEndpoint.
 
@@ -345,7 +336,7 @@ def endpoint(
             The auth for the endpoint.
 
     Returns:
-        :obj:`typing.Callable` [[ :obj:`typing.Callable` [..., :obj:`typing.Any` ]], :obj:`WebhookEndpoint` ]:
+        Callable[[Callable[..., Any]], :obj:`WebhookEndpoint`]:
             The actual decorator.
 
     :Example:
@@ -353,13 +344,13 @@ def endpoint(
 
             import topgg
 
+
             @topgg.endpoint("/dblwebhook", WebhookType.BOT, "youshallnotpass")
             async def on_vote(
                 vote_data: topgg.BotVoteData,
                 # database here is an injected data
                 database: Database = topgg.data(Database),
-            ):
-                ...
+            ): ...
     """
 
     def decorator(func: t.Callable[..., t.Any]) -> WebhookEndpoint:
