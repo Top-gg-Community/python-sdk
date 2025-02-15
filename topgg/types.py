@@ -90,7 +90,7 @@ def parse_bot_dict(d: dict) -> dict:
     data = parse_dict(d.copy())
 
     if data.get("date") and not isinstance(data["date"], datetime):
-        data["date"] = datetime.fromisoformat(data["date"])
+        data["date"] = datetime.fromisoformat(data["date"].replace("Z", "+00:00"))
 
     if data.get("owners"):
         data["owners"] = [int(e) for e in data["owners"]]
