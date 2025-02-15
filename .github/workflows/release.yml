@@ -11,7 +11,7 @@ jobs:
         with:
           python-version: 3.13
       - name: Install dependencies
-        run: python3 -m pip install twine
+        run: python3 -m pip install build twine
       - name: Build and publish
         env:
           TWINE_USERNAME: __token__
