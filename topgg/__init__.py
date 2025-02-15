@@ -3,7 +3,7 @@ Top.gg Python API Wrapper
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 A basic wrapper for the Top.gg API.
 :copyright: (c) 2021 Assanali Mukhanov & Top.gg
-:copyright: (c) 2024 null8626 & Top.gg
+:copyright: (c) 2024-2025 null8626 & Top.gg
 :license: MIT, see LICENSE for more details.
 """
 

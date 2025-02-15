@@ -61,7 +61,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "topggpy"
-copyright = "2021 Assanali Mukhanov; 2024 null8626"
+copyright = "2021 Assanali Mukhanov; 2024-2025 null8626"
 author = "null8626"
 release = version
 
