@@ -8,6 +8,7 @@ exclude .gitignore
 exclude .readthedocs.yml
 exclude mypy.ini
 exclude pytest.ini
+exclude requirements.txt
 exclude requirements-dev.txt
 exclude requirements-docs.txt
 exclude ruff.toml
