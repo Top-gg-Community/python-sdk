@@ -109,9 +109,6 @@ class DBLClient(DataContainerMixin):
     async def post_guild_count(self, guild_count: t.Optional[int] = None) -> None:
         """Posts your bot's guild count to Top.gg.
 
-        Warning:
-            You can't provide both args and kwargs at once.
-
         Args:
             guild_count (Optional[:obj:`int`])
                 Number of guilds the bot is in.
