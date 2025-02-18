@@ -15,8 +15,8 @@ v2.0.1
 * :attr:`.BotData.discriminator` is now deprecated
 * :attr:`.BotData.lib` is now deprecated
 * :attr:`.BotData.guilds` is now deprecated
-* :attr:`.BotData.shards` is now deprecated
-* :attr:`.BotData.shard_count` is now deprecated
+* :attr:`.BotStatsData.shards` is now deprecated
+* :attr:`.BotStatsData.shard_count` is now deprecated
 * :attr:`.UserData.certified_dev` is now deprecated
 * :attr:`.UserData.discriminator` is now deprecated
 * :meth:`.DBLClient.get_guild_count` no longer accepts a ``bot_id`` argument
