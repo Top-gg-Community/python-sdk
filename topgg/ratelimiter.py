@@ -65,8 +65,7 @@ class AsyncRateLimiter:
                 until = time() + self.period - self._timespan
                 if self.callback:
                     asyncio.ensure_future(self.callback(until))
-                sleep_time = until - time()
-                if sleep_time > 0:
+                if (sleep_time := until - time()) > 0:
                     await asyncio.sleep(sleep_time)
             return self
 
@@ -97,7 +96,9 @@ class AsyncRateLimiterManager:
         self.rate_limiters = rate_limiters
 
     async def __aenter__(self) -> "AsyncRateLimiterManager":
-        [await manager.__aenter__() for manager in self.rate_limiters]
+        for manager in self.rate_limiters:
+            await manager.__aenter__()
+
         return self
 
     async def __aexit__(
@@ -106,4 +107,4 @@ class AsyncRateLimiterManager:
         exc_val: BaseException,
         exc_tb: TracebackType,
     ) -> None:
-        await asyncio.gather(*[manager.__aexit__(exc_type, exc_val, exc_tb) for manager in self.rate_limiters])
+        await asyncio.gather(*(manager.__aexit__(exc_type, exc_val, exc_tb) for manager in self.rate_limiters))

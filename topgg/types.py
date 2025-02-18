@@ -41,8 +41,7 @@ def camel_to_snake(string: str) -> str:
 def parse_vote_dict(d: dict) -> dict:
     data = d.copy()
 
-    query = data.get("query", "").lstrip("?")
-    if query:
+    if query := data.get("query", "").lstrip("?"):
         query_dict = {k: v for k, v in [pair.split("=") for pair in query.split("&")]}
         data["query"] = DataDict(**query_dict)
     else:
@@ -55,8 +54,7 @@ def parse_vote_dict(d: dict) -> dict:
         data["guild"] = int(data["guild"])
 
     for key, value in data.copy().items():
-        converted_key = camel_to_snake(key)
-        if key != converted_key:
+        if key != (converted_key := camel_to_snake(key)):
             del data[key]
             data[converted_key] = value
 
@@ -67,20 +65,17 @@ def parse_dict(d: dict) -> dict:
     data = d.copy()
 
     for key, value in data.copy().items():
-        if "id" in key.lower():
-            if value == "":
-                value = None
-            else:
-                if isinstance(value, str) and value.isdigit():
-                    value = int(value)
-                else:
-                    continue
-        elif value == "":
+        if value == "":
             value = None
+        elif "id" in key.lower():
+            if isinstance(value, str) and value.isdigit():
+                value = int(value)
+            else:
+                continue
 
-        converted_key = camel_to_snake(key)
-        if key != converted_key:
+        if key != (converted_key := camel_to_snake(key)):
             del data[key]
+
         data[converted_key] = value
 
     return data
@@ -89,13 +84,14 @@ def parse_dict(d: dict) -> dict:
 def parse_bot_dict(d: dict) -> dict:
     data = parse_dict(d.copy())
 
-    if data.get("date") and not isinstance(data["date"], datetime):
-        data["date"] = datetime.fromisoformat(data["date"].replace("Z", "+00:00"))
+    if (date := data.get("date")) and not isinstance(date, datetime):
+        data["date"] = datetime.fromisoformat(date.replace("Z", "+00:00"))
 
-    if data.get("owners"):
-        data["owners"] = [int(e) for e in data["owners"]]
-    if data.get("guilds"):
-        data["guilds"] = [int(e) for e in data["guilds"]]
+    if owners := data.get("owners"):
+        data["owners"] = [int(e) for e in owners]
+
+    # TODO: remove this soon
+    data["guilds"] = []
 
     for key, value in data.copy().items():
         converted_key = camel_to_snake(key)

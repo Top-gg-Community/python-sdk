@@ -255,7 +255,7 @@ class AutoPoster:
 
     async def _internal_loop(self) -> None:
         try:
-            while 1:
+            while True:
                 stats = await self.client._invoke_callback(self._stats)
                 try:
                     await self.client.post_guild_count(stats)
