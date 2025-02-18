@@ -1,31 +1,32 @@
-# -*- coding: utf-8 -*-
+"""
+The MIT License (MIT)
 
-# The MIT License (MIT)
+Copyright (c) 2021 Assanali Mukhanov
 
-# Copyright (c) 2021 Assanali Mukhanov
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
 
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+"""
 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-
-__all__ = ["WidgetOptions", "StatsWrapper"]
+__all__ = ("WidgetOptions", "StatsWrapper")
 
 import dataclasses
 import typing as t
+import warnings
 from datetime import datetime
 
 KT = t.TypeVar("KT")
@@ -35,14 +36,13 @@ Colours = Colors
 
 
 def camel_to_snake(string: str) -> str:
-    return "".join(["_" + c.lower() if c.isupper() else c for c in string]).lstrip("_")
+    return "".join("_" + c.lower() if c.isupper() else c for c in string).lstrip("_")
 
 
 def parse_vote_dict(d: dict) -> dict:
     data = d.copy()
 
-    query = data.get("query", "").lstrip("?")
-    if query:
+    if query := data.get("query", "").lstrip("?"):
         query_dict = {k: v for k, v in [pair.split("=") for pair in query.split("&")]}
         data["query"] = DataDict(**query_dict)
     else:
@@ -55,8 +55,7 @@ def parse_vote_dict(d: dict) -> dict:
         data["guild"] = int(data["guild"])
 
     for key, value in data.copy().items():
-        converted_key = camel_to_snake(key)
-        if key != converted_key:
+        if key != (converted_key := camel_to_snake(key)):
             del data[key]
             data[converted_key] = value
 
@@ -67,20 +66,17 @@ def parse_dict(d: dict) -> dict:
     data = d.copy()
 
     for key, value in data.copy().items():
-        if "id" in key.lower():
-            if value == "":
-                value = None
-            else:
-                if isinstance(value, str) and value.isdigit():
-                    value = int(value)
-                else:
-                    continue
-        elif value == "":
+        if value == "":
             value = None
+        elif "id" in key.lower():
+            if isinstance(value, str) and value.isdigit():
+                value = int(value)
+            else:
+                continue
 
-        converted_key = camel_to_snake(key)
-        if key != converted_key:
+        if key != (converted_key := camel_to_snake(key)):
             del data[key]
+
         data[converted_key] = value
 
     return data
@@ -89,13 +85,17 @@ def parse_dict(d: dict) -> dict:
 def parse_bot_dict(d: dict) -> dict:
     data = parse_dict(d.copy())
 
-    if data.get("date") and not isinstance(data["date"], datetime):
-        data["date"] = datetime.strptime(data["date"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    if (date := data.get("date")) and not isinstance(date, datetime):
+        data["date"] = datetime.fromisoformat(date.replace("Z", "+00:00"))
 
-    if data.get("owners"):
-        data["owners"] = [int(e) for e in data["owners"]]
-    if data.get("guilds"):
-        data["guilds"] = [int(e) for e in data["guilds"]]
+    if owners := data.get("owners"):
+        data["owners"] = [int(e) for e in owners]
+
+    # TODO: remove this soon
+    data.pop("defAvatar", None)
+    data.pop("discriminator", None)
+    data.pop("guilds", None)
+    data.pop("certifiedBot", None)
 
     for key, value in data.copy().items():
         converted_key = camel_to_snake(key)
@@ -109,6 +109,10 @@ def parse_bot_dict(d: dict) -> dict:
 def parse_user_dict(d: dict) -> dict:
     data = d.copy()
 
+    # TODO: remove this soon
+    data.pop("discriminator", None)
+    data.pop("certifiedDev", None)
+
     data["social"] = SocialData(**data.get("social", {}))
 
     return data
@@ -119,10 +123,6 @@ def parse_bot_stats_dict(d: dict) -> dict:
 
     if "server_count" not in data:
         data["server_count"] = None
-    if "shards" not in data:
-        data["shards"] = []
-    if "shard_count" not in data:
-        data["shard_count"] = None
 
     return data
 
@@ -141,6 +141,8 @@ class DataDict(dict, t.MutableMapping[KT, VT]):
 class WidgetOptions(DataDict[str, t.Any]):
     """Model that represents widget options that are passed to Top.gg widget URL generated via
     :meth:`DBLClient.generate_widget`."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     id: t.Optional[int]
     """ID of a bot to generate the widget for. Must resolve to an ID of a listed bot when converted to a string."""
@@ -202,20 +204,16 @@ class BotData(DataDict[str, t.Any]):
     """Model that contains information about a listed bot on top.gg. The data this model contains can be found `here
     <https://docs.top.gg/api/bot/#bot-structure>`__."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     id: int
     """The ID of the bot."""
 
     username: str
     """The username of the bot."""
 
-    discriminator: str
-    """The discriminator of the bot."""
-
     avatar: t.Optional[str]
     """The avatar hash of the bot."""
-
-    def_avatar: str
-    """The avatar hash of the bot's default avatar."""
 
     prefix: str
     """The prefix of the bot."""
@@ -241,17 +239,11 @@ class BotData(DataDict[str, t.Any]):
     owners: t.List[int]
     """The IDs of the owners of the bot."""
 
-    guilds: t.List[int]
-    """The guilds the bot is in."""
-
     invite: t.Optional[str]
     """The invite URL of the bot."""
 
     date: datetime
     """The time the bot was added."""
-
-    certified_bot: bool
-    """Whether or not the bot is certified."""
 
     vanity: t.Optional[str]
     """The vanity URL of the bot."""
@@ -268,23 +260,76 @@ class BotData(DataDict[str, t.Any]):
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_dict(kwargs))
 
+    @property
+    def def_avatar(self) -> t.Optional[str]:
+        warnings.warn(
+            "def_avatar is no longer supported by Top.gg API v0. At the moment, this will always be None.",
+            DeprecationWarning,
+        )
+
+    @property
+    def discriminator(self) -> str:
+        warnings.warn(
+            "Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'.",
+            DeprecationWarning,
+        )
+        return "0"
+
+    @property
+    def lib(self) -> t.Optional[str]:
+        warnings.warn(
+            "lib is no longer supported by Top.gg API v0. At the moment, this will always be None.",
+            DeprecationWarning,
+        )
+
+    @property
+    def guilds(self) -> t.List[int]:
+        warnings.warn(
+            "Guilds list is no longer supported by Top.gg API v0. At the moment, this will always be an empty list.",
+            DeprecationWarning,
+        )
+        return []
+
+    @property
+    def certified_bot(self) -> bool:
+        warnings.warn(
+            "Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be False.",
+            DeprecationWarning,
+        )
+        return False
+
 
 class BotStatsData(DataDict[str, t.Any]):
-    """Model that contains information about a listed bot's guild and shard count."""
+    """Model that contains information about a listed bot's guild count."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     server_count: t.Optional[int]
     """The amount of servers the bot is in."""
-    shards: t.List[int]
-    """The amount of servers the bot is in per shard."""
-    shard_count: t.Optional[int]
-    """The amount of shards a bot has."""
 
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_stats_dict(kwargs))
 
+    @property
+    def shards(self) -> t.List[int]:
+        warnings.warn(
+            "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty list.",
+            DeprecationWarning,
+        )
+        return []
+
+    @property
+    def shard_count(self) -> t.Optional[int]:
+        warnings.warn(
+            "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return None.",
+            DeprecationWarning,
+        )
+
 
 class BriefUserData(DataDict[str, t.Any]):
     """Model that contains brief information about a Top.gg user."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     id: int
     """The Discord ID of the user."""
@@ -302,6 +347,8 @@ class BriefUserData(DataDict[str, t.Any]):
 class SocialData(DataDict[str, str]):
     """Model that contains social information about a top.gg user."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     youtube: str
     """The YouTube channel ID of the user."""
     reddit: str
@@ -318,14 +365,13 @@ class UserData(DataDict[str, t.Any]):
     """Model that contains information about a top.gg user. The data this model contains can be found `here
     <https://docs.top.gg/api/user/#structure>`__."""
 
+    __slots__: t.Tuple[str, ...] = ()
+
     id: int
     """The ID of the user."""
 
     username: str
     """The username of the user."""
-
-    discriminator: str
-    """The discriminator of the user."""
 
     social: SocialData
     """The social data of the user."""
@@ -335,9 +381,6 @@ class UserData(DataDict[str, t.Any]):
 
     supporter: bool
     """Whether or not the user is a supporter."""
-
-    certified_dev: bool
-    """Whether or not the user is a certified dev."""
 
     mod: bool
     """Whether or not the user is a Top.gg mod."""
@@ -351,16 +394,34 @@ class UserData(DataDict[str, t.Any]):
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_user_dict(kwargs))
 
+    @property
+    def certified_dev(self) -> bool:
+        warnings.warn(
+            "Certified dev is no longer supported by Top.gg API v0. At the moment, this will always be False.",
+            DeprecationWarning,
+        )
+        return False
+
+    @property
+    def discriminator(self) -> str:
+        warnings.warn(
+            "Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'.",
+            DeprecationWarning,
+        )
+        return "0"
+
 
 class VoteDataDict(DataDict[str, t.Any]):
     """Base model that represents received information from Top.gg via webhooks."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     type: str
     """Type of the action (``upvote`` or ``test``)."""
     user: int
     """ID of the voter."""
     query: DataDict
-    """Query parameters in :obj:`~.DataDict`."""
+    """Query parameters in :obj:`.DataDict`."""
 
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_vote_dict(kwargs))
@@ -368,6 +429,8 @@ class VoteDataDict(DataDict[str, t.Any]):
 
 class BotVoteData(VoteDataDict):
     """Model that contains information about a bot vote."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     bot: int
     """ID of the bot the user voted for."""
@@ -377,6 +440,8 @@ class BotVoteData(VoteDataDict):
 
 class GuildVoteData(VoteDataDict):
     """Model that contains information about a guild vote."""
+
+    __slots__: t.Tuple[str, ...] = ()
 
     guild: int
     """ID of the guild the user voted for."""
@@ -391,7 +456,10 @@ class StatsWrapper:
     """The guild count."""
 
     shard_count: t.Optional[int] = None
-    """The shard count."""
-
     shard_id: t.Optional[int] = None
-    """The shard ID the guild count belongs to."""
+
+    def __init__(self, guild_count: int, **kwargs):
+        if kwargs.get("shard_count") or kwargs.get("shard_id"):
+            warnings.warn("Posting shard-related data no longer has a use by Top.gg API v0.", DeprecationWarning)
+
+        self.guild_count = guild_count

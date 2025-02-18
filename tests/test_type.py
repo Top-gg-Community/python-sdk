@@ -3,7 +3,6 @@ import pytest
 from topgg import types
 
 d: dict = {
-    "defAvatar": "6debd47ed13483642cf09e832ed0bc1b",
     "invite": "",
     "website": "https://top.gg",
     "support": "KYZsaFb",
@@ -127,7 +126,7 @@ def test_bot_data_fields(bot_data: types.BotData) -> None:
     for attr in bot_data:
         if "id" in attr.lower():
             assert isinstance(bot_data[attr], int) or bot_data[attr] is None
-        elif attr in ("owners", "guilds"):
+        elif attr == "owners":
             for item in bot_data[attr]:
                 assert isinstance(item, int)
         assert bot_data.get(attr) == bot_data[attr] == getattr(bot_data, attr)
@@ -143,12 +142,7 @@ def test_widget_options_fields(widget_options: types.WidgetOptions) -> None:
     for attr in widget_options:
         if "id" in attr.lower():
             assert isinstance(widget_options[attr], int) or widget_options[attr] is None
-        assert (
-            widget_options.get(attr)
-            == widget_options[attr]
-            == widget_options[attr]
-            == getattr(widget_options, attr)
-        )
+        assert widget_options.get(attr) == widget_options[attr] == widget_options[attr] == getattr(widget_options, attr)
 
 
 def test_vote_data_fields(vote_data: types.VoteDataDict) -> None:
@@ -165,11 +159,7 @@ def test_bot_vote_data_fields(bot_vote_data: types.BotVoteData) -> None:
 
     assert isinstance(bot_vote_data["bot"], int)
     for attr in bot_vote_data:
-        assert (
-            getattr(bot_vote_data, attr)
-            == bot_vote_data.get(attr)
-            == bot_vote_data[attr]
-        )
+        assert getattr(bot_vote_data, attr) == bot_vote_data.get(attr) == bot_vote_data[attr]
 
 
 def test_server_vote_data_fields(server_vote_data: types.BotVoteData) -> None:
@@ -178,20 +168,11 @@ def test_server_vote_data_fields(server_vote_data: types.BotVoteData) -> None:
 
     assert isinstance(server_vote_data["guild"], int)
     for attr in server_vote_data:
-        assert (
-            getattr(server_vote_data, attr)
-            == server_vote_data.get(attr)
-            == server_vote_data[attr]
-        )
+        assert getattr(server_vote_data, attr) == server_vote_data.get(attr) == server_vote_data[attr]
 
 
 def test_bot_stats_data_attrs(bot_stats_data: types.BotStatsData) -> None:
-    for count in ("server_count", "shard_count"):
-        assert isinstance(bot_stats_data[count], int) or bot_stats_data[count] is None
-    assert isinstance(bot_stats_data.shards, list)
-    if bot_stats_data.shards:
-        for shard in bot_stats_data.shards:
-            assert isinstance(shard, int)
+    assert isinstance(bot_stats_data["server_count"], int) or bot_stats_data["server_count"] is None
 
 
 def test_user_data_attrs(user_data: types.UserData) -> None:
