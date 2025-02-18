@@ -154,13 +154,22 @@ class DBLClient(DataContainerMixin):
                 If the client has been closed.
         """
         if stats:
+            warnings.warn(
+                "Using stats no longer has a use by Top.gg API v0. Soon, all you need is just your bot's server count.",
+                DeprecationWarning,
+            )
+
             guild_count = stats.guild_count
-            shard_count = stats.shard_count
-            shard_id = stats.shard_id
+
+            if stats.shard_count or stats.shard_id:
+                warnings.warn("Posting shard-related data no longer has a use by Top.gg API v0.", DeprecationWarning)
         elif guild_count is None:
-            raise TypeError("stats or guild_count must be provided.")
+            raise TypeError("guild_count must be provided.")
+        elif shard_count or shard_id:
+            warnings.warn("Posting shard-related data no longer has a use by Top.gg API v0.", DeprecationWarning)
+
         await self._ensure_session()
-        await self.http.post_guild_count(guild_count, shard_count, shard_id)
+        await self.http.post_guild_count(guild_count)
 
     async def get_guild_count(self) -> types.BotStatsData:
         """Gets this bot's guild count and shard info from Top.gg.
@@ -225,13 +234,6 @@ class DBLClient(DataContainerMixin):
         search: t.Optional[t.Dict[str, t.Any]] = None,
         fields: t.Optional[t.List[str]] = None,
     ) -> types.DataDict[str, t.Any]:
-        """
-        Warning:
-            This function is deprecated.
-        """
-
-        warnings.warn("get_bots is now deprecated.", DeprecationWarning)
-
         sort = sort or ""
         search = search or {}
         fields = fields or []

@@ -264,12 +264,11 @@ class AutoPoster:
                     if isinstance(err, errors.Unauthorized):
                         raise err from None
                 else:
-                    on_success = getattr(self, "_success", None)
-                    if on_success:
+                    if on_success := getattr(self, "_success", None):
                         await self.client._invoke_callback(on_success)
 
                 if self._stopping:
-                    return None
+                    return
 
                 await asyncio.sleep(self.interval)
         finally:
@@ -305,7 +304,7 @@ class AutoPoster:
             because this will post once before stopping as opposed to cancel immediately.
         """
         if not self.is_running:
-            return None
+            return
 
         self._stopping = True
 
@@ -322,4 +321,3 @@ class AutoPoster:
 
         self._task.cancel()
         self._refresh_state()
-        return None

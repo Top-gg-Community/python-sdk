@@ -30,7 +30,7 @@ import json
 import logging
 import sys
 import warnings
-from datetime import datetime
+from time import time
 from typing import Any, Coroutine, Dict, Iterable, List, Optional, Sequence, Union, cast, Tuple
 
 import aiohttp
@@ -175,20 +175,9 @@ class HTTPClient:
         if self._own_session:
             await self.session.close()
 
-    async def post_guild_count(
-        self,
-        guild_count: Optional[Union[int, List[int]]],
-        shard_count: Optional[int],
-        shard_id: Optional[int],
-    ) -> None:
+    async def post_guild_count(self, guild_count: Optional[Union[int, List[int]]]) -> None:
         """Posts bot's guild count and shards info on Top.gg."""
-        payload = {"server_count": guild_count}
-        if shard_count:
-            payload["shard_count"] = shard_count
-        if shard_id:
-            payload["shard_id"] = shard_id
-
-        await self.request("POST", "/bots/stats", json=payload)
+        await self.request("POST", "/bots/stats", json={"server_count": guild_count})
 
     def get_weekend_status(self) -> Coroutine[Any, Any, dict]:
         """Gets the weekend status from Top.gg."""
@@ -214,16 +203,9 @@ class HTTPClient:
         search: Dict[str, str],
         fields: Sequence[str],
     ) -> Coroutine[Any, Any, dict]:
-        """
-        Warning:
-            This function is deprecated.
-        """
-
-        warnings.warn("get_bots is now deprecated.", DeprecationWarning)
-
         limit = min(limit, 500)
         fields = ", ".join(fields)
-        search = " ".join([f"{field}: {value}" for field, value in search.items()])
+        search = " ".join(f"{field}: {value}" for field, value in search.items())
 
         return self.request(
             "GET",
@@ -248,13 +230,16 @@ class HTTPClient:
 
 async def _rate_limit_handler(until: float) -> None:
     """Handles the displayed message when we are ratelimited."""
-    duration = round(until - datetime.utcnow().timestamp())
+    duration = round(until - time())
     mins = duration / 60
     fmt = "We have exhausted a ratelimit quota. Retrying in %.2f seconds (%.3f minutes)."
     _LOGGER.warning(fmt, duration, mins)
 
 
 def to_json(obj: Any) -> str:
-    if json.__name__ == "ujson":
-        return json.dumps(obj, ensure_ascii=True)
-    return json.dumps(obj, separators=(",", ":"), ensure_ascii=True)
+    kwargs = {"ensure_ascii": True}
+
+    if json.__name__ != "ujson":
+        kwargs["separators"] = (",", ":")
+
+    return json.dumps(obj, **kwargs)
