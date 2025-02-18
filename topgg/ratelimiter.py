@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 import asyncio
 import collections
-from datetime import datetime
+from time import time
 from types import TracebackType
 from typing import Any, Awaitable, Callable, List, Optional, Type, Tuple
 
@@ -62,10 +62,10 @@ class AsyncRateLimiter:
     async def __aenter__(self) -> "AsyncRateLimiter":
         async with self.__lock:
             if len(self.calls) >= self.max_calls:
-                until = datetime.utcnow().timestamp() + self.period - self._timespan
+                until = time() + self.period - self._timespan
                 if self.callback:
                     asyncio.ensure_future(self.callback(until))
-                sleep_time = until - datetime.utcnow().timestamp()
+                sleep_time = until - time()
                 if sleep_time > 0:
                     await asyncio.sleep(sleep_time)
             return self
@@ -78,7 +78,7 @@ class AsyncRateLimiter:
     ) -> None:
         async with self.__lock:
             # Store the last operation timestamp.
-            self.calls.append(datetime.utcnow().timestamp())
+            self.calls.append(time())
 
             while self._timespan >= self.period:
                 self.calls.popleft()
