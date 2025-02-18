@@ -60,7 +60,7 @@ def data(type_: t.Type[T]) -> T:
 
             @autopost.stats()
             def get_stats(client: Client = topgg.data(Client)):
-                return topgg.StatsWrapper(guild_count=len(client.guilds), shard_count=len(client.shards))
+                return topgg.StatsWrapper(guild_count=len(client.guilds))
     """
     return t.cast(T, Data(type_))
 

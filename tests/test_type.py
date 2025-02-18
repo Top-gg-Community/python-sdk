@@ -173,12 +173,7 @@ def test_server_vote_data_fields(server_vote_data: types.BotVoteData) -> None:
 
 
 def test_bot_stats_data_attrs(bot_stats_data: types.BotStatsData) -> None:
-    for count in ("server_count", "shard_count"):
-        assert isinstance(bot_stats_data[count], int) or bot_stats_data[count] is None
-    assert isinstance(bot_stats_data.shards, list)
-    if bot_stats_data.shards:
-        for shard in bot_stats_data.shards:
-            assert isinstance(shard, int)
+    assert isinstance(bot_stats_data["server_count"], int) or bot_stats_data["server_count"] is None
 
 
 def test_user_data_attrs(user_data: types.UserData) -> None:

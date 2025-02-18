@@ -26,6 +26,7 @@ __all__ = ("WidgetOptions", "StatsWrapper")
 
 import dataclasses
 import typing as t
+import warnings
 from datetime import datetime
 
 KT = t.TypeVar("KT")
@@ -115,10 +116,6 @@ def parse_bot_stats_dict(d: dict) -> dict:
 
     if "server_count" not in data:
         data["server_count"] = None
-    if "shards" not in data:
-        data["shards"] = []
-    if "shard_count" not in data:
-        data["shard_count"] = None
 
     return data
 
@@ -270,19 +267,33 @@ class BotData(DataDict[str, t.Any]):
 
 
 class BotStatsData(DataDict[str, t.Any]):
-    """Model that contains information about a listed bot's guild and shard count."""
+    """Model that contains information about a listed bot's guild count."""
 
     __slots__: t.Tuple[str, ...] = ()
 
     server_count: t.Optional[int]
     """The amount of servers the bot is in."""
-    shards: t.List[int]
-    """The amount of servers the bot is in per shard."""
-    shard_count: t.Optional[int]
-    """The amount of shards a bot has."""
 
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_stats_dict(kwargs))
+
+    @property
+    def shards(self) -> t.List[int]:
+        """DEPRECATED: No longer supported by Top.gg API v0. At the moment, this will always return an empty array."""
+
+        warnings.warn(
+            "No longer supported by Top.gg API v0. At the moment, this will always return an empty array.",
+            DeprecationWarning,
+        )
+        return []
+
+    @property
+    def shard_count(self) -> t.Optional[int]:
+        """DEPRECATED: No longer supported by Top.gg API v0. At the moment, this will always return None."""
+
+        warnings.warn(
+            "No longer supported by Top.gg API v0. At the moment, this will always return None.", DeprecationWarning
+        )
 
 
 class BriefUserData(DataDict[str, t.Any]):
@@ -405,7 +416,10 @@ class StatsWrapper:
     """The guild count."""
 
     shard_count: t.Optional[int] = None
-    """The shard count."""
-
     shard_id: t.Optional[int] = None
-    """The shard ID the guild count belongs to."""
+
+    def __init__(self, guild_count: int, **kwargs):
+        if kwargs.get("shard_count") or kwargs.get("shard_id"):
+            warnings.warn("Posting shard-related data no longer has a use by Top.gg API v0.", DeprecationWarning)
+
+        self.guild_count = guild_count

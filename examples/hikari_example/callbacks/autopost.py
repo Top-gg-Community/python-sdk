@@ -58,4 +58,4 @@ def on_autopost_error(
 
 
 def stats(app: hikari.GatewayBot = topgg.data(hikari.GatewayBot)):
-    return topgg.StatsWrapper(guild_count=len(app.cache.get_guilds_view()), shard_count=app.shard_count)
+    return topgg.StatsWrapper(guild_count=len(app.cache.get_guilds_view()))

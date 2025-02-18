@@ -127,7 +127,7 @@ class DBLClient(DataContainerMixin):
         shard_count: t.Any = None,
         shard_id: t.Any = None,
     ) -> None:
-        """Posts your bot's guild count and shards info to Top.gg.
+        """Posts your bot's guild count to Top.gg.
 
         .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
@@ -136,16 +136,12 @@ class DBLClient(DataContainerMixin):
 
         Args:
             stats (:obj:`~.types.StatsWrapper`)
-                An instance of StatsWrapper containing guild_count, shard_count, and shard_id.
+                An instance of StatsWrapper containing guild_count.
 
         Keyword Arguments:
             guild_count (Optional[Union[:obj:`int`, List[:obj:`int`]]])
-                Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
+                Number of guilds the bot is in.
                 If not specified, length of provided client's property `.guilds` will be posted.
-            shard_count (Optional[:obj:`int`])
-                The total number of shards.
-            shard_id (Optional[:obj:`int`])
-                The index of the current shard. Top.gg uses `0 based indexing`_ for shards.
 
         Raises:
             TypeError
@@ -172,11 +168,11 @@ class DBLClient(DataContainerMixin):
         await self.http.post_guild_count(guild_count)
 
     async def get_guild_count(self) -> types.BotStatsData:
-        """Gets this bot's guild count and shard info from Top.gg.
+        """Gets this bot's guild count from Top.gg.
 
         Returns:
             :obj:`~.types.BotStatsData`:
-                The guild count and shards of a bot on Top.gg.
+                The guild count on Top.gg.
 
         Raises:
             :exc:`~.errors.ClientStateException`
