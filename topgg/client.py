@@ -129,8 +129,6 @@ class DBLClient(DataContainerMixin):
     ) -> None:
         """Posts your bot's guild count to Top.gg.
 
-        .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
-
         Warning:
             You can't provide both args and kwargs at once.
 
@@ -139,7 +137,7 @@ class DBLClient(DataContainerMixin):
                 An instance of StatsWrapper containing guild_count.
 
         Keyword Arguments:
-            guild_count (Optional[Union[:obj:`int`, List[:obj:`int`]]])
+            guild_count (Optional[:obj:`int`])
                 Number of guilds the bot is in.
                 If not specified, length of provided client's property `.guilds` will be posted.
 
