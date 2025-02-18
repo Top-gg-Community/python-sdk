@@ -291,10 +291,10 @@ class BotData(DataDict[str, t.Any]):
 
     @property
     def certified_bot(self) -> bool:
-        """DEPRECATED: Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be false."""
+        """DEPRECATED: Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be False."""
 
         warnings.warn(
-            "Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be false.",
+            "Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be False.",
             DeprecationWarning,
         )
         return False
@@ -313,10 +313,10 @@ class BotStatsData(DataDict[str, t.Any]):
 
     @property
     def shards(self) -> t.List[int]:
-        """DEPRECATED: Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty array."""
+        """DEPRECATED: Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty list."""
 
         warnings.warn(
-            "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty array.",
+            "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty list.",
             DeprecationWarning,
         )
         return []

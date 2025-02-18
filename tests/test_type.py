@@ -3,7 +3,6 @@ import pytest
 from topgg import types
 
 d: dict = {
-    "defAvatar": "6debd47ed13483642cf09e832ed0bc1b",
     "invite": "",
     "website": "https://top.gg",
     "support": "KYZsaFb",
@@ -127,7 +126,7 @@ def test_bot_data_fields(bot_data: types.BotData) -> None:
     for attr in bot_data:
         if "id" in attr.lower():
             assert isinstance(bot_data[attr], int) or bot_data[attr] is None
-        elif attr in ("owners", "guilds"):
+        elif attr == "owners":
             for item in bot_data[attr]:
                 assert isinstance(item, int)
         assert bot_data.get(attr) == bot_data[attr] == getattr(bot_data, attr)
