@@ -280,6 +280,15 @@ class BotData(DataDict[str, t.Any]):
         return "0"
 
     @property
+    def lib(self) -> t.Optional[str]:
+        """DEPRECATED: lib is no longer supported by Top.gg API v0. At the moment, this will always be None."""
+
+        warnings.warn(
+            "lib is no longer supported by Top.gg API v0. At the moment, this will always be None.",
+            DeprecationWarning,
+        )
+
+    @property
     def guilds(self) -> t.List[int]:
         """DEPRECATED: Guilds list is no longer supported by Top.gg API v0. At the moment, this will always be an empty list."""
 
