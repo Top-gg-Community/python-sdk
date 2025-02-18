@@ -92,7 +92,10 @@ def parse_bot_dict(d: dict) -> dict:
         data["owners"] = [int(e) for e in owners]
 
     # TODO: remove this soon
-    data["guilds"] = []
+    data.pop("defAvatar", None)
+    data.pop("discriminator", None)
+    data.pop("guilds", None)
+    data.pop("certifiedBot", None)
 
     for key, value in data.copy().items():
         converted_key = camel_to_snake(key)
@@ -105,6 +108,10 @@ def parse_bot_dict(d: dict) -> dict:
 
 def parse_user_dict(d: dict) -> dict:
     data = d.copy()
+
+    # TODO: remove this soon
+    data.pop("discriminator", None)
+    data.pop("certifiedDev", None)
 
     data["social"] = SocialData(**data.get("social", {}))
 
@@ -205,14 +212,8 @@ class BotData(DataDict[str, t.Any]):
     username: str
     """The username of the bot."""
 
-    discriminator: str
-    """The discriminator of the bot."""
-
     avatar: t.Optional[str]
     """The avatar hash of the bot."""
-
-    def_avatar: t.Optional[str]
-    """The avatar hash of the bot's default avatar."""
 
     prefix: str
     """The prefix of the bot."""
@@ -238,17 +239,11 @@ class BotData(DataDict[str, t.Any]):
     owners: t.List[int]
     """The IDs of the owners of the bot."""
 
-    guilds: t.List[int]
-    """The guilds the bot is in."""
-
     invite: t.Optional[str]
     """The invite URL of the bot."""
 
     date: datetime
     """The time the bot was added."""
-
-    certified_bot: bool
-    """Whether or not the bot is certified."""
 
     vanity: t.Optional[str]
     """The vanity URL of the bot."""
@@ -265,6 +260,45 @@ class BotData(DataDict[str, t.Any]):
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_dict(kwargs))
 
+    @property
+    def def_avatar(self) -> t.Optional[str]:
+        """DEPRECATED: def_avatar is no longer supported by Top.gg API v0. At the moment, this will always be None."""
+
+        warnings.warn(
+            "def_avatar is no longer supported by Top.gg API v0. At the moment, this will always be None.",
+            DeprecationWarning,
+        )
+
+    @property
+    def discriminator(self) -> str:
+        """DEPRECATED: Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'."""
+
+        warnings.warn(
+            "Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'.",
+            DeprecationWarning,
+        )
+        return "0"
+
+    @property
+    def guilds(self) -> t.List[int]:
+        """DEPRECATED: Guilds list is no longer supported by Top.gg API v0. At the moment, this will always be an empty list."""
+
+        warnings.warn(
+            "Guilds list is no longer supported by Top.gg API v0. At the moment, this will always be an empty list.",
+            DeprecationWarning,
+        )
+        return []
+
+    @property
+    def certified_bot(self) -> bool:
+        """DEPRECATED: Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be false."""
+
+        warnings.warn(
+            "Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be false.",
+            DeprecationWarning,
+        )
+        return False
+
 
 class BotStatsData(DataDict[str, t.Any]):
     """Model that contains information about a listed bot's guild count."""
@@ -279,20 +313,21 @@ class BotStatsData(DataDict[str, t.Any]):
 
     @property
     def shards(self) -> t.List[int]:
-        """DEPRECATED: No longer supported by Top.gg API v0. At the moment, this will always return an empty array."""
+        """DEPRECATED: Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty array."""
 
         warnings.warn(
-            "No longer supported by Top.gg API v0. At the moment, this will always return an empty array.",
+            "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty array.",
             DeprecationWarning,
         )
         return []
 
     @property
     def shard_count(self) -> t.Optional[int]:
-        """DEPRECATED: No longer supported by Top.gg API v0. At the moment, this will always return None."""
+        """DEPRECATED: Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return None."""
 
         warnings.warn(
-            "No longer supported by Top.gg API v0. At the moment, this will always return None.", DeprecationWarning
+            "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return None.",
+            DeprecationWarning,
         )
 
 
@@ -343,9 +378,6 @@ class UserData(DataDict[str, t.Any]):
     username: str
     """The username of the user."""
 
-    discriminator: str
-    """The discriminator of the user."""
-
     social: SocialData
     """The social data of the user."""
 
@@ -354,9 +386,6 @@ class UserData(DataDict[str, t.Any]):
 
     supporter: bool
     """Whether or not the user is a supporter."""
-
-    certified_dev: bool
-    """Whether or not the user is a certified dev."""
 
     mod: bool
     """Whether or not the user is a Top.gg mod."""
@@ -369,6 +398,26 @@ class UserData(DataDict[str, t.Any]):
 
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_user_dict(kwargs))
+
+    @property
+    def certified_dev(self) -> bool:
+        """DEPRECATED: Certified dev is no longer supported by Top.gg API v0. At the moment, this will always be False."""
+
+        warnings.warn(
+            "Certified dev is no longer supported by Top.gg API v0. At the moment, this will always be False.",
+            DeprecationWarning,
+        )
+        return False
+
+    @property
+    def discriminator(self) -> str:
+        """DEPRECATED: Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'."""
+
+        warnings.warn(
+            "Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'.",
+            DeprecationWarning,
+        )
+        return "0"
 
 
 class VoteDataDict(DataDict[str, t.Any]):
