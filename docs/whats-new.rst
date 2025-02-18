@@ -7,9 +7,18 @@ This page keeps a detailed human friendly rendering of what's new and changed in
 v2.0.1
 ======
 * Added Python 3.12 support (:issue:`78`)
-* Dropped Python 3.6 and 3.7 support (:issue:`75`)
+* Dropped Python 3.6, 3.7, and 3.8 support (:issue:`75`)
 * Removed the need to manually set a ``default_bot_id`` property
-* :attr:`.BotData.def_avatar` is now an optional string
+* Posting shard-related data is now deprecated
+* :attr:`.BotData.certified_bot` is now deprecated
+* :attr:`.BotData.def_avatar` is now deprecated
+* :attr:`.BotData.discriminator` is now deprecated
+* :attr:`.BotData.lib` is now deprecated
+* :attr:`.BotData.guilds` is now deprecated
+* :attr:`.BotData.shards` is now deprecated
+* :attr:`.BotData.shard_count` is now deprecated
+* :attr:`.UserData.certified_dev` is now deprecated
+* :attr:`.UserData.discriminator` is now deprecated
 * :meth:`.DBLClient.get_guild_count` no longer accepts a ``bot_id`` argument
 * :meth:`.DBLClient.get_bot_votes` no longer raises a :class:`.ClientException` without a ``default_bot_id`` property
 * :meth:`.DBLClient.get_bot_info` no longer raises a :class:`.ClientException` without a ``default_bot_id`` property

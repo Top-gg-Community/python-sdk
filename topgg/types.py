@@ -36,7 +36,7 @@ Colours = Colors
 
 
 def camel_to_snake(string: str) -> str:
-    return "".join(["_" + c.lower() if c.isupper() else c for c in string]).lstrip("_")
+    return "".join("_" + c.lower() if c.isupper() else c for c in string).lstrip("_")
 
 
 def parse_vote_dict(d: dict) -> dict:
@@ -262,8 +262,6 @@ class BotData(DataDict[str, t.Any]):
 
     @property
     def def_avatar(self) -> t.Optional[str]:
-        """DEPRECATED: def_avatar is no longer supported by Top.gg API v0. At the moment, this will always be None."""
-
         warnings.warn(
             "def_avatar is no longer supported by Top.gg API v0. At the moment, this will always be None.",
             DeprecationWarning,
@@ -271,8 +269,6 @@ class BotData(DataDict[str, t.Any]):
 
     @property
     def discriminator(self) -> str:
-        """DEPRECATED: Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'."""
-
         warnings.warn(
             "Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'.",
             DeprecationWarning,
@@ -281,8 +277,6 @@ class BotData(DataDict[str, t.Any]):
 
     @property
     def lib(self) -> t.Optional[str]:
-        """DEPRECATED: lib is no longer supported by Top.gg API v0. At the moment, this will always be None."""
-
         warnings.warn(
             "lib is no longer supported by Top.gg API v0. At the moment, this will always be None.",
             DeprecationWarning,
@@ -290,8 +284,6 @@ class BotData(DataDict[str, t.Any]):
 
     @property
     def guilds(self) -> t.List[int]:
-        """DEPRECATED: Guilds list is no longer supported by Top.gg API v0. At the moment, this will always be an empty list."""
-
         warnings.warn(
             "Guilds list is no longer supported by Top.gg API v0. At the moment, this will always be an empty list.",
             DeprecationWarning,
@@ -300,8 +292,6 @@ class BotData(DataDict[str, t.Any]):
 
     @property
     def certified_bot(self) -> bool:
-        """DEPRECATED: Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be False."""
-
         warnings.warn(
             "Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be False.",
             DeprecationWarning,
@@ -322,8 +312,6 @@ class BotStatsData(DataDict[str, t.Any]):
 
     @property
     def shards(self) -> t.List[int]:
-        """DEPRECATED: Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty list."""
-
         warnings.warn(
             "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty list.",
             DeprecationWarning,
@@ -332,8 +320,6 @@ class BotStatsData(DataDict[str, t.Any]):
 
     @property
     def shard_count(self) -> t.Optional[int]:
-        """DEPRECATED: Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return None."""
-
         warnings.warn(
             "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return None.",
             DeprecationWarning,
@@ -410,8 +396,6 @@ class UserData(DataDict[str, t.Any]):
 
     @property
     def certified_dev(self) -> bool:
-        """DEPRECATED: Certified dev is no longer supported by Top.gg API v0. At the moment, this will always be False."""
-
         warnings.warn(
             "Certified dev is no longer supported by Top.gg API v0. At the moment, this will always be False.",
             DeprecationWarning,
@@ -420,8 +404,6 @@ class UserData(DataDict[str, t.Any]):
 
     @property
     def discriminator(self) -> str:
-        """DEPRECATED: Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'."""
-
         warnings.warn(
             "Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'.",
             DeprecationWarning,
