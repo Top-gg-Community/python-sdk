@@ -26,7 +26,6 @@ __all__ = ("WidgetOptions", "StatsWrapper")
 
 import dataclasses
 import typing as t
-import warnings
 from datetime import datetime
 
 KT = t.TypeVar("KT")
@@ -260,44 +259,6 @@ class BotData(DataDict[str, t.Any]):
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_dict(kwargs))
 
-    @property
-    def def_avatar(self) -> t.Optional[str]:
-        warnings.warn(
-            "def_avatar is no longer supported by Top.gg API v0. At the moment, this will always be None.",
-            DeprecationWarning,
-        )
-
-    @property
-    def discriminator(self) -> str:
-        warnings.warn(
-            "Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'.",
-            DeprecationWarning,
-        )
-        return "0"
-
-    @property
-    def lib(self) -> t.Optional[str]:
-        warnings.warn(
-            "lib is no longer supported by Top.gg API v0. At the moment, this will always be None.",
-            DeprecationWarning,
-        )
-
-    @property
-    def guilds(self) -> t.List[int]:
-        warnings.warn(
-            "Guilds list is no longer supported by Top.gg API v0. At the moment, this will always be an empty list.",
-            DeprecationWarning,
-        )
-        return []
-
-    @property
-    def certified_bot(self) -> bool:
-        warnings.warn(
-            "Certified bot is no longer supported by Top.gg API v0. At the moment, this will always be False.",
-            DeprecationWarning,
-        )
-        return False
-
 
 class BotStatsData(DataDict[str, t.Any]):
     """Model that contains information about a listed bot's guild count."""
@@ -309,21 +270,6 @@ class BotStatsData(DataDict[str, t.Any]):
 
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_bot_stats_dict(kwargs))
-
-    @property
-    def shards(self) -> t.List[int]:
-        warnings.warn(
-            "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return an empty list.",
-            DeprecationWarning,
-        )
-        return []
-
-    @property
-    def shard_count(self) -> t.Optional[int]:
-        warnings.warn(
-            "Shard-related data is no longer supported by Top.gg API v0. At the moment, this will always return None.",
-            DeprecationWarning,
-        )
 
 
 class BriefUserData(DataDict[str, t.Any]):
@@ -394,22 +340,6 @@ class UserData(DataDict[str, t.Any]):
     def __init__(self, **kwargs: t.Any):
         super().__init__(**parse_user_dict(kwargs))
 
-    @property
-    def certified_dev(self) -> bool:
-        warnings.warn(
-            "Certified dev is no longer supported by Top.gg API v0. At the moment, this will always be False.",
-            DeprecationWarning,
-        )
-        return False
-
-    @property
-    def discriminator(self) -> str:
-        warnings.warn(
-            "Discriminators are no longer supported by Top.gg API v0. At the moment, this will always be '0'.",
-            DeprecationWarning,
-        )
-        return "0"
-
 
 class VoteDataDict(DataDict[str, t.Any]):
     """Base model that represents received information from Top.gg via webhooks."""
@@ -454,12 +384,3 @@ ServerVoteData = GuildVoteData
 class StatsWrapper:
     guild_count: int
     """The guild count."""
-
-    shard_count: t.Optional[int] = None
-    shard_id: t.Optional[int] = None
-
-    def __init__(self, guild_count: int, **kwargs):
-        if kwargs.get("shard_count") or kwargs.get("shard_id"):
-            warnings.warn("Posting shard-related data no longer has a use by Top.gg API v0.", DeprecationWarning)
-
-        self.guild_count = guild_count

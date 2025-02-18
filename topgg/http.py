@@ -29,7 +29,6 @@ import asyncio
 import json
 import logging
 import sys
-import warnings
 from time import time
 from typing import Any, Coroutine, Dict, Iterable, List, Optional, Sequence, Union, cast, Tuple
 
@@ -175,8 +174,8 @@ class HTTPClient:
         if self._own_session:
             await self.session.close()
 
-    async def post_guild_count(self, guild_count: Optional[Union[int, List[int]]]) -> None:
-        """Posts bot's guild count and shards info on Top.gg."""
+    async def post_guild_count(self, guild_count: Optional[int]) -> None:
+        """Posts bot's guild count on Top.gg."""
         await self.request("POST", "/bots/stats", json={"server_count": guild_count})
 
     def get_weekend_status(self) -> Coroutine[Any, Any, dict]:

@@ -28,7 +28,6 @@ __all__ = ("DBLClient",)
 import base64
 import json
 import typing as t
-import warnings
 
 import aiohttp
 
@@ -107,39 +106,14 @@ class DBLClient(DataContainerMixin):
         data = await self.http.get_weekend_status()
         return data["is_weekend"]
 
-    @t.overload
-    async def post_guild_count(self, stats: types.StatsWrapper) -> None: ...
-
-    @t.overload
-    async def post_guild_count(
-        self,
-        *,
-        guild_count: t.Union[int, t.List[int]],
-        shard_count: t.Optional[int] = None,
-        shard_id: t.Optional[int] = None,
-    ) -> None: ...
-
-    async def post_guild_count(
-        self,
-        stats: t.Any = None,
-        *,
-        guild_count: t.Any = None,
-        shard_count: t.Any = None,
-        shard_id: t.Any = None,
-    ) -> None:
+    async def post_guild_count(self, guild_count: t.Optional[int] = None) -> None:
         """Posts your bot's guild count to Top.gg.
-
-        .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
 
         Warning:
             You can't provide both args and kwargs at once.
 
         Args:
-            stats (:obj:`~.types.StatsWrapper`)
-                An instance of StatsWrapper containing guild_count.
-
-        Keyword Arguments:
-            guild_count (Optional[Union[:obj:`int`, List[:obj:`int`]]])
+            guild_count (Optional[:obj:`int`])
                 Number of guilds the bot is in.
                 If not specified, length of provided client's property `.guilds` will be posted.
 
@@ -149,20 +123,8 @@ class DBLClient(DataContainerMixin):
             :exc:`~.errors.ClientStateException`
                 If the client has been closed.
         """
-        if stats:
-            warnings.warn(
-                "Using stats no longer has a use by Top.gg API v0. Soon, all you need is just your bot's server count.",
-                DeprecationWarning,
-            )
-
-            guild_count = stats.guild_count
-
-            if stats.shard_count or stats.shard_id:
-                warnings.warn("Posting shard-related data no longer has a use by Top.gg API v0.", DeprecationWarning)
-        elif guild_count is None:
+        if guild_count is None:
             raise TypeError("guild_count must be provided.")
-        elif shard_count or shard_id:
-            warnings.warn("Posting shard-related data no longer has a use by Top.gg API v0.", DeprecationWarning)
 
         await self._ensure_session()
         await self.http.post_guild_count(guild_count)
