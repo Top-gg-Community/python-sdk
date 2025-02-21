@@ -1,110 +1,95 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2021 Assanali Mukhanov
+Copyright (c) 2021 Assanali Mukhanov & Top.gg
+Copyright (c) 2024-2025 null8626 & Top.gg
 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
 import asyncio
-import collections
+
 from time import time
+from collections import deque
 from types import TracebackType
-from typing import Any, Awaitable, Callable, List, Optional, Type, Tuple
+from typing import Type, Tuple, Iterable
 
 
-class AsyncRateLimiter:
-    """
-    Provides rate limiting for an operation with a configurable number of requests for a time period.
-    """
+class Ratelimiter:
+  __slots__: Tuple[str, ...] = ('__lock', '__max_calls', '__period', '__calls')
 
-    __slots__: Tuple[str, ...] = ("__lock", "callback", "max_calls", "period", "calls")
+  def __init__(
+    self,
+    max_calls: int,
+    period: float = 1.0,
+  ):
+    self.__calls = deque()
+    self.__period = period
+    self.__max_calls = max_calls
+    self.__lock = asyncio.Lock()
 
-    __lock: asyncio.Lock
-    callback: Optional[Callable[[float], Awaitable[Any]]]
-    max_calls: int
-    period: float
-    calls: collections.deque
+  async def __aenter__(self) -> 'Ratelimiter':
+    async with self.__lock:
+      if len(self.__calls) >= self.__max_calls:
+        until = time() + self.__period - self._timespan
 
-    def __init__(
-        self,
-        max_calls: int,
-        period: float = 1.0,
-        callback: Optional[Callable[[float], Awaitable[Any]]] = None,
-    ):
-        if period <= 0:
-            raise ValueError("Rate limiting period should be > 0")
-        if max_calls <= 0:
-            raise ValueError("Rate limiting number of calls should be > 0")
-        self.calls = collections.deque()
+        if (sleep_time := until - time()) > 0:
+          await asyncio.sleep(sleep_time)
 
-        self.period = period
-        self.max_calls = max_calls
-        self.callback = callback
-        self.__lock = asyncio.Lock()
+      return self
 
-    async def __aenter__(self) -> "AsyncRateLimiter":
-        async with self.__lock:
-            if len(self.calls) >= self.max_calls:
-                until = time() + self.period - self._timespan
-                if self.callback:
-                    asyncio.ensure_future(self.callback(until))
-                if (sleep_time := until - time()) > 0:
-                    await asyncio.sleep(sleep_time)
-            return self
+  async def __aexit__(
+    self,
+    _exc_type: Type[BaseException],
+    _exc_val: BaseException,
+    _exc_tb: TracebackType,
+  ) -> None:
+    async with self.__lock:
+      # Store the last operation timestamp.
+      self.__calls.append(time())
 
-    async def __aexit__(
-        self,
-        exc_type: Type[BaseException],
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ) -> None:
-        async with self.__lock:
-            # Store the last operation timestamp.
-            self.calls.append(time())
+      while self._timespan >= self.__period:
+        self.__calls.popleft()
 
-            while self._timespan >= self.period:
-                self.calls.popleft()
-
-    @property
-    def _timespan(self) -> float:
-        return self.calls[-1] - self.calls[0]
+  @property
+  def _timespan(self) -> float:
+    return self.__calls[-1] - self.__calls[0]
 
 
-class AsyncRateLimiterManager:
-    __slots__: Tuple[str, ...] = ("rate_limiters",)
+class RatelimiterManager:
+  __slots__: Tuple[str, ...] = ('__ratelimiters',)
 
-    rate_limiters: List[AsyncRateLimiter]
+  def __init__(self, ratelimiters: Iterable[Ratelimiter]):
+    self.__ratelimiters = ratelimiters
 
-    def __init__(self, rate_limiters: List[AsyncRateLimiter]):
-        self.rate_limiters = rate_limiters
+  async def __aenter__(self) -> 'RatelimiterManager':
+    for manager in self.__ratelimiters:
+      await manager.__aenter__()
 
-    async def __aenter__(self) -> "AsyncRateLimiterManager":
-        for manager in self.rate_limiters:
-            await manager.__aenter__()
+    return self
 
-        return self
-
-    async def __aexit__(
-        self,
-        exc_type: Type[BaseException],
-        exc_val: BaseException,
-        exc_tb: TracebackType,
-    ) -> None:
-        await asyncio.gather(*(manager.__aexit__(exc_type, exc_val, exc_tb) for manager in self.rate_limiters))
+  async def __aexit__(
+    self,
+    exc_type: Type[BaseException],
+    exc_val: BaseException,
+    exc_tb: TracebackType,
+  ) -> None:
+    await asyncio.gather(
+      *(manager.__aexit__(exc_type, exc_val, exc_tb) for manager in self.__ratelimiters)
+    )

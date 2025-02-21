@@ -1,295 +1,252 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2021 Assanali Mukhanov
-Copyright (c) 2024-2025 null8626
+Copyright (c) 2021 Assanali Mukhanov & Top.gg
+Copyright (c) 2024-2025 null8626 & Top.gg
 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
-__all__ = ("DBLClient",)
-
-import base64
+from aiohttp import ClientSession, ClientTimeout
+from typing import Optional, Tuple, List
+from collections import namedtuple
+from base64 import b64decode
+from time import time
+import asyncio
 import json
-import typing as t
 
-import aiohttp
+from .models import Bot, BotQuery, Voter
+from .errors import Error, RequestError, Ratelimited
+from .ratelimiter import Ratelimiter, RatelimiterManager
 
-from . import errors, types
-from .autopost import AutoPoster
-from .data import DataContainerMixin
-from .http import HTTPClient
+BASE_URL = 'https://top.gg/api'
+MAXIMUM_DELAY_THRESHOLD = 5.0
 
 
-class DBLClient(DataContainerMixin):
-    """Represents a client connection that connects to Top.gg.
+class Client:
+  """
+  The class that lets you interact with the API.
 
-    This class is used to interact with the Top.gg API.
+  :param token: The API token to use with the API. To retrieve your topstats.gg API token, see https://docs.top.gg/docs/API/@reference.
+  :type token: :py:class:`str`
+  :param session: Whether to use an existing :class:`~aiohttp.ClientSession` for requesting or not. Defaults to :py:obj:`None` (creates a new one instead)
+  :type session: Optional[:class:`~aiohttp.ClientSession`]
 
-    .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
+  :raises TypeError: If ``token`` is not a :py:class:`str`.
+  :raises ValueError: If ``token`` is not a valid API token.
+  """
 
-    Args:
-        token (:obj:`str`): Your bot's Top.gg API Token.
+  __slots__: Tuple[str, ...] = (
+    '__own_session',
+    '__session',
+    '__token',
+    '__ratelimiters',
+    '__ratelimiter_manager',
+    '__current_ratelimit',
+    'id',
+  )
 
-    Keyword Args:
-        session (:class:`~aiohttp.ClientSession`)
-            An `aiohttp session`_ to use for requests to the API.
-        **kwargs:
-            Arbitrary kwargs to be passed to :class:`~aiohttp.ClientSession` if session was not provided.
+  def __init__(self, token: str, *, session: Optional[ClientSession] = None):
+    if not isinstance(token, str):
+      raise TypeError('An API token is required to use this API.')
+
+    self.__own_session = session is None
+    self.__session = session or ClientSession(
+      timeout=ClientTimeout(total=MAXIMUM_DELAY_THRESHOLD * 1000.0)
+    )
+    self.__token = token
+
+    try:
+      encoded_json = token.split('.')[1]
+      encoded_json += '=' * (4 - (len(encoded_json) % 4))
+
+      self.id = int(json.loads(b64decode(encoded_json))['id'])
+    except:
+      raise ValueError('Got a malformed Top.gg API token.')
+
+    endpoint_ratelimits = namedtuple('EndpointRatelimits', '_global bot')
+
+    self.__ratelimiters = endpoint_ratelimits(
+      _global=Ratelimiter(99, 1), bot=Ratelimiter(59, 60)
+    )
+    self.__ratelimiter_manager = RatelimiterManager(self.__ratelimiters)
+    self.__current_ratelimit = None
+
+  async def __request(
+    self,
+    method: str,
+    path: str,
+    params: dict = {},
+    json: Optional[dict] = None,
+    treat_404_as_none: bool = True,
+  ) -> Optional[dict]:
+    if self.__session.closed:
+      raise Error('Client session is already closed.')
+
+    if self.__current_ratelimit is not None:
+      current_time = time()
+
+      if current_time < self.__current_ratelimit:
+        raise Ratelimited(self.__current_ratelimit - current_time)
+      else:
+        self.__current_ratelimit = None
+
+    ratelimiter = (
+      self.__ratelimiter_manager
+      if path.startswith('/bots')
+      else self.__ratelimiters._global
+    )
+
+    status = None
+    headers = None
+    json = {}
+
+    async with ratelimiter:
+      try:
+        async with self.__session.request(
+          method,
+          BASE_URL + path,
+          headers={
+            'Authorization': self.__token,
+            'Content-Type': 'application/json',
+            'User-Agent': 'topggpy (https://github.com/top-gg-community/python-sdk 3.0.0) Python/',
+          },
+          json=json,
+          params=params,
+        ) as resp:
+          status = resp.status
+          headers = resp.headers
+          json = await resp.json()
+
+          assert 200 <= status <= 299
+          return json
+      except:
+        if status == 404 and treat_404_as_none:
+          return
+        elif status == 429:
+          retry_after = float(headers['Retry-After'])
+
+          if retry_after > MAXIMUM_DELAY_THRESHOLD:
+            self.__current_ratelimit = time() + retry_after
+
+            raise Ratelimited(retry_after) from None
+          else:
+            await asyncio.sleep(retry_after)
+        else:
+          raise RequestError(json, status) from None
+
+    return await self.__request(method, path)
+
+  async def get_bot(self, id: int) -> Optional[Bot]:
+    """
+    Fetches a Discord bot from its Discord ID.
+
+    :param id: The requested Discord ID.
+    :type id: :py:class:`int`
+
+    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
+    :exception RequestError: If the client received a non-favorable response from the API.
+    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+
+    :returns: The requested Discord bot. This can be :py:obj:`None` if the requested Discord bot does not exist.
+    :rtype: Optional[:class:`~.models.Bot`]
     """
 
-    __slots__: t.Tuple[str, ...] = ("http", "bot_id", "_token", "_is_closed", "_autopost")
+    bot = await self.__request('GET', f'/bots/{id}')
 
-    http: HTTPClient
+    return bot and Bot(bot)
 
-    def __init__(
-        self,
-        token: str,
-        *,
-        session: t.Optional[aiohttp.ClientSession] = None,
-        **kwargs: t.Any,
-    ) -> None:
-        super().__init__()
-        self._token = token
+  def get_bots(self) -> BotQuery:
+    """
+    Fetches a list of Discord bots that matches the specified bot query.
 
-        try:
-            encoded_json = token.split(".")[1]
-            encoded_json += "=" * (4 - (len(encoded_json) % 4))
+    :returns: A :class:`~.models.BotQuery` object, which allows you to configure a Discord bot query before sending it to the API to retrieve a list of Discord bots that matches the specified query.
+    :rtype: :class:`~.models.BotQuery`
+    """
 
-            self.bot_id = int(json.loads(base64.b64decode(encoded_json))["id"])
-        except:
-            raise errors.ClientException("invalid token.")
+    return BotQuery(self)
 
-        self._is_closed = False
-        if session is not None:
-            self.http = HTTPClient(token, session=session)
-        self._autopost: t.Optional[AutoPoster] = None
+  async def is_weekend(self) -> bool:
+    """
+    Checks if the weekend multiplier is active.
 
-    @property
-    def is_closed(self) -> bool:
-        return self._is_closed
+    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
+    :exception RequestError: If the client received a non-favorable response from the API.
+    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    async def _ensure_session(self) -> None:
-        if self.is_closed:
-            raise errors.ClientStateException("client has been closed.")
+    :returns: Whether the weekend multiplier is active or not.
+    :rtype: bool
+    """
 
-        if not hasattr(self, "http"):
-            self.http = HTTPClient(self._token, session=None)
+    response = await self.__request('GET', '/weekend', treat_404_as_none=False)
 
-    async def get_weekend_status(self) -> bool:
-        """Gets weekend status from Top.gg.
+    return response['is_weekend']
 
-        Returns:
-            :obj:`bool`: The boolean value of weekend status.
+  async def get_voters(self) -> List[Voter]:
+    """
+    Fetches your Discord bot's last 1000 voters.
 
-        Raises:
-            :exc:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        await self._ensure_session()
-        data = await self.http.get_weekend_status()
-        return data["is_weekend"]
+    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
+    :exception RequestError: If the client received a non-favorable response from the API.
+    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    async def post_guild_count(self, guild_count: t.Optional[int] = None) -> None:
-        """Posts your bot's guild count to Top.gg.
+    :returns: Your Discord bot's last 1000 voters.
+    :rtype: List[:class:`~.models.Voter`]
+    """
 
-        Args:
-            guild_count (Optional[:obj:`int`])
-                Number of guilds the bot is in.
-                If not specified, length of provided client's property `.guilds` will be posted.
+    voters = await self.__request('GET', f'/bots/{self.id}/votes')
+    output = []
 
-        Raises:
-            TypeError
-                If no argument is provided.
-            :exc:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        if guild_count is None:
-            raise TypeError("guild_count must be provided.")
+    for voter in voters or ():
+      output.append(Voter(voter))
 
-        await self._ensure_session()
-        await self.http.post_guild_count(guild_count)
+    return output
 
-    async def get_guild_count(self) -> types.BotStatsData:
-        """Gets this bot's guild count from Top.gg.
+  async def has_voted(self, id: int) -> bool:
+    """
+    Checks if the specified user has voted your Discord bot.
 
-        Returns:
-            :obj:`~.types.BotStatsData`:
-                The guild count on Top.gg.
+    :param id: The requested user's Discord ID.
+    :type id: :py:class:`int`
 
-        Raises:
-            :exc:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        await self._ensure_session()
-        response = await self.http.get_guild_count(self.bot_id)
-        return types.BotStatsData(**response)
+    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
+    :exception RequestError: If the client received a non-favorable response from the API.
+    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    async def get_bot_votes(self) -> t.List[types.BriefUserData]:
-        """Gets information about last 1000 votes for your bot on Top.gg.
+    :returns: Whether the specified user has voted your Discord bot.
+    :rtype: bool
+    """
 
-        Note:
-            This API endpoint is only available to the bot's owner.
+    response = await self.__request(
+      'GET', f'/bots/{self.id}/check?userId={id}', treat_404_as_none=False
+    )
 
-        Returns:
-            List[:obj:`~.types.BriefUserData`]:
-                Users who voted for your bot.
+    return bool(response['voted'])
 
-        Raises:
-            :exc:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        await self._ensure_session()
-        response = await self.http.get_bot_votes(self.bot_id)
-        return [types.BriefUserData(**user) for user in response]
+  async def close(self) -> None:
+    """Closes the :class:`~.client.Client` object. Nothing will happen if the client uses a pre-existing :class:`~aiohttp.ClientSession` or if the session is already closed."""
 
-    async def get_bot_info(self, bot_id: t.Optional[int] = None) -> types.BotData:
-        """This function is a coroutine.
+    if self.__own_session and not self.__session.closed:
+      await self.__session.close()
 
-        Gets information about a bot from Top.gg.
+  async def __aenter__(self) -> 'Client':
+    return self
 
-        Args:
-            bot_id (int)
-                ID of the bot to look up. Defaults to this bot's ID.
-
-        Returns:
-            :obj:`~.types.BotData`:
-                Information on the bot you looked up. Returned data can be found
-                `here <https://docs.top.gg/api/bot/#bot-structure>`_.
-
-        Raises:
-            :exc:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        await self._ensure_session()
-        response = await self.http.get_bot_info(bot_id or self.bot_id)
-        return types.BotData(**response)
-
-    async def get_bots(
-        self,
-        limit: int = 50,
-        offset: int = 0,
-        sort: t.Optional[str] = None,
-        search: t.Optional[t.Dict[str, t.Any]] = None,
-        fields: t.Optional[t.List[str]] = None,
-    ) -> types.DataDict[str, t.Any]:
-        sort = sort or ""
-        search = search or {}
-        fields = fields or []
-        await self._ensure_session()
-        response = await self.http.get_bots(limit, offset, sort, search, fields)
-        response["results"] = [types.BotData(**bot_data) for bot_data in response["results"]]
-        return types.DataDict(**response)
-
-    async def get_user_info(self, user_id: int) -> types.UserData:
-        """This function is a coroutine.
-
-        Gets information about a user on Top.gg.
-
-        Args:
-            user_id (int)
-                ID of the user to look up.
-
-        Returns:
-            :obj:`~.types.UserData`:
-                Information about a Top.gg user.
-
-        Raises:
-            :exc:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        await self._ensure_session()
-        response = await self.http.get_user_info(user_id)
-        return types.UserData(**response)
-
-    async def get_user_vote(self, user_id: int) -> bool:
-        """Gets information about a user's vote for your bot on Top.gg.
-
-        Args:
-            user_id (int)
-                ID of the user.
-
-        Returns:
-            :obj:`bool`: Info about the user's vote.
-
-        Raises:
-            :exc:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        await self._ensure_session()
-        data = await self.http.get_user_vote(self.bot_id, user_id)
-        return bool(data["voted"])
-
-    def generate_widget(self, *, options: types.WidgetOptions) -> str:
-        """
-        Generates a Top.gg widget from the provided :obj:`~.types.WidgetOptions` object.
-
-        Keyword Arguments:
-            options (:obj:`~.types.WidgetOptions`)
-                A :obj:`~.types.WidgetOptions` object containing widget parameters.
-
-        Returns:
-            str: Generated widget URL.
-
-        Raises:
-            TypeError:
-                If options passed is not of type WidgetOptions.
-        """
-        if not isinstance(options, types.WidgetOptions):
-            raise TypeError("options argument passed to generate_widget must be of type WidgetOptions")
-
-        bot_id = options.id or self.bot_id
-        widget_query = f"noavatar={str(options.noavatar).lower()}"
-
-        for key, value in options.colors.items():
-            widget_query += f"&{key.lower()}{'' if key.lower().endswith('color') else 'color'}={value:x}"
-
-        widget_format = options.format
-        widget_type = f"/{options.type}" if options.type else ""
-
-        return f"https://top.gg/api/widget{widget_type}/{bot_id}.{widget_format}?{widget_query}"
-
-    async def close(self) -> None:
-        """Closes all connections."""
-        if self.is_closed:
-            return
-
-        if hasattr(self, "http"):
-            await self.http.close()
-
-        if self._autopost:
-            self._autopost.cancel()
-
-        self._is_closed = True
-
-    def autopost(self) -> AutoPoster:
-        """Returns a helper instance for auto-posting.
-
-        Note:
-            The second time you call this method, it'll return the same instance
-            as the one returned from the first call.
-
-        Returns:
-            :obj:`~.autopost.AutoPoster`: An instance of AutoPoster.
-        """
-        if self._autopost is not None:
-            return self._autopost
-
-        self._autopost = AutoPoster(self)
-        return self._autopost
+  async def __aexit__(self, *_, **__) -> None:
+    await self.close()

@@ -1,9 +1,0 @@
-# Formatting and Linting
-ruff
-
-# Unit Testing
-mock
-pytest
-pytest-asyncio
-pytest-mock
-pytest-cov

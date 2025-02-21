@@ -3,9 +3,9 @@ requires = ["setuptools"]
 
 [project]
 name = "topggpy"
-version = "2.0.1"
+version = "3.0.0"
 description = "A simple API wrapper for Top.gg written in Python."
-readme = "README.rst"
+readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "null8626" }, { name = "Top.gg" }]
 keywords = ["discord", "discord-bot", "topgg"]
@@ -32,6 +32,5 @@ requires-python = ">=3.9"
 [project.urls]
 Documentation = "https://topggpy.readthedocs.io/en/latest/"
 "Raw API Documentation" = "https://docs.top.gg/docs/"
-"Release notes" = "https://topggpy.readthedocs.io/en/latest/whats_new.html"
 Repository = "https://github.com/top-gg-community/python-sdk"
 "Support server" = "https://discord.gg/dbl"

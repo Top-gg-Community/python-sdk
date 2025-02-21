@@ -1,10 +1,6 @@
-topggpy.egg-info/
-build/
-dist/
-docs/_build
-docs/_templates
-.vscode/
-.idea/
 **/__pycache__/
-.coverage
+topstats.egg-info/
+docs/_build/
+dist/
 .ruff_cache/
+.vscode/

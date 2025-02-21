@@ -1,54 +1,86 @@
-.. topggpy documentation master file, created by
-   sphinx-quickstart on Thu Feb  8 18:32:44 2018.
+.. topstats documentation master file, created by
+   sphinx-quickstart on Sat Oct 14 19:20:61 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-#####################
-Top.gg Python Library
-#####################
+=========
+topstats_
+=========
 
-.. image:: https://img.shields.io/pypi/v/topggpy.svg
-   :target: https://pypi.python.org/pypi/topggpy
-   :alt: View on PyPI
-.. image:: https://img.shields.io/pypi/dm/topggpy?style=flat-square
-   :target: https://topggpy.readthedocs.io/en/latest/?badge=latest
-   :alt: Monthly PyPI downloads
+|pypi|_ |downloads|_
 
-A simple API wrapper for `Top.gg <https://top.gg/>`_ written in Python.
+.. _topstats: https://pypi.org/project/topstats/
+.. |pypi| image:: https://img.shields.io/pypi/v/topstats.svg?style=flat-square
+.. _pypi: https://pypi.org/project/topstats/
+.. |downloads| image:: https://img.shields.io/pypi/dm/topstats?style=flat-square
+.. _downloads: https://pypi.org/project/topstats/
+
+The community-maintained Python API wrapper for `topstats.gg <https://topstats.gg/>`_.
 
 Installation
 ------------
 
-.. code:: bash
+.. code-block:: console
 
-    pip install topggpy
+  $ pip install topstats
 
-Features
---------
+Example
+-------
 
-* POST server count
-* GET bot info, server count, upvote info
-* GET user info
-* GET widgets (large and small) including custom ones. See `docs.top.gg <https://docs.top.gg/>`_ for more info.
-* GET weekend status
-* Built-in webhook to handle Top.gg votes
-* Automated server count posting
-* Searching for bots via the API
+.. code-block:: python
 
-Additional information
-----------------------
-
-* Before using the webhook provided by this library, make sure that you have specified port open.
-* Optimal values for port are between 1024 and 49151.
-* If you happen to need help implementing topggpy in your bot, feel free to ask in the ``#development`` or ``#api`` channels in our `Discord server <https://discord.gg/EYHTgJX>`_.
+  # import the module
+  import topstats
+  
+  import asyncio
+  import os
+  
+  async def main() -> None:
+    # declare the client. to retrieve your topstats.gg token, see https://docs.topstats.gg/authentication/tokens/
+    async with topstats.Client('your topstats.gg API token') as ts:
+      # fetch a ranked bot from its bot ID
+      bot = await ts.get_bot(432610292342587392)
+      
+      print(bot)
+  
+      # fetch topstats.gg's top bots
+      bots = await ts.get_top_bots(sort_by=topstats.SortBy.server_count())
+      
+      for b in bots:
+        print(b)
+      
+      # compare two bots' historical server count
+      vs = await ts.compare_bot_server_count(432610292342587392, 437808476106784770)
+  
+      for first, second in vs:
+        print(first, second)
+      
+      # compare up to four bots' historical total votes
+      vs2 = await ts.compare_bot_total_votes(
+        topstats.Period.LAST_YEAR,
+        339254240012664832,
+        432610292342587392,
+        408785106942164992,
+        437808476106784770
+      )
+  
+      for first, second, third, fourth in vs2:
+        print(first, second, third, fourth)
+  
+  if __name__ == '__main__':
+    # see https://stackoverflow.com/questions/45600579/asyncio-event-loop-is-closed-when-getting-loop
+    # for more details
+    if os.name == 'nt':
+      asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    
+    asyncio.run(main())
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
+  :maxdepth: 2
+  :hidden:
 
-   api/index.rst
-   examples/index.rst
-   whats-new
-   support-server
-   repository
-   raw-api-reference
+  client
+  data
+  support-server
+  repository
+  raw-api-reference
