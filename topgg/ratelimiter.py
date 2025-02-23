@@ -23,12 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import asyncio
-
-from time import time
-from collections import deque
-from types import TracebackType
 from typing import Type, Tuple, Iterable
+from types import TracebackType
+from collections import deque
+from time import time
+import asyncio
 
 
 class Ratelimiter:

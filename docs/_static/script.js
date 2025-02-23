@@ -12,7 +12,7 @@ document.addEventListener('load', () => {
 
 const tocDrawer = document.querySelector('aside.toc-drawer')
 
-if (document.querySelector('section#topstats')) {
+if (document.querySelector('section#topggpy')) {
   // we don't need the right sidebar on the main landing page
   tocDrawer.remove()
 } else {

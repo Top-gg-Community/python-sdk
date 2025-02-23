@@ -27,9 +27,9 @@ from aiohttp import ClientSession, ClientTimeout
 from typing import Optional, Tuple, List
 from collections import namedtuple
 from base64 import b64decode
+from asyncio import sleep
+from json import loads
 from time import time
-import asyncio
-import json
 
 from .models import Bot, BotQuery, Voter
 from .errors import Error, RequestError, Ratelimited
@@ -43,13 +43,13 @@ class Client:
   """
   The class that lets you interact with the API.
 
-  :param token: The API token to use with the API. To retrieve your topstats.gg API token, see https://docs.top.gg/docs/API/@reference.
+  :param token: The API token to use with the API. To retrieve your API token, see https://docs.top.gg/docs/API/@reference.
   :type token: :py:class:`str`
   :param session: Whether to use an existing :class:`~aiohttp.ClientSession` for requesting or not. Defaults to :py:obj:`None` (creates a new one instead)
   :type session: Optional[:class:`~aiohttp.ClientSession`]
 
-  :raises TypeError: If ``token`` is not a :py:class:`str`.
-  :raises ValueError: If ``token`` is not a valid API token.
+  :exception TypeError: If ``token`` is not a :py:class:`str`.
+  :exception ValueError: If ``token`` is not a valid API token.
   """
 
   __slots__: Tuple[str, ...] = (
@@ -76,7 +76,7 @@ class Client:
       encoded_json = token.split('.')[1]
       encoded_json += '=' * (4 - (len(encoded_json) % 4))
 
-      self.id = int(json.loads(b64decode(encoded_json))['id'])
+      self.id = int(loads(b64decode(encoded_json))['id'])
     except:
       raise ValueError('Got a malformed Top.gg API token.')
 
@@ -114,7 +114,7 @@ class Client:
     )
 
     status = None
-    headers = None
+    retry_after = None
     json = {}
 
     async with ratelimiter:
@@ -131,40 +131,41 @@ class Client:
           params=params,
         ) as resp:
           status = resp.status
-          headers = resp.headers
           json = await resp.json()
 
-          assert 200 <= status <= 299
+          if retry_after_ms := json.get('expiresIn'):
+            retry_after = float(retry_after_ms) / 1000
+
+          resp.raise_for_status()
+
           return json
       except:
         if status == 404 and treat_404_as_none:
           return
         elif status == 429:
-          retry_after = float(headers['Retry-After'])
-
           if retry_after > MAXIMUM_DELAY_THRESHOLD:
             self.__current_ratelimit = time() + retry_after
 
             raise Ratelimited(retry_after) from None
-          else:
-            await asyncio.sleep(retry_after)
-        else:
-          raise RequestError(json, status) from None
 
-    return await self.__request(method, path)
+          await sleep(retry_after)
+
+          return await self.__request(method, path)
+
+        raise RequestError(json, status) from None
 
   async def get_bot(self, id: int) -> Optional[Bot]:
     """
-    Fetches a Discord bot from its Discord ID.
+    Fetches a Discord bot from its ID.
 
-    :param id: The requested Discord ID.
+    :param id: The requested ID.
     :type id: :py:class:`int`
 
     :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
     :exception RequestError: If the client received a non-favorable response from the API.
     :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    :returns: The requested Discord bot. This can be :py:obj:`None` if the requested Discord bot does not exist.
+    :returns: The requested bot. This can be :py:obj:`None` if it does not exist.
     :rtype: Optional[:class:`~.models.Bot`]
     """
 
@@ -174,9 +175,9 @@ class Client:
 
   def get_bots(self) -> BotQuery:
     """
-    Fetches a list of Discord bots that matches the specified bot query.
+    Fetches a list of Discord bots that matches the specified query.
 
-    :returns: A :class:`~.models.BotQuery` object, which allows you to configure a Discord bot query before sending it to the API to retrieve a list of Discord bots that matches the specified query.
+    :returns: A :class:`~.models.BotQuery` object, which allows you to configure a query before sending it to the API.
     :rtype: :class:`~.models.BotQuery`
     """
 
@@ -190,7 +191,7 @@ class Client:
     :exception RequestError: If the client received a non-favorable response from the API.
     :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    :returns: Whether the weekend multiplier is active or not.
+    :returns: Whether the weekend multiplier is active.
     :rtype: bool
     """
 
@@ -206,30 +207,26 @@ class Client:
     :exception RequestError: If the client received a non-favorable response from the API.
     :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    :returns: Your Discord bot's last 1000 voters.
+    :returns: Your bot's last 1000 voters.
     :rtype: List[:class:`~.models.Voter`]
     """
 
     voters = await self.__request('GET', f'/bots/{self.id}/votes')
-    output = []
 
-    for voter in voters or ():
-      output.append(Voter(voter))
-
-    return output
+    return [Voter(voter) for voter in voters or ()]
 
   async def has_voted(self, id: int) -> bool:
     """
-    Checks if the specified user has voted your Discord bot.
+    Checks if the specified Discord user has voted your Discord bot.
 
-    :param id: The requested user's Discord ID.
+    :param id: The requested user's ID.
     :type id: :py:class:`int`
 
     :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
     :exception RequestError: If the client received a non-favorable response from the API.
     :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    :returns: Whether the specified user has voted your Discord bot.
+    :returns: Whether the specified user has voted your bot.
     :rtype: bool
     """
 

@@ -138,7 +138,7 @@ class Bot:
   """This bot's avatar URL. Its format will either be PNG or GIF if animated."""
 
   url: str
-  """The URL of this bot's page."""
+  """This bot's Top.gg page URL."""
 
   def __init__(self, json: dict):
     self.id = int(json['clientid'])
@@ -191,7 +191,7 @@ class BotQuery:
 
   def sort_by_id(self) -> 'BotQuery':
     """
-    Sorts results based on each Discord bot's ID.
+    Sorts results based on each bot's ID.
 
     :returns: The same object. This allows this object to have chained method calls.
     :rtype: :class:`~.models.BotQuery`
@@ -203,7 +203,7 @@ class BotQuery:
 
   def sort_by_approval_date(self) -> 'BotQuery':
     """
-    Sorts results based on each Discord bot's approval date.
+    Sorts results based on each bot's approval date.
 
     :returns: The same object. This allows this object to have chained method calls.
     :rtype: :class:`~.models.BotQuery`
@@ -215,7 +215,7 @@ class BotQuery:
 
   def sort_by_monthly_votes(self) -> 'BotQuery':
     """
-    Sorts results based on each Discord bot's monthly vote count.
+    Sorts results based on each bot's monthly vote count.
 
     :returns: The same object. This allows this object to have chained method calls.
     :rtype: :class:`~.models.BotQuery`
@@ -257,7 +257,7 @@ class BotQuery:
 
   def name(self, name: str) -> 'BotQuery':
     """
-    Queries only Discord bots that has this username.
+    Queries only bots that has this username.
 
     :param id: The specified username.
     :type id: :py:class:`str`
@@ -272,7 +272,7 @@ class BotQuery:
 
   def prefix(self, prefix: str) -> 'BotQuery':
     """
-    Queries only Discord bots that has this prefix.
+    Queries only bots that has this prefix.
 
     :param id: The specified prefix.
     :type id: :py:class:`str`
@@ -287,7 +287,7 @@ class BotQuery:
 
   def votes(self, votes: int) -> 'BotQuery':
     """
-    Queries only Discord bots that has this vote count.
+    Queries only bots that has this vote count.
 
     :param id: The specified vote count.
     :type id: :py:class:`int`
@@ -302,7 +302,7 @@ class BotQuery:
 
   def monthly_votes(self, monthly_votes: int) -> 'BotQuery':
     """
-    Queries only Discord bots that has this monthly vote count.
+    Queries only bots that has this monthly vote count.
 
     :param id: The specified monthly vote count.
     :type id: :py:class:`int`
@@ -317,7 +317,7 @@ class BotQuery:
 
   def vanity(self, vanity: str) -> 'BotQuery':
     """
-    Queries only Discord bots that has this Top.gg vanity URL.
+    Queries only bots that has this Top.gg vanity URL.
 
     :param id: The specified Top.gg vanity URL (without the preceeding https://top.gg/).
     :type id: :py:class:`str`
@@ -332,13 +332,13 @@ class BotQuery:
 
   async def send(self) -> List[Bot]:
     """
-    Sends the query to the API and returns a list of matching Discord bots.
+    Sends the query to the API.
 
     :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
     :exception RequestError: If the client received a non-favorable response from the API.
     :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    :returns: A list of matching discord bots.
+    :returns: A list of matching bots.
     :rtype: List[:class:`~.models.Bot`]
     """
 

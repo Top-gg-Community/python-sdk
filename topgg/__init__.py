@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from .client import Client
 from .errors import Error, RequestError, Ratelimited
 from .models import Bot, BotQuery, Voter
+from .client import Client
 
 __title__ = 'topggpy'
 __author__ = 'null8626 & Top.gg'
