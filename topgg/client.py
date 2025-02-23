@@ -24,7 +24,7 @@ SOFTWARE.
 """
 
 from aiohttp import ClientSession, ClientTimeout
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, Iterable
 from collections import namedtuple
 from base64 import b64decode
 from asyncio import sleep
@@ -131,10 +131,9 @@ class Client:
           params=params,
         ) as resp:
           status = resp.status
-          json = await resp.json()
+          retry_after = float(resp.headers.get('Retry-After', 0))
 
-          if retry_after_ms := json.get('expiresIn'):
-            retry_after = float(retry_after_ms) / 1000
+          json = await resp.json()
 
           resp.raise_for_status()
 
@@ -152,7 +151,7 @@ class Client:
 
           return await self.__request(method, path)
 
-        raise RequestError(json, status) from None
+        raise RequestError(json.get('message'), status) from None
 
   async def get_bot(self, id: int) -> Optional[Bot]:
     """
@@ -199,21 +198,21 @@ class Client:
 
     return response['is_weekend']
 
-  async def get_voters(self) -> List[Voter]:
+  async def get_voters(self) -> Iterable[Voter]:
     """
-    Fetches your Discord bot's last 1000 voters.
+    Fetches and yields your Discord bot's last 1000 voters.
 
     :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
     :exception RequestError: If the client received a non-favorable response from the API.
     :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
     :returns: Your bot's last 1000 voters.
-    :rtype: List[:class:`~.models.Voter`]
+    :rtype: Iterable[:class:`~.models.Voter`]
     """
 
     voters = await self.__request('GET', f'/bots/{self.id}/votes')
 
-    return [Voter(voter) for voter in voters or ()]
+    return map(Voter, voters or ())
 
   async def has_voted(self, id: int) -> bool:
     """

@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Iterable, Optional, Tuple
 from datetime import datetime, timezone
 from urllib.parse import quote
 
@@ -330,7 +330,7 @@ class BotQuery:
 
     return self
 
-  async def send(self) -> List[Bot]:
+  async def send(self) -> Iterable[Bot]:
     """
     Sends the query to the API.
 
@@ -338,8 +338,8 @@ class BotQuery:
     :exception RequestError: If the client received a non-favorable response from the API.
     :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    :returns: A list of matching bots.
-    :rtype: List[:class:`~.models.Bot`]
+    :returns: A generator of matching bots.
+    :rtype: Iterable[:class:`~.models.Bot`]
     """
 
     params = self.__params.copy()
@@ -350,11 +350,6 @@ class BotQuery:
     if self.__sort:
       params['sort'] = self.__sort
 
-    bots = await self.__client.__request('GET', '/bots', params=params)
-    output = []
+    bots = (await self.__client.__request('GET', '/bots', params=params)) or {}
 
-    if bots:
-      for b in bots.get('results', ()):
-        output.append(Bot(b))
-
-    return output
+    return map(Bot, bots.get('results', ()))

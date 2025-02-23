@@ -43,8 +43,8 @@ class RequestError(Error):
   status: Optional[int]
   """The status code returned from the API. This can be :py:obj:`None`."""
 
-  def __init__(self, json: dict, status: Optional[int]):
-    self.message = json.get('message')
+  def __init__(self, message: Optional[str], status: Optional[int]):
+    self.message = message
     self.status = status
 
     super().__init__(f'Got {status}: {self.message!r}')
