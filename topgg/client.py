@@ -164,7 +164,7 @@ class Client:
 
           return await self.__request(method, path)
 
-        raise RequestError(json.get('message'), status) from None
+        raise RequestError(json and json.get('message'), status) from None
 
   async def get_bot(self, id: int) -> Optional[Bot]:
     """
