@@ -24,23 +24,23 @@ Example
 
 .. code-block:: python
 
-  # Import the module
+  # Import the module.
   import topgg
   
   import asyncio
   import os
   
-  
-  async def main() -> None:
-    
-    # Declare the client. to retrieve your top.gg token, see https://docs.top.gg/docs/API/@reference.
-    async with topgg.Client(os.getenv('TOPGG_TOKEN')) as tg:
-      # Fetch a Discord bot from its ID.
-      bot = await tg.get_bot(432610292342587392)
 
+  async def main() -> None:
+  
+    # Declare the client. To retrieve your top.gg token, see https://docs.top.gg/docs/API/@reference.
+    async with topgg.Client(os.getenv('TOPGG_TOKEN')) as tg:
+      # Fetch a bot from its ID.
+      bot = await tg.get_bot(432610292342587392)
+  
       print(bot)
   
-      # Fetch Discord bots that matches the specified query.
+      # Fetch bots that matches the specified query.
       bots = (
         await tg.get_bots()
         .limit(250)
@@ -53,19 +53,19 @@ Example
       for b in bots:
         print(b)
   
-      # Post your Discord bot's server count to the API. This will update the server count in your bot's Top.gg page.
+      # Post your bot's server count to the API. This will update the server count in your bot's Top.gg page.
       await tg.post_server_count(2)
   
-      # Fetch your Discord bot's posted server count.
+      # Fetch your bot's posted server count.
       posted_server_count = await tg.get_server_count()
   
-      # Fetch your Discord bot's last 1000 voters.
+      # Fetch your bot's last 1000 voters.
       voters = await tg.get_voters()
   
       for voter in voters:
         print(voter)
   
-      # Check if a Discord user has voted your Discord bot.
+      # Check if a user has voted your bot.
       has_voted = await tg.has_voted(661200758510977084)
   
       if has_voted:
@@ -79,6 +79,7 @@ Example
   
   
   if __name__ == '__main__':
+    
     # See https://stackoverflow.com/questions/45600579/asyncio-event-loop-is-closed-when-getting-loop
     # for more details.
     if os.name == 'nt':
