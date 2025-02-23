@@ -63,7 +63,7 @@ class Client:
   )
 
   def __init__(self, token: str, *, session: Optional[ClientSession] = None):
-    if not isinstance(token, str):
+    if not isinstance(token, str) or not token:
       raise TypeError('An API token is required to use this API.')
 
     self.__own_session = session is None
@@ -78,7 +78,7 @@ class Client:
 
       self.id = int(loads(b64decode(encoded_json))['id'])
     except:
-      raise ValueError(f'Got a malformed Top.gg API token with a length of {len(token)}.')
+      raise ValueError('Got a malformed Top.gg API token.')
 
     endpoint_ratelimits = namedtuple('EndpointRatelimits', 'global_ bot')
 
@@ -87,6 +87,9 @@ class Client:
     )
     self.__ratelimiter_manager = RatelimiterManager(self.__ratelimiters)
     self.__current_ratelimit = None
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} {self.__session!r}>'
 
   async def __request(
     self,

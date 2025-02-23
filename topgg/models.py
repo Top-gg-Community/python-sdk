@@ -44,12 +44,24 @@ class Voter:
   """This voter's username."""
 
   avatar: str
-  """This voter's avatar URL. Its format will either be PNG or GIF if animated."""
+  """This voter's avatar URL."""
 
   def __init__(self, json: dict):
     self.id = int(json['id'])
     self.name = json['username']
     self.avatar = json['avatar']
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} id={self.id} name={self.name!r}>'
+
+  def __int__(self) -> int:
+    return self.id
+
+  def __eq__(self, other: 'Voter') -> bool:
+    if isinstance(other, __class__):
+      return self.id == other.id
+
+    return NotImplemented
 
   @property
   def created_at(self) -> datetime:
@@ -132,6 +144,12 @@ class Bot:
   url: str
   """This bot's Top.gg page URL."""
 
+  invite: Optional[str]
+  """This bot's invite URL."""
+
+  server_count: Optional[str]
+  """This bot's posted server count."""
+
   def __init__(self, json: dict):
     self.id = int(json['clientid'])
     self.topgg_id = int(json['id'])
@@ -150,6 +168,20 @@ class Bot:
     self.support = json.get('support')
     self.avatar = json['avatar']
     self.url = f'https://top.gg/bot/{json.get("vanity") or self.id}'
+    self.invite = json.get('invite')
+    self.server_count = json.get('server_count')
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} id={self.id} name={self.name!r} votes={self.votes} monthly_votes={self.monthly_votes} server_count={self.server_count}>'
+
+  def __int__(self) -> int:
+    return self.id
+
+  def __eq__(self, other: 'Bot') -> bool:
+    if isinstance(other, __class__):
+      return self.id == other.id
+
+    return NotImplemented
 
   @property
   def created_at(self) -> datetime:
@@ -168,6 +200,9 @@ class BotQuery:
     self.__params = {}
     self.__search = {}
     self.__sort = None
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__}>'
 
   def sort_by_id(self) -> 'BotQuery':
     """
