@@ -38,10 +38,10 @@ class RequestError(Error):
   __slots__: Tuple[str, ...] = ('message', 'status')
 
   message: Optional[str]
-  """The message returned from the API. This can be :py:obj:`None`."""
+  """The message returned from the API."""
 
   status: Optional[int]
-  """The status code returned from the API. This can be :py:obj:`None`."""
+  """The status code returned from the API."""
 
   def __init__(self, message: Optional[str], status: Optional[int]):
     self.message = message

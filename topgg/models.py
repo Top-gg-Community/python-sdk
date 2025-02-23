@@ -25,7 +25,6 @@ SOFTWARE.
 
 from typing import Any, List, Iterable, Optional, Tuple
 from datetime import datetime, timezone
-from urllib.parse import quote
 
 
 def truthy_only(value: Optional[Any], default: Any = None) -> Optional[Any]:
@@ -50,14 +49,7 @@ class Voter:
   def __init__(self, json: dict):
     self.id = int(json['id'])
     self.name = json['username']
-
-    if avatar_hash := json.get('avatar'):
-      ext = 'gif' if avatar_hash.startswith('a_') else 'png'
-      self.avatar = (
-        f'https://cdn.discordapp.com/avatars/{self.id}/{avatar_hash}.{ext}?size=1024'
-      )
-    else:
-      self.avatar = f'https://cdn.discordapp.com/embed/avatars/{(self.id >> 2) % 6}.png'
+    self.avatar = json['avatar']
 
   @property
   def created_at(self) -> datetime:
@@ -117,7 +109,7 @@ class Bot:
   """This bot's GitHub repository URL."""
 
   owners: List[int]
-  """A list of this bot's owners IDs."""
+  """This bot's owners IDs."""
 
   banner_url: Optional[str]
   """This bot's banner URL."""
@@ -132,10 +124,10 @@ class Bot:
   """The amount of votes this bot has this month."""
 
   support: Optional[str]
-  """This bot's support server invite URL."""
+  """This bot's support URL."""
 
   avatar: str
-  """This bot's avatar URL. Its format will either be PNG or GIF if animated."""
+  """This bot's avatar URL."""
 
   url: str
   """This bot's Top.gg page URL."""
@@ -155,21 +147,9 @@ class Bot:
     self.approved_at = datetime.fromisoformat(json['date'].replace('Z', '+00:00'))
     self.votes = json['points']
     self.monthly_votes = json['monthlyPoints']
-
-    if support := json.get('support'):
-      self.support = f'https://discord.com/invite/{support}'
-    else:
-      self.support = None
-
-    if avatar_hash := json.get('avatar'):
-      ext = 'gif' if avatar_hash.startswith('a_') else 'png'
-      self.avatar = (
-        f'https://cdn.discordapp.com/avatars/{self.id}/{avatar_hash}.{ext}?size=1024'
-      )
-    else:
-      self.avatar = f'https://cdn.discordapp.com/embed/avatars/{(self.id >> 2) % 6}.png'
-
-    self.url = f'https://top.gg/bot/{json.get("support") or self.id}'
+    self.support = json.get('support')
+    self.avatar = json['avatar']
+    self.url = f'https://top.gg/bot/{json.get("vanity") or self.id}'
 
   @property
   def created_at(self) -> datetime:
@@ -343,13 +323,11 @@ class BotQuery:
     """
 
     params = self.__params.copy()
-    params['search'] = [f'{k}%3A%20{quote(v)}' for k, v in self.__search.values()].join(
-      '%20'
-    )
+    params['search'] = ' '.join(f'{k}: {v}' for k, v in self.__search.items())
 
     if self.__sort:
       params['sort'] = self.__sort
 
-    bots = (await self.__client.__request('GET', '/bots', params=params)) or {}
+    bots = (await self.__client._Client__request('GET', '/bots', params=params)) or {}
 
     return map(Bot, bots.get('results', ()))

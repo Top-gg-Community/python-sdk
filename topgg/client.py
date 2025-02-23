@@ -80,10 +80,10 @@ class Client:
     except:
       raise ValueError('Got a malformed Top.gg API token.')
 
-    endpoint_ratelimits = namedtuple('EndpointRatelimits', '_global bot')
+    endpoint_ratelimits = namedtuple('EndpointRatelimits', 'global_ bot')
 
     self.__ratelimiters = endpoint_ratelimits(
-      _global=Ratelimiter(99, 1), bot=Ratelimiter(59, 60)
+      global_=Ratelimiter(99, 1), bot=Ratelimiter(59, 60)
     )
     self.__ratelimiter_manager = RatelimiterManager(self.__ratelimiters)
     self.__current_ratelimit = None
@@ -92,7 +92,7 @@ class Client:
     self,
     method: str,
     path: str,
-    params: dict = {},
+    params: Optional[dict] = None,
     json: Optional[dict] = None,
     treat_404_as_none: bool = True,
   ) -> Optional[dict]:
@@ -110,12 +110,20 @@ class Client:
     ratelimiter = (
       self.__ratelimiter_manager
       if path.startswith('/bots')
-      else self.__ratelimiters._global
+      else self.__ratelimiters.global_
     )
+
+    kwargs = {}
+
+    if json:
+      kwargs['json'] = json
+
+    if params:
+      kwargs['params'] = params
 
     status = None
     retry_after = None
-    json = {}
+    json = None
 
     async with ratelimiter:
       try:
@@ -127,13 +135,15 @@ class Client:
             'Content-Type': 'application/json',
             'User-Agent': 'topggpy (https://github.com/top-gg-community/python-sdk 3.0.0) Python/',
           },
-          json=json,
-          params=params,
+          **kwargs,
         ) as resp:
           status = resp.status
           retry_after = float(resp.headers.get('Retry-After', 0))
 
-          json = await resp.json()
+          try:
+            json = await resp.json()
+          except:
+            pass
 
           resp.raise_for_status()
 
@@ -174,13 +184,42 @@ class Client:
 
   def get_bots(self) -> BotQuery:
     """
-    Fetches a list of Discord bots that matches the specified query.
+    Fetches and yields Discord bots that matches the specified query.
 
     :returns: A :class:`~.models.BotQuery` object, which allows you to configure a query before sending it to the API.
     :rtype: :class:`~.models.BotQuery`
     """
 
     return BotQuery(self)
+
+  async def get_server_count(self) -> Optional[int]:
+    """
+    Fetches your Discord bot's posted server count.
+
+    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
+    :exception RequestError: If the client received a non-favorable response from the API.
+    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+
+    :returns: The posted server count. This can be :py:obj:`None` if it does not exist.
+    :rtype: Optional[:py:class:`int`]
+    """
+
+    stats = await self.__request('GET', f'/bots/{self.id}/stats')
+
+    return stats and stats.get('server_count')
+
+  async def post_server_count(self, new_server_count: int):
+    """
+    Posts your Discord bot's server count to the API. This will update the server count in your bot's Top.gg page.
+
+    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
+    :exception RequestError: If the client received a non-favorable response from the API.
+    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+    """
+
+    await self.__request(
+      'POST', f'/bots/{self.id}/stats', json={'server_count': new_server_count}
+    )
 
   async def is_weekend(self) -> bool:
     """

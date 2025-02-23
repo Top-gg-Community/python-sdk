@@ -1,0 +1,34 @@
+name: Run tests
+on:
+  push:
+    branches: [master, v0-rewrite]
+    paths:
+      - '.github/workflows/test.yml'
+      - 'topgg/**/*.py'
+  pull_request:
+    paths:
+      - '.github/workflows/test.yml'
+      - 'topgg/**/*.py'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, '3.10', 3.11, 3.12, 3.13]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: python3 -m pip install .
+      - name: Run tests
+        run: python3 test.py
+        env:
+          TOPGG_TOKEN: ${{ secrets.TOPGG_TOKEN }}
+      - name: Install dev dependencies
+        if: ${{ matrix.python-version == 3.13 }}
+        run: python3 -m pip install ruff
+      - name: Lint with ruff
+        if: ${{ matrix.python-version == 3.13 }}
+        run: python3 -m ruff check
