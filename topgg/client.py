@@ -78,7 +78,7 @@ class Client:
 
       self.id = int(loads(b64decode(encoded_json))['id'])
     except:
-      raise ValueError('Got a malformed Top.gg API token.')
+      raise ValueError(f'Got a malformed Top.gg API token with a length of {len(token)}.')
 
     endpoint_ratelimits = namedtuple('EndpointRatelimits', 'global_ bot')
 

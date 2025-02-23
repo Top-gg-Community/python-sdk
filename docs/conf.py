@@ -25,7 +25,7 @@ intersphinx_mapping = {
 }
 
 redirects = {
-  'support-server': 'https://discord.com/invite/dbl',
+  'support-server': 'https://discord.gg/dbl',
   'repository': 'https://github.com/top-gg-community/python-sdk',
   'raw-api-reference': 'https://docs.top.gg/docs/',
 }
