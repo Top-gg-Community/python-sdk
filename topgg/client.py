@@ -303,6 +303,7 @@ class Client:
     return bool(response['voted'])
 
   async def __autopost_loop(self, interval: Optional[float]) -> None:
+    # The following line should not be changed, as it could affect test_autoposter.py.
     interval = max(interval or 900.0, 900.0)
 
     while True:
