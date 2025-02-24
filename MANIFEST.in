@@ -6,4 +6,5 @@ exclude .gitignore
 exclude .readthedocs.yml
 exclude ruff.toml
 exclude test.py
+exclude test_autoposter.py
 exclude LICENSE

@@ -25,11 +25,13 @@ SOFTWARE.
 
 from .errors import Error, RequestError, Ratelimited
 from .models import Bot, BotQuery, Voter
+from .version import VERSION
 from .client import Client
+
 
 __title__ = 'topggpy'
 __author__ = 'null8626 & Top.gg'
 __license__ = 'MIT'
 __copyright__ = 'Copyright (c) 2021 Assanali Mukhanov & Top.gg; Copyright (c) 2024-2025 null8626 & Top.gg'
-__version__ = '3.0.0'
+__version__ = VERSION
 __all__ = ('Bot', 'BotQuery', 'Client', 'Error', 'Ratelimited', 'RequestError', 'Voter')

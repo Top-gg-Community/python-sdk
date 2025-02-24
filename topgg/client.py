@@ -24,8 +24,8 @@ SOFTWARE.
 """
 
 from collections.abc import Iterable, Callable, Coroutine
-from typing import Any, Optional, TypeVar, Union
 from aiohttp import ClientSession, ClientTimeout
+from typing import Any, Optional, Union
 from collections import namedtuple
 from inspect import isawaitable
 from base64 import b64decode
@@ -36,6 +36,7 @@ import asyncio
 from .ratelimiter import Ratelimiter, RatelimiterManager
 from .errors import Error, RequestError, Ratelimited
 from .models import Bot, BotQuery, Voter
+from .version import VERSION
 
 
 BASE_URL = 'https://top.gg/api'
@@ -160,7 +161,7 @@ class Client:
           headers={
             'Authorization': self.__token,
             'Content-Type': 'application/json',
-            'User-Agent': 'topggpy (https://github.com/top-gg-community/python-sdk 3.0.0) Python/',
+            'User-Agent': f'topggpy (https://github.com/top-gg-community/python-sdk {VERSION}) Python/',
           },
           **kwargs,
         ) as resp:
