@@ -23,19 +23,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Any, List, Iterable, Optional, Tuple
 from datetime import datetime, timezone
+from typing import Optional, TypeVar
+from collections.abc import Iterable
 
 
-def truthy_only(value: Optional[Any], default: Any = None) -> Optional[Any]:
+T = TypeVar('T')
+
+
+def truthy_only(value: Optional[T]) -> Optional[T]:
   if value:
     return value
 
-  return default
-
 
 class Voter:
-  __slots__: Tuple[str, ...] = ('id', 'name', 'avatar')
+  __slots__: tuple[str, ...] = ('id', 'name', 'avatar')
 
   id: int
   """This voter's user ID."""
@@ -73,7 +75,7 @@ class Voter:
 
 
 class Bot:
-  __slots__: Tuple[str, ...] = (
+  __slots__: tuple[str, ...] = (
     'id',
     'topgg_id',
     'name',
@@ -91,6 +93,8 @@ class Bot:
     'support',
     'avatar',
     'url',
+    'invite',
+    'server_count',
   )
 
   id: int
@@ -111,7 +115,7 @@ class Bot:
   long_description: Optional[str]
   """This bot's long description. This can contain HTML and/or Markdown."""
 
-  tags: List[str]
+  tags: list[str]
   """This bot's tags."""
 
   website: Optional[str]
@@ -120,7 +124,7 @@ class Bot:
   github: Optional[str]
   """This bot's GitHub repository URL."""
 
-  owners: List[int]
+  owners: list[int]
   """This bot's owners IDs."""
 
   banner_url: Optional[str]
@@ -193,7 +197,7 @@ class Bot:
 
 
 class BotQuery:
-  __slots__: Tuple[str, ...] = ('__client', '__params', '__search', '__sort')
+  __slots__: tuple[str, ...] = ('__client', '__params', '__search', '__sort')
 
   def __init__(self, client: object):
     self.__client = client

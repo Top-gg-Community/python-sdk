@@ -11,3 +11,12 @@ Client reference
 
 .. autoclass:: topgg.errors.Ratelimited()
    :members:
+
+.. autodata:: topgg.client.AutopostRetrievalCallback
+.. autodata:: topgg.client.AutopostRetrievalDecorator
+
+.. autodata:: topgg.client.AutopostSuccessCallback
+.. autodata:: topgg.client.AutopostSuccessDecorator
+
+.. autodata:: topgg.client.AutopostErrorCallback
+.. autodata:: topgg.client.AutopostErrorDecorator

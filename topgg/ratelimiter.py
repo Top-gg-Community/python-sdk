@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Type, Tuple, Iterable
+from collections.abc import Iterable
 from types import TracebackType
 from collections import deque
 from time import time
@@ -31,7 +31,7 @@ import asyncio
 
 
 class Ratelimiter:
-  __slots__: Tuple[str, ...] = ('__lock', '__max_calls', '__period', '__calls')
+  __slots__: tuple[str, ...] = ('__lock', '__max_calls', '__period', '__calls')
 
   def __init__(
     self,
@@ -55,7 +55,7 @@ class Ratelimiter:
 
   async def __aexit__(
     self,
-    _exc_type: Type[BaseException],
+    _exc_type: type[BaseException],
     _exc_val: BaseException,
     _exc_tb: TracebackType,
   ) -> None:
@@ -72,7 +72,7 @@ class Ratelimiter:
 
 
 class RatelimiterManager:
-  __slots__: Tuple[str, ...] = ('__ratelimiters',)
+  __slots__: tuple[str, ...] = ('__ratelimiters',)
 
   def __init__(self, ratelimiters: Iterable[Ratelimiter]):
     self.__ratelimiters = ratelimiters
@@ -85,7 +85,7 @@ class RatelimiterManager:
 
   async def __aexit__(
     self,
-    exc_type: Type[BaseException],
+    exc_type: type[BaseException],
     exc_val: BaseException,
     exc_tb: TracebackType,
   ) -> None:

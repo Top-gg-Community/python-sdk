@@ -19,8 +19,8 @@ Installation
 
   $ pip install topggpy
 
-Example
--------
+Basic example
+-------------
 
 .. code-block:: python
 
@@ -35,6 +35,7 @@ Example
   
     # Declare the client. To retrieve your top.gg token, see https://docs.top.gg/docs/API/@reference.
     async with topgg.Client(os.getenv('TOPGG_TOKEN')) as tg:
+      
       # Fetch a bot from its ID.
       bot = await tg.get_bot(432610292342587392)
   
@@ -77,6 +78,55 @@ Example
       if is_weekend:
         print('The weekend multiplier is active!')
   
+  
+  if __name__ == '__main__':
+    
+    # See https://stackoverflow.com/questions/45600579/asyncio-event-loop-is-closed-when-getting-loop
+    # for more details.
+    if os.name == 'nt':
+      asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    
+    asyncio.run(main())
+
+Autoposting example
+-------------------
+
+.. code-block:: python
+
+  # Import the module.
+  import topgg
+  
+  import asyncio
+  import os
+  
+  
+  async def main() -> None:
+  
+    # Declare the client. To retrieve your top.gg token, see https://docs.top.gg/docs/API/@reference.
+    tg = topgg.Client(os.getenv('TOPGG_TOKEN'))
+  
+    # Callback to retrieve server count data (required).
+    @tg.autopost_retrieval
+    def get_server_count() -> int:
+      return 2
+  
+    # Callback upon successful server count autoposting (optional).
+    @tg.autopost_success
+    def success(server_count: int):
+      print(f'Successfully posted {server_count} servers to the Top.gg API!')
+  
+    # Error handler upon HTTP-related posting failure (optional).
+    @tg.autopost_error
+    def error(error: topgg.Error):
+      print(f'Error: {error!r}')
+  
+    # Start the autoposter.
+    tg.start_autoposter()
+  
+    # Your other logic here...
+  
+    # Client session cleanup while also implicitly calling tg.stop_autoposter().
+    await tg.close()
   
   if __name__ == '__main__':
     

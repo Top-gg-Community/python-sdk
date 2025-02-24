@@ -23,19 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Tuple, Optional
+from typing import Optional
 
 
 class Error(Exception):
   """The base error class. Extends :py:class:`Exception`."""
 
-  __slots__: Tuple[str, ...] = ()
+  __slots__: tuple[str, ...] = ()
 
 
 class RequestError(Error):
   """Thrown upon HTTP request failure. Extends :class:`~.errors.Error`."""
 
-  __slots__: Tuple[str, ...] = ('message', 'status')
+  __slots__: tuple[str, ...] = ('message', 'status')
 
   message: Optional[str]
   """The message returned from the API."""
@@ -56,7 +56,7 @@ class RequestError(Error):
 class Ratelimited(Error):
   """Thrown upon HTTP request failure due to the client being ratelimited. Because of this, the client is not allowed to make requests for an hour. Extends :class:`~.errors.Error`."""
 
-  __slots__: Tuple[str, ...] = ('retry_after',)
+  __slots__: tuple[str, ...] = ('retry_after',)
 
   retry_after: float
   """How long the client should wait (in seconds) until it can make a request to the API again."""
