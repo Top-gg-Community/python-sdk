@@ -131,7 +131,7 @@ class Bot:
   """This bot's banner URL."""
 
   submitted_at: datetime
-  """When this bot was submitted on Top.gg."""
+  """This bot's submission date."""
 
   votes: int
   """The amount of votes this bot has."""
