@@ -40,7 +40,7 @@ class Voter:
   __slots__: tuple[str, ...] = ('id', 'name', 'avatar')
 
   id: int
-  """This voter's user ID."""
+  """This voter's Discord ID."""
 
   name: str
   """This voter's username."""
@@ -87,7 +87,7 @@ class Bot:
     'github',
     'owners',
     'banner_url',
-    'approved_at',
+    'submitted_at',
     'votes',
     'monthly_votes',
     'support',
@@ -98,10 +98,10 @@ class Bot:
   )
 
   id: int
-  """This bot's application ID."""
+  """This bot's Discord ID."""
 
   topgg_id: int
-  """This bot's Top.gg user ID."""
+  """This bot's Top.gg ID."""
 
   name: str
   """This bot's username."""
@@ -130,8 +130,8 @@ class Bot:
   banner_url: Optional[str]
   """This bot's banner URL."""
 
-  approved_at: datetime
-  """When this bot was approved on Top.gg."""
+  submitted_at: datetime
+  """When this bot was submitted on Top.gg."""
 
   votes: int
   """The amount of votes this bot has."""
@@ -161,18 +161,18 @@ class Bot:
     self.prefix = json['prefix']
     self.short_description = json['shortdesc']
     self.long_description = truthy_only(json.get('longdesc'))
-    self.tags = json.get('tags') or []
+    self.tags = json['tags']
     self.website = truthy_only(json.get('website'))
     self.github = truthy_only(json.get('github'))
-    self.owners = [int(id) for id in json.get('owners') or []]
+    self.owners = [int(id) for id in json['owners']]
     self.banner_url = truthy_only(json.get('bannerUrl'))
-    self.approved_at = datetime.fromisoformat(json['date'].replace('Z', '+00:00'))
+    self.submitted_at = datetime.fromisoformat(json['date'].replace('Z', '+00:00'))
     self.votes = json['points']
     self.monthly_votes = json['monthlyPoints']
-    self.support = json.get('support')
+    self.support = truthy_only(json.get('support'))
     self.avatar = json['avatar']
     self.url = f'https://top.gg/bot/{json.get("vanity") or self.id}'
-    self.invite = json.get('invite')
+    self.invite = truthy_only(json.get('invite'))
     self.server_count = json.get('server_count')
 
   def __repr__(self) -> str:
@@ -220,9 +220,9 @@ class BotQuery:
 
     return self
 
-  def sort_by_approval_date(self) -> 'BotQuery':
+  def sort_by_submission_date(self) -> 'BotQuery':
     """
-    Sorts results based on each bot's approval date.
+    Sorts results based on each bot's submission date.
 
     :returns: The same object. This allows this object to have chained method calls.
     :rtype: :class:`~.models.BotQuery`
@@ -259,7 +259,7 @@ class BotQuery:
 
     return self
 
-  def skip(self, skip: int) -> 'BotQuery':
+  def offset(self, offset: int) -> 'BotQuery':
     """
     Sets the amount of bots to be skipped during the query.
 
@@ -270,7 +270,7 @@ class BotQuery:
     :rtype: :class:`~.models.BotQuery`
     """
 
-    self.__params['skip'] = max(min(skip, 499), 0)
+    self.__params['offset'] = max(min(offset, 499), 0)
 
     return self
 

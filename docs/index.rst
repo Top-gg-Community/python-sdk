@@ -45,7 +45,7 @@ Basic example
       bots = (
         await tg.get_bots()
         .limit(250)
-        .skip(50)
+        .offset(50)
         .name('shiro')
         .sort_by_monthly_votes()
         .send()
@@ -60,7 +60,7 @@ Basic example
       # Fetch your bot's posted server count.
       posted_server_count = await tg.get_server_count()
   
-      # Fetch your bot's last 1000 voters.
+      # Fetch your bot's last 1000 unique voters.
       voters = await tg.get_voters()
   
       for voter in voters:
@@ -112,12 +112,12 @@ Autoposting example
   
     # Callback upon successful server count autoposting (optional).
     @tg.autopost_success
-    def success(server_count: int):
+    def success(server_count: int) -> None:
       print(f'Successfully posted {server_count} servers to the Top.gg API!')
   
     # Error handler upon HTTP-related posting failure (optional).
     @tg.autopost_error
-    def error(error: topgg.Error):
+    def error(error: topgg.Error) -> None:
       print(f'Error: {error!r}')
   
     # Start the autoposter.
