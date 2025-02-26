@@ -98,6 +98,8 @@ class Bot:
     'url',
     'invite',
     'server_count',
+    'review_score',
+    'review_count',
   )
 
   id: int
@@ -157,6 +159,12 @@ class Bot:
   server_count: Optional[str]
   """This bot's posted server count."""
 
+  review_score: float
+  """This bot's average review score out of 5."""
+
+  review_count: int
+  """This bot's review count."""
+
   def __init__(self, json: dict):
     self.id = int(json['clientid'])
     self.topgg_id = int(json['id'])
@@ -177,6 +185,8 @@ class Bot:
     self.url = f'https://top.gg/bot/{json.get("vanity") or self.id}'
     self.invite = truthy_only(json.get('invite'))
     self.server_count = json.get('server_count')
+    self.review_score = json['reviews']['averageScore']
+    self.review_count = json['reviews']['count']
 
   def __repr__(self) -> str:
     return f'<{__class__.__name__} id={self.id} name={self.name!r} votes={self.votes} monthly_votes={self.monthly_votes} server_count={self.server_count}>'
