@@ -49,7 +49,7 @@ async def run() -> None:
     bots = (
       await tg.get_bots()
       .limit(250)
-      .offset(50)
+      .skip(50)
       .name('shiro')
       .sort_by_monthly_votes()
       .send()

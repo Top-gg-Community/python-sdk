@@ -260,7 +260,7 @@ class BotQuery:
 
     return self
 
-  def offset(self, offset: int) -> 'BotQuery':
+  def skip(self, skip: int) -> 'BotQuery':
     """
     Sets the amount of bots to be skipped during the query.
 
@@ -271,7 +271,7 @@ class BotQuery:
     :rtype: :class:`~.models.BotQuery`
     """
 
-    self.__params['offset'] = max(min(offset, 499), 0)
+    self.__params['offset'] = max(min(skip, 499), 0)
 
     return self
 
