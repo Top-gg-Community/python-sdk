@@ -35,6 +35,11 @@ def truthy_only(value: Optional[T]) -> Optional[T]:
   if value:
     return value
 
+def timestamp_from_id(id: int) -> datetime:
+  return datetime.fromtimestamp(
+    ((id >> 22) + 1420070400000) // 1000, tz=timezone.utc
+  )
+
 
 class Voter:
   __slots__: tuple[str, ...] = ('id', 'name', 'avatar')
@@ -69,9 +74,7 @@ class Voter:
   def created_at(self) -> datetime:
     """This voter's creation date."""
 
-    return datetime.fromtimestamp(
-      ((self.id >> 22) + 1420070400000) // 1000, tz=timezone.utc
-    )
+    return timestamp_from_id(self.id)
 
 
 class Bot:
@@ -191,9 +194,7 @@ class Bot:
   def created_at(self) -> datetime:
     """This bot's creation date."""
 
-    return datetime.fromtimestamp(
-      ((self.id >> 22) + 1420070400000) // 1000, tz=timezone.utc
-    )
+    return timestamp_from_id(self.id)
 
 
 class BotQuery:
