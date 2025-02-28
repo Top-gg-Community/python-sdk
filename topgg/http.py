@@ -44,7 +44,7 @@ async def _json_or_text(
     response: ClientResponse,
 ) -> Union[dict, str]:
     text = await response.text()
-    if "application/json" in response.headers["Content-Type"]::
+    if "application/json" in response.headers["Content-Type"]:
         return json.loads(text)
     return text
 
