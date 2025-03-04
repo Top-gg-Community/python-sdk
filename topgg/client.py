@@ -272,19 +272,22 @@ class Client:
 
     return response['is_weekend']
 
-  async def get_voters(self) -> Iterable[Voter]:
+  async def get_voters(self, page: int = 1) -> Iterable[Voter]:
     """
-    Fetches and yields your Discord bot's last 1000 unique voters.
+    Fetches and yields your Discord bot's recent unique voters.
+
+    :param page: The page number. Each page can only have at most 100 voters. Defaults to 1.
+    :type page: :py:class:`int`
 
     :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
     :exception RequestError: If the client received a non-favorable response from the API.
     :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
 
-    :returns: Your bot's last 1000 unique voters.
+    :returns: A generator of your bot's recent unique voters.
     :rtype: Iterable[:class:`~.models.Voter`]
     """
 
-    voters = await self.__request('GET', f'/bots/{self.id}/votes')
+    voters = await self.__request('GET', f'/bots/{self.id}/votes', params={'page': max(page, 1)})
 
     return map(Voter, voters or ())
 
