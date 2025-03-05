@@ -276,7 +276,7 @@ class Client:
 
   async def get_voters(self, page: int = 1) -> Iterable[Voter]:
     """
-    Fetches and yields your Discord bot's recent unique voters.
+    Fetches and yields your Discord bot's recent 100 unique voters.
 
     :param page: The page number. Each page can only have at most 100 voters. Defaults to 1.
     :type page: :py:class:`int`
