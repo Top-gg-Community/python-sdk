@@ -74,6 +74,11 @@ class Vote:
     else:
       self.query = {}
 
+  def __repr__(self) -> str:
+    return (
+      f'<{__class__.__name__} receiver_id={self.receiver_id} voter_id={self.voter_id}>'
+    )
+
 
 OnVoteCallback = Callable[[Vote], Any]
 OnVoteDecorator = Callable[[OnVoteCallback], RawCallback]
@@ -97,6 +102,9 @@ class Webhooks:
     self.__default_auth = auth
     self.__default_port = port
     self.__running = False
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} app={self.__app!r} running={self.__running}>'
 
   def on_vote(
     self,

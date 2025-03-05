@@ -121,7 +121,7 @@ class Client:
     """The Discord ID associated with this API token."""
 
     return self.__id
-  
+
   def __int__(self) -> int:
     return self.id
 
