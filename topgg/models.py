@@ -133,7 +133,7 @@ class Bot:
   """This bot's GitHub repository URL."""
 
   owners: list[int]
-  """This bot's owners IDs."""
+  """This bot's owner IDs."""
 
   banner_url: Optional[str]
   """This bot's banner URL."""
@@ -211,7 +211,7 @@ class Bot:
 
 
 class BotQuery:
-  """Configure a query before sending it to the API."""
+  """Configure a Discord bot query before sending it to the API."""
 
   __slots__: tuple[str, ...] = ('__client', '__params', '__search', '__sort')
 
@@ -277,9 +277,9 @@ class BotQuery:
 
   def skip(self, skip: int) -> 'BotQuery':
     """
-    Sets the amount of bots to be skipped during the query.
+    Sets the amount of bots to be skipped.
 
-    :param id: The amount of bots to be skipped during the query. This cannot be more than 499.
+    :param id: The amount of bots to be skipped. This cannot be more than 499.
     :type id: :py:class:`int`
 
     :returns: The same object. This allows this object to have chained method calls.
@@ -369,9 +369,9 @@ class BotQuery:
     """
     Sends the query to the API.
 
-    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
-    :exception RequestError: If the client received a non-favorable response from the API.
-    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: A generator of matching bots.
     :rtype: Iterable[:class:`~.models.Bot`]

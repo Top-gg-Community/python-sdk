@@ -59,13 +59,13 @@ class Client:
   """
   Interact with the API's endpoints.
 
-  :param token: The API token to use with the API. To retrieve your API token, see https://docs.top.gg/docs/API/@reference.
+  :param token: The API token to use. To retrieve it, see https://github.com/top-gg/rust-sdk/assets/60427892/d2df5bd3-bc48-464c-b878-a04121727bff.
   :type token: :py:class:`str`
   :param session: Whether to use an existing :class:`~aiohttp.ClientSession` for requesting or not. Defaults to :py:obj:`None` (creates a new one instead)
   :type session: Optional[:class:`~aiohttp.ClientSession`]
 
-  :exception TypeError: If ``token`` is not a :py:class:`str`.
-  :exception ValueError: If ``token`` is not a valid API token.
+  :exception TypeError: ``token`` is not a :py:class:`str`.
+  :exception ValueError: ``token`` is not a valid API token.
   """
 
   __slots__: tuple[str, ...] = (
@@ -207,9 +207,9 @@ class Client:
     :param id: The requested ID.
     :type id: :py:class:`int`
 
-    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
-    :exception RequestError: If the client received a non-favorable response from the API.
-    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: The requested bot. This can be :py:obj:`None` if it does not exist.
     :rtype: Optional[:class:`~.models.Bot`]
@@ -221,9 +221,9 @@ class Client:
 
   def get_bots(self) -> BotQuery:
     """
-    Fetches and yields Discord bots that matches the specified query.
+    Returns a :class:`~.models.BotQuery` object that allows you to configure a bot query before sending it to the API.
 
-    :returns: A :class:`~.models.BotQuery` object, which allows you to configure a query before sending it to the API.
+    :returns: A :class:`~.models.BotQuery` object that allows you to configure a bot query before sending it to the API.
     :rtype: :class:`~.models.BotQuery`
     """
 
@@ -233,9 +233,9 @@ class Client:
     """
     Fetches your Discord bot's posted server count.
 
-    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
-    :exception RequestError: If the client received a non-favorable response from the API.
-    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: The posted server count. This can be :py:obj:`None` if it does not exist.
     :rtype: Optional[:py:class:`int`]
@@ -252,10 +252,10 @@ class Client:
     :param new_server_count: The new server count to post. This cannot be zero.
     :type new_server_count: :py:class:`int`
 
-    :exception ValueError: If the new_server_count argument is zero or lower.
-    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
-    :exception RequestError: If the client received a non-favorable response from the API.
-    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+    :exception ValueError: The new_server_count argument is zero or lower.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
     """
 
     if new_server_count <= 0:
@@ -269,11 +269,11 @@ class Client:
 
   async def is_weekend(self) -> bool:
     """
-    Checks if the weekend multiplier is active.
+    Checks if the weekend multiplier is active, where a single vote counts as two.
 
-    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
-    :exception RequestError: If the client received a non-favorable response from the API.
-    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: Whether the weekend multiplier is active.
     :rtype: bool
@@ -290,9 +290,9 @@ class Client:
     :param page: The page number. Each page can only have at most 100 voters. Defaults to 1.
     :type page: :py:class:`int`
 
-    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
-    :exception RequestError: If the client received a non-favorable response from the API.
-    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: A generator of your bot's recent unique voters.
     :rtype: Iterable[:class:`~.models.Voter`]
@@ -311,9 +311,9 @@ class Client:
     :param id: The requested user's ID.
     :type id: :py:class:`int`
 
-    :exception Error: If the :class:`~aiohttp.ClientSession` used by the client is already closed.
-    :exception RequestError: If the client received a non-favorable response from the API.
-    :exception Ratelimited: If the client got blocked by the API for an hour because it exceeded its ratelimits.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: Whether the specified user has voted your bot.
     :rtype: bool
@@ -439,7 +439,7 @@ class Client:
     :param interval: The interval between posting in seconds. Defaults to 15 minutes.
     :type interval: Optional[:py:class:`float`]
 
-    :exception TypeError: If the autoposter server count retrieval callback does not exist.
+    :exception TypeError: The server count retrieval callback does not exist.
     """
 
     if self.__autopost_task is None:

@@ -51,11 +51,7 @@ class Vote:
   """Whether this vote is just a test done from the page settings."""
 
   is_weekend: bool
-  """
-  Whether the weekend multiplier is active, where a single vote counts as two.
-  
-  If the dispatched event came from a server being voted, this will always be ``false``.
-  """
+  """Whether the weekend multiplier is active, where a single vote counts as two."""
 
   query: dict[str, str]
   """Query strings found on the vote page."""
@@ -123,7 +119,7 @@ class Webhooks:
     :param callback: The callback to override and use. If this is :py:obj:`None`, this method relies on the decorator input.
     :type callback: Optional[:data:`~.webhooks.OnVoteCallback`]
 
-    :exception TypeError: If the route argument is not a :py:class:`str` or if the password is not provided.
+    :exception TypeError: the route argument is not a :py:class:`str` or if the password is not provided.
 
     :returns: The function itself or a decorated function depending on the argument.
     :rtype: Union[:data:`~.webhooks.OnVoteCallback`, :data:`~.webhooks.OnVoteDecorator`]
@@ -168,7 +164,7 @@ class Webhooks:
     :param port: The port to override and use. Defaults to the default port provided in the constructor call.
     :type port: Optional[:py:class:`int`]
 
-    :exception TypeError: If the port is not provided either here or in the constructor call.
+    :exception TypeError: the port is not provided either here or in the constructor call.
     """
 
     if not self.__running:

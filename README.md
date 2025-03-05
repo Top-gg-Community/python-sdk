@@ -4,15 +4,19 @@
 [pypi-url]: https://pypi.org/project/topggpy/
 [downloads-image]: https://img.shields.io/pypi/dm/topggpy?style=flat-square
 
-The community-maintained Python API wrapper for [Top.gg](https://top.gg/)
+A simple API wrapper for [Top.gg](https://top.gg) written in Python.
 
-## Installation
+## Getting started
+
+Make sure you already have an API token handy. See [this tutorial](https://github.com/top-gg/rust-sdk/assets/60427892/d2df5bd3-bc48-464c-b878-a04121727bff) on how to retrieve it.
+
+After that, run the following command in your terminal:
 
 ```console
 pip install topggpy
 ```
 
-## Basic example
+## Basic examples
 
 For more information, please read the [documentation](https://topggpy.readthedocs.io/en/latest/).
 
@@ -65,7 +69,7 @@ async def main() -> None:
     if has_voted:
       print('This user has voted!')
 
-    # Check if the weekend multiplier is active.
+    # Check if the weekend multiplier is active, where a single vote counts as two.
     is_weekend = await tg.is_weekend()
 
     if is_weekend:
@@ -82,7 +86,7 @@ if __name__ == '__main__':
   asyncio.run(main())
 ```
 
-# Autoposting example
+## Autoposting example
 
 ```py
 # Import the module.
