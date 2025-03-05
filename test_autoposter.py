@@ -31,7 +31,7 @@ async def run() -> None:
 
       @tg.autopost_success
       def success(server_count: int) -> None:
-        print(f'Successfully posted {server_count} servers to the Top.gg API!')
+        print(f'Successfully posted {server_count} servers to the API!')
 
       @tg.autopost_error
       def error(error: topgg.Error) -> None:

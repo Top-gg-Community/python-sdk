@@ -25,13 +25,28 @@ SOFTWARE.
 
 from .errors import Error, RequestError, Ratelimited
 from .models import Bot, BotQuery, Voter
+from .webhooks import Vote, Webhooks
 from .version import VERSION
 from .client import Client
 
 
 __title__ = 'topggpy'
 __author__ = 'null8626 & Top.gg'
+__credits__ = ('null8626', 'Top.gg')
+__maintainer__ = 'null8626'
+__status__ = 'Production'
 __license__ = 'MIT'
 __copyright__ = 'Copyright (c) 2021 Assanali Mukhanov & Top.gg; Copyright (c) 2024-2025 null8626 & Top.gg'
 __version__ = VERSION
-__all__ = ('Bot', 'BotQuery', 'Client', 'Error', 'Ratelimited', 'RequestError', 'Voter')
+__all__ = (
+  'Bot',
+  'BotQuery',
+  'Client',
+  'Error',
+  'Ratelimited',
+  'RequestError',
+  'VERSION',
+  'Vote',
+  'Voter',
+  'Webhooks',
+)

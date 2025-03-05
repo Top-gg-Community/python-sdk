@@ -35,13 +35,14 @@ def truthy_only(value: Optional[T]) -> Optional[T]:
   if value:
     return value
 
+
 def timestamp_from_id(id: int) -> datetime:
-  return datetime.fromtimestamp(
-    ((id >> 22) + 1420070400000) // 1000, tz=timezone.utc
-  )
+  return datetime.fromtimestamp(((id >> 22) + 1420070400000) // 1000, tz=timezone.utc)
 
 
 class Voter:
+  """A Top.gg voter."""
+
   __slots__: tuple[str, ...] = ('id', 'name', 'avatar')
 
   id: int
@@ -78,6 +79,8 @@ class Voter:
 
 
 class Bot:
+  """A Discord bot listed on Top.gg."""
+
   __slots__: tuple[str, ...] = (
     'id',
     'topgg_id',
@@ -182,7 +185,7 @@ class Bot:
     self.monthly_votes = json['monthlyPoints']
     self.support = truthy_only(json.get('support'))
     self.avatar = json['avatar']
-    self.url = f'https://top.gg/bot/{json.get("vanity") or self.id}'
+    self.url = f'https://top.gg/bot/{json.get("vanity") or self.topgg_id}'
     self.invite = truthy_only(json.get('invite'))
     self.server_count = json.get('server_count')
     self.review_score = json['reviews']['averageScore']
@@ -208,6 +211,8 @@ class Bot:
 
 
 class BotQuery:
+  """Configure a query before sending it to the API."""
+
   __slots__: tuple[str, ...] = ('__client', '__params', '__search', '__sort')
 
   def __init__(self, client: object):

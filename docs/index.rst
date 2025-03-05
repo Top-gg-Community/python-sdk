@@ -113,7 +113,7 @@ Autoposting example
     # Callback upon successful server count autoposting (optional).
     @tg.autopost_success
     def success(server_count: int) -> None:
-      print(f'Successfully posted {server_count} servers to the Top.gg API!')
+      print(f'Successfully posted {server_count} servers to the API!')
   
     # Error handler upon HTTP-related posting failure (optional).
     @tg.autopost_error
@@ -143,6 +143,7 @@ Autoposting example
 
   client
   data
+  webhooks
   support-server
   repository
   raw-api-reference

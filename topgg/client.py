@@ -57,7 +57,7 @@ AutopostErrorDecorator = Callable[[AutopostErrorCallback], AutopostErrorCallback
 
 class Client:
   """
-  The class that lets you interact with the API.
+  Interact with the API's endpoints.
 
   :param token: The API token to use with the API. To retrieve your API token, see https://docs.top.gg/docs/API/@reference.
   :type token: :py:class:`str`
@@ -250,7 +250,9 @@ class Client:
     """
 
     if new_server_count <= 0:
-      raise ValueError(f'Posted server count cannot be zero or lower, got {new_server_count}.')
+      raise ValueError(
+        f'Posted server count cannot be zero or lower, got {new_server_count}.'
+      )
 
     await self.__request(
       'POST', f'/bots/{self.id}/stats', json={'server_count': new_server_count}
@@ -287,7 +289,9 @@ class Client:
     :rtype: Iterable[:class:`~.models.Voter`]
     """
 
-    voters = await self.__request('GET', f'/bots/{self.id}/votes', params={'page': max(page, 1)})
+    voters = await self.__request(
+      'GET', f'/bots/{self.id}/votes', params={'page': max(page, 1)}
+    )
 
     return map(Voter, voters or ())
 
@@ -345,77 +349,77 @@ class Client:
           raise
 
   def autopost_retrieval(
-    self, callback: Optional[AutopostRetrievalCallback]
-  ) -> Union['Client', AutopostRetrievalDecorator]:
+    self, callback: Optional[AutopostRetrievalCallback] = None
+  ) -> Union[AutopostRetrievalCallback, AutopostRetrievalDecorator]:
     """
     Registers an autopost server count retrieval callback. This callback is required for autoposting.
 
     :param callback: The autopost server count retrieval callback. This can be asynchronous or synchronous, as long as it eventually returns an :py:class:`int`.
     :type callback: Optional[:data:`~.client.AutopostRetrievalCallback`]
 
-    :returns: Either the client object itself or the function callback decorator depending on the argument.
-    :rtype: Union[:class:`~.Client`, :data:`~.client.AutopostRetrievalDecorator`]
+    :returns: The function itself or a decorated function depending on the argument.
+    :rtype: Union[:data:`~.client.AutopostRetrievalCallback`, :data:`~.client.AutopostRetrievalDecorator`]
     """
-
-    if callback is not None:
-      self.__autopost_retrieval_callback = callback
-
-      return self
 
     def decorator(callback: AutopostRetrievalCallback) -> AutopostRetrievalCallback:
       self.__autopost_retrieval_callback = callback
 
       return callback
 
+    if callback is not None:
+      decorator(callback)
+
+      return callback
+
     return decorator
 
   def autopost_success(
-    self, callback: Optional[AutopostSuccessCallback]
-  ) -> Union['Client', AutopostSuccessDecorator]:
+    self, callback: Optional[AutopostSuccessCallback] = None
+  ) -> Union[AutopostSuccessCallback, AutopostSuccessDecorator]:
     """
     Adds an autopost on success callback. Several callbacks are possible.
 
     :param callback: The autopost on success callback. This can be asynchronous or synchronous, as long as it accepts a :py:class:`int` argument for the posted server count.
     :type callback: Optional[:data:`~.client.AutopostSuccessCallback`]
 
-    :returns: Either the client object itself or the function callback decorator depending on the argument.
-    :rtype: Union[:class:`~.Client`, :data:`~.client.AutopostSuccessDecorator`]
+    :returns: The function itself or a decorated function depending on the argument.
+    :rtype: Union[:data:`~.client.AutopostSuccessCallback`, :data:`~.client.AutopostSuccessDecorator`]
     """
-
-    if callback is not None:
-      self.__autopost_success_callbacks.add(callback)
-
-      return self
 
     def decorator(callback: AutopostSuccessCallback) -> AutopostSuccessCallback:
       self.__autopost_success_callbacks.add(callback)
 
       return callback
 
+    if callback is not None:
+      decorator(callback)
+
+      return self
+
     return decorator
 
   def autopost_error(
-    self, callback: Optional[AutopostErrorCallback]
-  ) -> Union['Client', AutopostErrorDecorator]:
+    self, callback: Optional[AutopostErrorCallback] = None
+  ) -> Union[AutopostErrorCallback, AutopostErrorDecorator]:
     """
     Adds an autopost on error handler. Several callbacks are possible.
 
     :param callback: The autopost on error handler. This can be asynchronous or synchronous, as long as it accepts an :class:`~.Error` argument for the request exception.
     :type callback: Optional[:data:`~.client.AutopostErrorCallback`]
 
-    :returns: Either the client object itself or the function callback decorator depending on the argument.
-    :rtype: Union[:class:`~.Client`, :data:`~.client.AutopostErrorDecorator`]
+    :returns: The function itself or a decorated function depending on the argument.
+    :rtype: Union[:data:`~.client.AutopostErrorCallback`, :data:`~.client.AutopostErrorDecorator`]
     """
-
-    if callback is not None:
-      self.__autopost_error_callbacks.add(callback)
-
-      return self
 
     def decorator(callback: AutopostErrorCallback) -> AutopostErrorCallback:
       self.__autopost_error_callbacks.add(callback)
 
       return callback
+
+    if callback is not None:
+      decorator
+
+      return self
 
     return decorator
 
@@ -426,12 +430,12 @@ class Client:
     :param interval: The interval between posting in seconds. Defaults to 15 minutes.
     :type interval: Optional[:py:class:`float`]
 
-    :exception Error: If the autoposter server count retrieval callback does not exist.
+    :exception TypeError: If the autoposter server count retrieval callback does not exist.
     """
 
     if self.__autopost_task is None:
       if self.__autopost_retrieval_callback is None:
-        raise Error('Missing autopost_retrieval callback.')
+        raise TypeError('Missing autopost_retrieval callback.')
 
       self.__autopost_task = asyncio.create_task(self.__autopost_loop(interval))
 
@@ -445,7 +449,7 @@ class Client:
       self.__autopost_task = None
 
   async def close(self) -> None:
-    """Closes the :class:`~.client.Client` object. Nothing will happen if the client uses a pre-existing :class:`~aiohttp.ClientSession` or if the session is already closed."""
+    """Closes the client. Nothing will happen if the client uses a pre-existing :class:`~aiohttp.ClientSession` or if the session is already closed."""
 
     self.stop_autoposter()
 
