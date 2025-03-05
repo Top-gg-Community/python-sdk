@@ -115,7 +115,7 @@ class Webhooks:
     :param callback: The callback to override and use. If this is :py:obj:`None`, this method relies on the decorator input.
     :type callback: Optional[:data:`~.webhooks.OnVoteCallback`]
 
-    :exception TypeError: If the route argument is not a :py:class:`str`.
+    :exception TypeError: If the route argument is not a :py:class:`str` or if the password is not provided.
 
     :returns: The function itself or a decorated function depending on the argument.
     :rtype: Union[:data:`~.webhooks.OnVoteCallback`, :data:`~.webhooks.OnVoteDecorator`]
@@ -126,6 +126,9 @@ class Webhooks:
 
     if auth is None:
       auth = self.__default_auth
+
+      if auth is None:
+        raise TypeError('Missing password.')
 
     def decorator(inner_callback: OnVoteCallback) -> RawCallback:
       async def handler(request: web.Request) -> web.Response:
