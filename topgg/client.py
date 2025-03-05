@@ -79,7 +79,7 @@ class Client:
     '__autopost_retrieval_callback',
     '__autopost_success_callbacks',
     '__autopost_error_callbacks',
-    'id',
+    '__id',
   )
 
   def __init__(self, token: str, *, session: Optional[ClientSession] = None):
@@ -96,7 +96,7 @@ class Client:
       encoded_json = token.split('.')[1]
       encoded_json += '=' * (4 - (len(encoded_json) % 4))
 
-      self.id = int(loads(b64decode(encoded_json))['id'])
+      self.__id = int(loads(b64decode(encoded_json))['id'])
     except:
       raise ValueError('Got a malformed API token.')
 
@@ -115,6 +115,15 @@ class Client:
 
   def __repr__(self) -> str:
     return f'<{__class__.__name__} {self.__session!r}>'
+
+  @property
+  def id(self) -> int:
+    """The Discord ID associated with this API token."""
+
+    return self.__id
+  
+  def __int__(self) -> int:
+    return self.id
 
   async def __request(
     self,
@@ -232,7 +241,7 @@ class Client:
     :rtype: Optional[:py:class:`int`]
     """
 
-    stats = await self.__request('GET', f'/bots/{self.id}/stats')
+    stats = await self.__request('GET', f'/bots/{self.__id}/stats')
 
     return stats and stats.get('server_count')
 
@@ -255,7 +264,7 @@ class Client:
       )
 
     await self.__request(
-      'POST', f'/bots/{self.id}/stats', json={'server_count': new_server_count}
+      'POST', f'/bots/{self.__id}/stats', json={'server_count': new_server_count}
     )
 
   async def is_weekend(self) -> bool:
@@ -290,7 +299,7 @@ class Client:
     """
 
     voters = await self.__request(
-      'GET', f'/bots/{self.id}/votes', params={'page': max(page, 1)}
+      'GET', f'/bots/{self.__id}/votes', params={'page': max(page, 1)}
     )
 
     return map(Voter, voters or ())
@@ -311,7 +320,7 @@ class Client:
     """
 
     response = await self.__request(
-      'GET', f'/bots/{self.id}/check?userId={id}', treat_404_as_none=False
+      'GET', f'/bots/{self.__id}/check?userId={id}', treat_404_as_none=False
     )
 
     return bool(response['voted'])
@@ -417,7 +426,7 @@ class Client:
       return callback
 
     if callback is not None:
-      decorator
+      decorator(callback)
 
       return self
 
