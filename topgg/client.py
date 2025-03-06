@@ -131,8 +131,7 @@ class Client:
     path: str,
     params: Optional[dict] = None,
     json: Optional[dict] = None,
-    treat_404_as_none: bool = True,
-  ) -> Optional[dict]:
+  ) -> dict:
     if self.__session.closed:
       raise Error('Client session is already closed.')
 
@@ -186,9 +185,7 @@ class Client:
 
           return json
       except:
-        if status == 404 and treat_404_as_none:
-          return
-        elif status == 429:
+        if status == 429:
           if retry_after > MAXIMUM_DELAY_THRESHOLD:
             self.__current_ratelimit = time() + retry_after
 
@@ -200,7 +197,7 @@ class Client:
 
         raise RequestError(json and json.get('message'), status) from None
 
-  async def get_bot(self, id: int) -> Optional[Bot]:
+  async def get_bot(self, id: int) -> Bot:
     """
     Fetches a Discord bot from its ID.
 
@@ -208,16 +205,14 @@ class Client:
     :type id: :py:class:`int`
 
     :exception Error: The client is already closed.
-    :exception RequestError: Received a non-favorable response from the API.
+    :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
 
-    :returns: The requested bot. This can be :py:obj:`None` if it does not exist.
-    :rtype: Optional[:class:`~.models.Bot`]
+    :returns: The requested bot.
+    :rtype: :class:`~.models.Bot`
     """
 
-    bot = await self.__request('GET', f'/bots/{id}')
-
-    return bot and Bot(bot)
+    return Bot(await self.__request('GET', f'/bots/{id}'))
 
   def get_bots(self) -> BotQuery:
     """
@@ -243,7 +238,7 @@ class Client:
 
     stats = await self.__request('GET', f'/bots/{self.__id}/stats')
 
-    return stats and stats.get('server_count')
+    return stats.get('server_count')
 
   async def post_server_count(self, new_server_count: int) -> None:
     """
@@ -279,7 +274,7 @@ class Client:
     :rtype: bool
     """
 
-    response = await self.__request('GET', '/weekend', treat_404_as_none=False)
+    response = await self.__request('GET', '/weekend')
 
     return response['is_weekend']
 
@@ -298,11 +293,12 @@ class Client:
     :rtype: Iterable[:class:`~.models.Voter`]
     """
 
-    voters = await self.__request(
-      'GET', f'/bots/{self.__id}/votes', params={'page': max(page, 1)}
+    return map(
+      Voter,
+      await self.__request(
+        'GET', f'/bots/{self.__id}/votes', params={'page': max(page, 1)}
+      ),
     )
-
-    return map(Voter, voters or ())
 
   async def has_voted(self, id: int) -> bool:
     """
@@ -312,16 +308,14 @@ class Client:
     :type id: :py:class:`int`
 
     :exception Error: The client is already closed.
-    :exception RequestError: Received a non-favorable response from the API.
+    :exception RequestError: The specified user has not logged in to Top.gg or the client has received other non-favorable responses from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: Whether the specified user has voted your bot.
     :rtype: bool
     """
 
-    response = await self.__request(
-      'GET', f'/bots/{self.__id}/check?userId={id}', treat_404_as_none=False
-    )
+    response = await self.__request('GET', f'/bots/{self.__id}/check?userId={id}')
 
     return bool(response['voted'])
 
