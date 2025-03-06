@@ -37,7 +37,7 @@ Basic examples
 
   async def main() -> None:
   
-    # Declare the client. To retrieve your top.gg token, see https://docs.top.gg/docs/API/@reference.
+    # Declare the client.
     async with topgg.Client(os.getenv('TOPGG_TOKEN')) as tg:
       
       # Fetch a bot from its ID.
@@ -106,7 +106,7 @@ Autoposting example
   
   async def main() -> None:
   
-    # Declare the client. To retrieve your top.gg token, see https://docs.top.gg/docs/API/@reference.
+    # Declare the client.
     tg = topgg.Client(os.getenv('TOPGG_TOKEN'))
   
     # Callback to retrieve server count data (required).
