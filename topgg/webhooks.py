@@ -84,9 +84,9 @@ class Webhooks:
   """
   Receive events from the Top.gg servers.
 
-  :param auth: The default password to use. Defaults to :py:obj:`None`.
+  :param auth: The default password to use.
   :type auth: Optional[:py:class:`str`]
-  :param port: The default port to use. Defaults to :py:obj:`None`.
+  :param port: The default port to use.
   :type port: Optional[:py:class:`int`]
   """
 

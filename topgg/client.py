@@ -209,7 +209,7 @@ class Client:
     :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: The requested bot.
-    :rtype: :class:`~.models.Bot`
+    :rtype: Bot
     """
 
     return Bot(await self.__request('GET', f'/bots/{id}'))
@@ -219,7 +219,7 @@ class Client:
     Returns a :class:`~.models.BotQuery` object that allows you to configure a bot query before sending it to the API.
 
     :returns: A :class:`~.models.BotQuery` object that allows you to configure a bot query before sending it to the API.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     return BotQuery(self)
@@ -290,7 +290,7 @@ class Client:
     :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: A generator of your bot's recent unique voters.
-    :rtype: Iterable[:class:`~.models.Voter`]
+    :rtype: Iterable[Voter]
     """
 
     return map(

@@ -229,7 +229,7 @@ class BotQuery:
     Sorts results based on each bot's ID.
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__sort = 'id'
@@ -241,7 +241,7 @@ class BotQuery:
     Sorts results based on each bot's submission date.
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__sort = 'date'
@@ -253,7 +253,7 @@ class BotQuery:
     Sorts results based on each bot's monthly vote count.
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__sort = 'monthlyPoints'
@@ -268,7 +268,7 @@ class BotQuery:
     :type id: :py:class:`int`
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__params['limit'] = max(min(limit, 500), 1)
@@ -283,7 +283,7 @@ class BotQuery:
     :type id: :py:class:`int`
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__params['offset'] = max(min(skip, 499), 0)
@@ -298,7 +298,7 @@ class BotQuery:
     :type id: :py:class:`str`
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__search['username'] = name
@@ -313,7 +313,7 @@ class BotQuery:
     :type id: :py:class:`str`
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__search['prefix'] = prefix
@@ -328,7 +328,7 @@ class BotQuery:
     :type id: :py:class:`int`
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__search['points'] = max(votes, 0)
@@ -343,7 +343,7 @@ class BotQuery:
     :type id: :py:class:`int`
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__search['monthlyPoints'] = max(monthly_votes, 0)
@@ -358,7 +358,7 @@ class BotQuery:
     :type id: :py:class:`str`
 
     :returns: The same object. This allows this object to have chained method calls.
-    :rtype: :class:`~.models.BotQuery`
+    :rtype: BotQuery
     """
 
     self.__search['vanity'] = vanity
@@ -374,7 +374,7 @@ class BotQuery:
     :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: A generator of matching bots.
-    :rtype: Iterable[:class:`~.models.Bot`]
+    :rtype: Iterable[Bot]
     """
 
     params = self.__params.copy()
