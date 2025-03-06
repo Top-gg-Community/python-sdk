@@ -383,6 +383,6 @@ class BotQuery:
     if self.__sort:
       params['sort'] = self.__sort
 
-    bots = (await self.__client._Client__request('GET', '/bots', params=params)) or {}
+    bots = await self.__client._Client__request('GET', '/bots', params=params)
 
     return map(Bot, bots.get('results', ()))
