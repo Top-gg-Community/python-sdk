@@ -64,7 +64,7 @@ class Client:
   :param session: Whether to use an existing :class:`~aiohttp.ClientSession` for requesting or not. Defaults to :py:obj:`None` (creates a new one instead)
   :type session: Optional[:class:`~aiohttp.ClientSession`]
 
-  :exception TypeError: ``token`` is not a :py:class:`str`.
+  :exception TypeError: ``token`` is not a :py:class:`str` or is empty.
   :exception ValueError: ``token`` is not a valid API token.
   """
 
