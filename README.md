@@ -13,7 +13,7 @@ Make sure you already have an API token handy. See [this tutorial](https://githu
 After that, run the following command in your terminal:
 
 ```console
-pip install topggpy
+$ pip install topggpy
 ```
 
 ## Basic examples
