@@ -23,15 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from aiohttp import ClientResponseError, ClientSession, ClientTimeout
 from collections.abc import Iterable, Callable, Coroutine
-from aiohttp import ClientSession, ClientTimeout
 from typing import Any, Optional, Union
 from collections import namedtuple
 from inspect import isawaitable
 from base64 import b64decode
-from json import loads
 from time import time
+import binascii
 import asyncio
+import json
 
 from .ratelimiter import Ratelimiter, RatelimiterManager
 from .errors import Error, RequestError, Ratelimited
@@ -95,8 +96,8 @@ class Client:
       encoded_json = token.split('.')[1]
       encoded_json += '=' * (4 - (len(encoded_json) % 4))
 
-      int(loads(b64decode(encoded_json))['id'])
-    except:
+      int(json.loads(b64decode(encoded_json))['id'])
+    except (IndexError, ValueError, binascii.Error, json.decoder.JSONDecodeError):
       raise ValueError('Got a malformed API token.')
 
     endpoint_ratelimits = namedtuple('EndpointRatelimits', 'global_ bot')
@@ -123,7 +124,7 @@ class Client:
     method: str,
     path: str,
     params: Optional[dict] = None,
-    json: Optional[dict] = None,
+    body: Optional[dict] = None,
   ) -> dict:
     if self.__session.closed:
       raise Error('Client session is already closed.')
@@ -144,15 +145,15 @@ class Client:
 
     kwargs = {}
 
-    if json:
-      kwargs['json'] = json
+    if body:
+      kwargs['json'] = body
 
     if params:
       kwargs['params'] = params
 
     status = None
     retry_after = None
-    json = None
+    output = None
 
     async with ratelimiter:
       try:
@@ -169,15 +170,16 @@ class Client:
           status = resp.status
           retry_after = float(resp.headers.get('Retry-After', 0))
 
-          try:
-            json = await resp.json()
-          except:
-            pass
+          if 'application/json' in resp.headers['Content-Type']:
+            try:
+              output = await resp.json()
+            except json.decoder.JSONDecodeError:
+              pass
 
           resp.raise_for_status()
 
-          return json
-      except:
+          return output
+      except ClientResponseError:
         if status == 429:
           if retry_after > MAXIMUM_DELAY_THRESHOLD:
             self.__current_ratelimit = time() + retry_after
@@ -188,7 +190,7 @@ class Client:
 
           return await self.__request(method, path)
 
-        raise RequestError(json and json.get('message'), status) from None
+        raise RequestError(output and output.get('message'), status) from None
 
   async def get_bot(self, id: int) -> Bot:
     """
@@ -215,7 +217,7 @@ class Client:
     sort_by: Optional[SortBy] = None,
     votes: Optional[int] = None,
     monthly_votes: Optional[int] = None,
-    **search: Optional[str]
+    **search: Optional[str],
   ) -> Iterable[Bot]:
     """
     Fetches and yields Discord bots that matches the specified query.
@@ -249,19 +251,21 @@ class Client:
 
     if limit is not None:
       params['limit'] = max(min(limit, 500), 1)
-    
+
     if offset is not None:
       params['offset'] = max(min(offset, 499), 0)
 
     if sort_by is not None:
       if not isinstance(sort_by, SortBy):
-        raise TypeError(f'Expected sort_by to be a SortBy enum, got {sort_by.__class__.__name__}.')
+        raise TypeError(
+          f'Expected sort_by to be a SortBy enum, got {sort_by.__class__.__name__}.'
+        )
 
       params['sort'] = sort_by.value
 
     if votes is not None:
       search['points'] = max(votes, 0)
-    
+
     if monthly_votes is not None:
       search['monthlyPoints'] = max(monthly_votes, 0)
 
@@ -305,9 +309,7 @@ class Client:
         f'Posted server count cannot be zero or lower, got {new_server_count}.'
       )
 
-    await self.__request(
-      'POST', '/bots/stats', json={'server_count': new_server_count}
-    )
+    await self.__request('POST', '/bots/stats', body={'server_count': new_server_count})
 
   async def is_weekend(self) -> bool:
     """
@@ -342,9 +344,7 @@ class Client:
 
     return map(
       Voter,
-      await self.__request(
-        'GET', '/bots/votes', params={'page': max(page, 1)}
-      ),
+      await self.__request('GET', '/bots/votes', params={'page': max(page, 1)}),
     )
 
   async def has_voted(self, id: int) -> bool:
