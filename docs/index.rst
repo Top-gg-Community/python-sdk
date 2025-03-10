@@ -46,13 +46,11 @@ Basic examples
       print(bot)
   
       # Fetch bots that matches the specified query.
-      bots = (
-        await tg.get_bots()
-        .limit(250)
-        .skip(50)
-        .name('shiro')
-        .sort_by_monthly_votes()
-        .send()
+      bots = await tg.get_bots(
+        limit=250,
+        offset=50,
+        username='Shiro',
+        sort_by=topgg.SortBy.MONTHLY_VOTES
       )
   
       for b in bots:

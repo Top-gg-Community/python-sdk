@@ -41,18 +41,16 @@ def test_attributes(obj: object) -> None:
 
 async def run() -> None:
   async with topgg.Client(os.getenv('TOPGG_TOKEN')) as tg:
-    bot = await tg.get_bot(432610292342587392)
+    #bot = await tg.get_bot(432610292342587392)
 
-    test_attributes(bot)
+    #test_attributes(bot)
 
-    await asyncio.sleep(1)
-    bots = (
-      await tg.get_bots()
-      .limit(250)
-      .skip(50)
-      .name('shiro')
-      .sort_by_monthly_votes()
-      .send()
+    #await asyncio.sleep(1)
+    bots = await tg.get_bots(
+      limit=250,
+      offset=50,
+      username='Shiro',
+      sort_by=topgg.SortBy.MONTHLY_VOTES
     )
 
     for b in bots:

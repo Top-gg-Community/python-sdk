@@ -25,7 +25,7 @@ SOFTWARE.
 
 from datetime import datetime, timezone
 from typing import Optional, TypeVar
-from collections.abc import Iterable
+from enum import Enum
 
 
 T = TypeVar('T')
@@ -43,12 +43,12 @@ def timestamp_from_id(id: int) -> datetime:
 class Voter:
   """A Top.gg voter."""
 
-  __slots__: tuple[str, ...] = ('id', 'name', 'avatar')
+  __slots__: tuple[str, ...] = ('id', 'username', 'avatar')
 
   id: int
   """This voter's Discord ID."""
 
-  name: str
+  username: str
   """This voter's username."""
 
   avatar: str
@@ -56,11 +56,11 @@ class Voter:
 
   def __init__(self, json: dict):
     self.id = int(json['id'])
-    self.name = json['username']
+    self.username = json['username']
     self.avatar = json['avatar']
 
   def __repr__(self) -> str:
-    return f'<{__class__.__name__} id={self.id} name={self.name!r}>'
+    return f'<{__class__.__name__} id={self.id} username={self.username!r}>'
 
   def __int__(self) -> int:
     return self.id
@@ -84,7 +84,7 @@ class Bot:
   __slots__: tuple[str, ...] = (
     'id',
     'topgg_id',
-    'name',
+    'username',
     'prefix',
     'short_description',
     'long_description',
@@ -111,7 +111,7 @@ class Bot:
   topgg_id: int
   """This bot's Top.gg ID."""
 
-  name: str
+  username: str
   """This bot's username."""
 
   prefix: str
@@ -171,7 +171,7 @@ class Bot:
   def __init__(self, json: dict):
     self.id = int(json['clientid'])
     self.topgg_id = int(json['id'])
-    self.name = json['username']
+    self.username = json['username']
     self.prefix = json['prefix']
     self.short_description = json['shortdesc']
     self.long_description = truthy_only(json.get('longdesc'))
@@ -192,7 +192,7 @@ class Bot:
     self.review_count = json['reviews']['count']
 
   def __repr__(self) -> str:
-    return f'<{__class__.__name__} id={self.id} name={self.name!r} votes={self.votes} monthly_votes={self.monthly_votes} server_count={self.server_count}>'
+    return f'<{__class__.__name__} id={self.id} username={self.username!r} votes={self.votes} monthly_votes={self.monthly_votes} server_count={self.server_count}>'
 
   def __int__(self) -> int:
     return self.id
@@ -210,179 +210,16 @@ class Bot:
     return timestamp_from_id(self.id)
 
 
-class BotQuery:
-  """Configure a Discord bot query before sending it to the API."""
+class SortBy(Enum):
+  """Supported sorting criterias in :meth:`.Client.get_bots`."""
 
-  __slots__: tuple[str, ...] = ('__client', '__params', '__search', '__sort')
+  __slots__: tuple[str, ...] = ()
 
-  def __init__(self, client: object):
-    self.__client = client
-    self.__params = {}
-    self.__search = {}
-    self.__sort = None
+  ID = 'id'
+  """Sorts results based on each bot's ID."""
 
-  def __repr__(self) -> str:
-    return f'<{__class__.__name__}>'
+  SUBMISSION_DATE = 'date'
+  """Sorts results based on each bot's submission date."""
 
-  def sort_by_id(self) -> 'BotQuery':
-    """
-    Sorts results based on each bot's ID.
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__sort = 'id'
-
-    return self
-
-  def sort_by_submission_date(self) -> 'BotQuery':
-    """
-    Sorts results based on each bot's submission date.
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__sort = 'date'
-
-    return self
-
-  def sort_by_monthly_votes(self) -> 'BotQuery':
-    """
-    Sorts results based on each bot's monthly vote count.
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__sort = 'monthlyPoints'
-
-    return self
-
-  def limit(self, limit: int) -> 'BotQuery':
-    """
-    Sets the maximum amount of bots to be queried.
-
-    :param id: The maximum amount of bots to be queried. This cannot be more than 500.
-    :type id: :py:class:`int`
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__params['limit'] = max(min(limit, 500), 1)
-
-    return self
-
-  def skip(self, skip: int) -> 'BotQuery':
-    """
-    Sets the amount of bots to be skipped.
-
-    :param id: The amount of bots to be skipped. This cannot be more than 499.
-    :type id: :py:class:`int`
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__params['offset'] = max(min(skip, 499), 0)
-
-    return self
-
-  def name(self, name: str) -> 'BotQuery':
-    """
-    Queries only bots that has this username.
-
-    :param id: The specified username.
-    :type id: :py:class:`str`
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__search['username'] = name
-
-    return self
-
-  def prefix(self, prefix: str) -> 'BotQuery':
-    """
-    Queries only bots that has this prefix.
-
-    :param id: The specified prefix.
-    :type id: :py:class:`str`
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__search['prefix'] = prefix
-
-    return self
-
-  def votes(self, votes: int) -> 'BotQuery':
-    """
-    Queries only bots that has this vote count.
-
-    :param id: The specified vote count.
-    :type id: :py:class:`int`
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__search['points'] = max(votes, 0)
-
-    return self
-
-  def monthly_votes(self, monthly_votes: int) -> 'BotQuery':
-    """
-    Queries only bots that has this monthly vote count.
-
-    :param id: The specified monthly vote count.
-    :type id: :py:class:`int`
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__search['monthlyPoints'] = max(monthly_votes, 0)
-
-    return self
-
-  def vanity(self, vanity: str) -> 'BotQuery':
-    """
-    Queries only bots that has this Top.gg vanity URL.
-
-    :param id: The specified Top.gg vanity URL (without the preceeding https://top.gg/).
-    :type id: :py:class:`str`
-
-    :returns: The same object. This allows this object to have chained method calls.
-    :rtype: BotQuery
-    """
-
-    self.__search['vanity'] = vanity
-
-    return self
-
-  async def send(self) -> Iterable[Bot]:
-    """
-    Sends the query to the API.
-
-    :exception Error: The client is already closed.
-    :exception RequestError: Received a non-favorable response from the API.
-    :exception Ratelimited: Ratelimited from sending more requests.
-
-    :returns: A generator of matching bots.
-    :rtype: Iterable[Bot]
-    """
-
-    params = self.__params.copy()
-    params['search'] = ' '.join(f'{k}: {v}' for k, v in self.__search.items())
-
-    if self.__sort:
-      params['sort'] = self.__sort
-
-    bots = await self.__client._Client__request('GET', '/bots', params=params)
-
-    return map(Bot, bots.get('results', ()))
+  MONTHLY_VOTES = 'monthlyPoints'
+  """Sorts results based on each bot's monthly vote count."""

@@ -35,7 +35,7 @@ import asyncio
 
 from .ratelimiter import Ratelimiter, RatelimiterManager
 from .errors import Error, RequestError, Ratelimited
-from .models import Bot, BotQuery, Voter
+from .models import Bot, SortBy, Voter
 from .version import VERSION
 
 
@@ -79,7 +79,6 @@ class Client:
     '__autopost_retrieval_callback',
     '__autopost_success_callbacks',
     '__autopost_error_callbacks',
-    '__id',
   )
 
   def __init__(self, token: str, *, session: Optional[ClientSession] = None):
@@ -96,7 +95,7 @@ class Client:
       encoded_json = token.split('.')[1]
       encoded_json += '=' * (4 - (len(encoded_json) % 4))
 
-      self.__id = int(loads(b64decode(encoded_json))['id'])
+      int(loads(b64decode(encoded_json))['id'])
     except:
       raise ValueError('Got a malformed API token.')
 
@@ -115,12 +114,6 @@ class Client:
 
   def __repr__(self) -> str:
     return f'<{__class__.__name__} {self.__session!r}>'
-
-  @property
-  def id(self) -> int:
-    """The Discord ID associated with this API token."""
-
-    return self.__id
 
   def __int__(self) -> int:
     return self.id
@@ -205,24 +198,78 @@ class Client:
     :type id: :py:class:`int`
 
     :exception Error: The client is already closed.
-    :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
+    :exception RequestError: Such query does not exist or the client has received other non-favorable responses from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: The requested bot.
-    :rtype: Bot
+    :rtype: :class:`.Bot`
     """
 
     return Bot(await self.__request('GET', f'/bots/{id}'))
 
-  def get_bots(self) -> BotQuery:
+  async def get_bots(
+    self,
+    *,
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+    sort_by: Optional[SortBy] = None,
+    votes: Optional[int] = None,
+    monthly_votes: Optional[int] = None,
+    **search: Optional[str]
+  ) -> Iterable[Bot]:
     """
-    Returns a :class:`~.models.BotQuery` object that allows you to configure a bot query before sending it to the API.
+    Fetches and yields Discord bots that matches the specified query.
 
-    :returns: A :class:`~.models.BotQuery` object that allows you to configure a bot query before sending it to the API.
-    :rtype: BotQuery
+    :param limit: The maximum amount of bots to be queried.
+    :type limit: Optional[:py:class:`int`]
+    :param offset: The amount of bots to be skipped.
+    :type offset: Optional[:py:class:`int`]
+    :param sort_by: Sorts results based on a specific criteria. Results will always be descending.
+    :type sort_by: Optional[:class:`.SortBy`]
+    :param username: Queries only bots that has this username.
+    :type username: Optional[:py:class:`str`]
+    :param prefix: Queries only bots that has this prefix.
+    :type prefix: Optional[:py:class:`str`]
+    :param votes: Queries only bots that has this vote count.
+    :type votes: Optional[:py:class:`int`]
+    :param monthly_votes: Queries only bots that has this monthly vote count.
+    :type monthly_votes: Optional[:py:class:`int`]
+    :param vanity: Queries only bots that has this Top.gg vanity code.
+    :type vanity: Optional[:py:class:`str`]
+
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+
+    :returns: A generator of matching bots.
+    :rtype: Iterable[:class:`.Bot`]
     """
 
-    return BotQuery(self)
+    params = {}
+
+    if limit is not None:
+      params['limit'] = max(min(limit, 500), 1)
+    
+    if offset is not None:
+      params['offset'] = max(min(offset, 499), 0)
+
+    if sort_by is not None:
+      if not isinstance(sort_by, SortBy):
+        raise TypeError(f'Expected sort_by to be a SortBy enum, got {sort_by.__class__.__name__}.')
+
+      params['sort'] = sort_by.value
+
+    if votes is not None:
+      search['points'] = max(votes, 0)
+    
+    if monthly_votes is not None:
+      search['monthlyPoints'] = max(monthly_votes, 0)
+
+    params['search'] = ' '.join(f'{k}: {v}' for k, v in search.items())
+
+    bots = await self.__request('GET', '/bots', params=params)
+
+    return map(Bot, bots.get('results', ()))
 
   async def get_server_count(self) -> Optional[int]:
     """
@@ -236,7 +283,7 @@ class Client:
     :rtype: Optional[:py:class:`int`]
     """
 
-    stats = await self.__request('GET', f'/bots/{self.__id}/stats')
+    stats = await self.__request('GET', '/bots/stats')
 
     return stats.get('server_count')
 
@@ -259,7 +306,7 @@ class Client:
       )
 
     await self.__request(
-      'POST', f'/bots/{self.__id}/stats', json={'server_count': new_server_count}
+      'POST', '/bots/stats', json={'server_count': new_server_count}
     )
 
   async def is_weekend(self) -> bool:
@@ -271,7 +318,7 @@ class Client:
     :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: Whether the weekend multiplier is active.
-    :rtype: bool
+    :rtype: :py:class:`bool`
     """
 
     response = await self.__request('GET', '/weekend')
@@ -290,13 +337,13 @@ class Client:
     :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: A generator of your bot's recent unique voters.
-    :rtype: Iterable[Voter]
+    :rtype: Iterable[:class:`.Voter`]
     """
 
     return map(
       Voter,
       await self.__request(
-        'GET', f'/bots/{self.__id}/votes', params={'page': max(page, 1)}
+        'GET', '/bots/votes', params={'page': max(page, 1)}
       ),
     )
 
@@ -312,10 +359,10 @@ class Client:
     :exception Ratelimited: Ratelimited from sending more requests.
 
     :returns: Whether the specified user has voted your bot.
-    :rtype: bool
+    :rtype: :py:class:`bool`
     """
 
-    response = await self.__request('GET', f'/bots/{self.__id}/check?userId={id}')
+    response = await self.__request('GET', '/bots/check', params={'userId': id})
 
     return bool(response['voted'])
 
@@ -407,7 +454,7 @@ class Client:
     """
     Adds an autopost on error handler. Several callbacks are possible.
 
-    :param callback: The autopost on error handler. This can be asynchronous or synchronous, as long as it accepts an :class:`~.Error` argument for the request exception.
+    :param callback: The autopost on error handler. This can be asynchronous or synchronous, as long as it accepts an :class:`.Error` argument for the request exception.
     :type callback: Optional[:data:`~.client.AutopostErrorCallback`]
 
     :returns: The function itself or a decorated function depending on the argument.
@@ -426,6 +473,12 @@ class Client:
 
     return decorator
 
+  @property
+  def autoposter_running(self) -> bool:
+    """Whether the autoposter is running."""
+
+    return self.__autopost_task is not None
+
   def start_autoposter(self, interval: Optional[float] = None) -> None:
     """
     Starts the autoposter. Has no effect if the autoposter is already running.
@@ -436,7 +489,7 @@ class Client:
     :exception TypeError: The server count retrieval callback does not exist.
     """
 
-    if self.__autopost_task is None:
+    if not self.autoposter_running:
       if self.__autopost_retrieval_callback is None:
         raise TypeError('Missing autopost_retrieval callback.')
 
@@ -447,7 +500,7 @@ class Client:
     Stops the autoposter. Has no effect if the autoposter is already stopped.
     """
 
-    if self.__autopost_task is not None:
+    if self.autoposter_running:
       self.__autopost_task.cancel()
       self.__autopost_task = None
 

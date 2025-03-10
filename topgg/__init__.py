@@ -24,7 +24,7 @@ SOFTWARE.
 """
 
 from .errors import Error, RequestError, Ratelimited
-from .models import Bot, BotQuery, Voter
+from .models import Bot, SortBy, Voter
 from .webhooks import Vote, Webhooks
 from .version import VERSION
 from .client import Client
@@ -40,11 +40,11 @@ __copyright__ = 'Copyright (c) 2021 Assanali Mukhanov & Top.gg; Copyright (c) 20
 __version__ = VERSION
 __all__ = (
   'Bot',
-  'BotQuery',
   'Client',
   'Error',
   'Ratelimited',
   'RequestError',
+  'SortBy',
   'VERSION',
   'Vote',
   'Voter',

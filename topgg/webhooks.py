@@ -100,12 +100,11 @@ class Webhooks:
     self.__running = False
 
   def __repr__(self) -> str:
-    return f'<{__class__.__name__} app={self.__app!r} running={self.__running}>'
+    return f'<{__class__.__name__} app={self.__app!r} running={self.running}>'
 
   def on_vote(
     self,
     route: str,
-    *,
     auth: Optional[str] = None,
     callback: Optional[OnVoteCallback] = None,
   ) -> Union[OnVoteCallback, OnVoteDecorator]:
@@ -167,7 +166,7 @@ class Webhooks:
     :exception TypeError: the port is not provided either here or in the constructor call.
     """
 
-    if not self.__running:
+    if not self.running:
       if port is None:
         port = self.__default_port
 
@@ -187,13 +186,13 @@ class Webhooks:
     Closes the webhook server. Has no effect if the server is already closed.
     """
 
-    if self.__running:
+    if self.running:
       await self.__server.stop()
 
       self.__running = False
 
   @property
-  def is_running(self) -> bool:
+  def running(self) -> bool:
     """Whether the webhook server is running."""
 
     return self.__running

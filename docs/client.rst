@@ -4,6 +4,9 @@ Client reference
 .. autoclass:: topgg.client.Client
    :members:
 
+.. autoclass:: topgg.models.SortBy()
+   :members:
+
 .. autoclass:: topgg.errors.Error()
 
 .. autoclass:: topgg.errors.RequestError()
