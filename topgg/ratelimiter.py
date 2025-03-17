@@ -71,13 +71,13 @@ class Ratelimiter:
     return self.__calls[-1] - self.__calls[0]
 
 
-class RatelimiterManager:
+class Ratelimiters:
   __slots__: tuple[str, ...] = ('__ratelimiters',)
 
   def __init__(self, ratelimiters: Iterable[Ratelimiter]):
     self.__ratelimiters = ratelimiters
 
-  async def __aenter__(self) -> 'RatelimiterManager':
+  async def __aenter__(self) -> 'Ratelimiters':
     for manager in self.__ratelimiters:
       await manager.__aenter__()
 

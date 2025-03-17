@@ -34,7 +34,7 @@ import binascii
 import asyncio
 import json
 
-from .ratelimiter import Ratelimiter, RatelimiterManager
+from .ratelimiter import Ratelimiter, Ratelimiters
 from .errors import Error, RequestError, Ratelimited
 from .models import Bot, SortBy, Voter
 from .version import VERSION
@@ -105,7 +105,7 @@ class Client:
     self.__ratelimiters = endpoint_ratelimits(
       global_=Ratelimiter(99, 1), bot=Ratelimiter(59, 60)
     )
-    self.__ratelimiter_manager = RatelimiterManager(self.__ratelimiters)
+    self.__ratelimiter_manager = Ratelimiters(self.__ratelimiters)
     self.__current_ratelimit = None
 
     self.__autopost_task = None
