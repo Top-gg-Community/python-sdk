@@ -138,9 +138,7 @@ class Client:
         self.__current_ratelimit = None
 
     ratelimiter = (
-      self.__ratelimiters
-      if path.startswith('/bots')
-      else self.__ratelimiters.global_
+      self.__ratelimiters if path.startswith('/bots') else self.__ratelimiters.global_
     )
 
     kwargs = {}

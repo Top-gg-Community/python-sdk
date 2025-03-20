@@ -31,6 +31,8 @@ import asyncio
 
 
 class Ratelimiter:
+  """Handles ratelimits for a specific endpoint."""
+
   __slots__: tuple[str, ...] = ('__lock', '__max_calls', '__period', '__calls')
 
   def __init__(
@@ -44,6 +46,8 @@ class Ratelimiter:
     self.__lock = asyncio.Lock()
 
   async def __aenter__(self) -> 'Ratelimiter':
+    """Delays the request to this endpoint if it could lead to a ratelimit."""
+
     async with self.__lock:
       if len(self.__calls) >= self.__max_calls:
         until = time() + self.__period - self._timespan
@@ -59,8 +63,9 @@ class Ratelimiter:
     _exc_val: BaseException,
     _exc_tb: TracebackType,
   ) -> None:
+    """Stores the previous request's timestamp."""
+
     async with self.__lock:
-      # Store the last operation timestamp.
       self.__calls.append(time())
 
       while self._timespan >= self.__period:
@@ -68,18 +73,24 @@ class Ratelimiter:
 
   @property
   def _timespan(self) -> float:
+    """The timespan between the first call and last call."""
+
     return self.__calls[-1] - self.__calls[0]
 
 
 class Ratelimiters:
+  """Handles ratelimits for multiple endpoints."""
+
   __slots__: tuple[str, ...] = ('__ratelimiters',)
 
   def __init__(self, ratelimiters: Iterable[Ratelimiter]):
     self.__ratelimiters = ratelimiters
 
   async def __aenter__(self) -> 'Ratelimiters':
-    for manager in self.__ratelimiters:
-      await manager.__aenter__()
+    """Delays the request to this endpoint if it could lead to a ratelimit."""
+
+    for ratelimiter in self.__ratelimiters:
+      await ratelimiter.__aenter__()
 
     return self
 
@@ -89,6 +100,11 @@ class Ratelimiters:
     exc_val: BaseException,
     exc_tb: TracebackType,
   ) -> None:
+    """Stores the previous request's timestamp."""
+
     await asyncio.gather(
-      *(manager.__aexit__(exc_type, exc_val, exc_tb) for manager in self.__ratelimiters)
+      *(
+        ratelimiter.__aexit__(exc_type, exc_val, exc_tb)
+        for ratelimiter in self.__ratelimiters
+      )
     )
