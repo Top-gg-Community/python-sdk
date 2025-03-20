@@ -74,7 +74,7 @@ class Client:
     '__session',
     '__token',
     '__ratelimiters',
-    '__ratelimiter_manager',
+    '__ratelimiters',
     '__current_ratelimit',
     '__autopost_task',
     '__autopost_retrieval_callback',
@@ -105,7 +105,7 @@ class Client:
     self.__ratelimiters = endpoint_ratelimits(
       global_=Ratelimiter(99, 1), bot=Ratelimiter(59, 60)
     )
-    self.__ratelimiter_manager = Ratelimiters(self.__ratelimiters)
+    self.__ratelimiters = Ratelimiters(self.__ratelimiters)
     self.__current_ratelimit = None
 
     self.__autopost_task = None
@@ -138,7 +138,7 @@ class Client:
         self.__current_ratelimit = None
 
     ratelimiter = (
-      self.__ratelimiter_manager
+      self.__ratelimiters
       if path.startswith('/bots')
       else self.__ratelimiters.global_
     )
