@@ -92,7 +92,6 @@ class Bot:
     'website',
     'github',
     'owners',
-    'banner_url',
     'submitted_at',
     'votes',
     'monthly_votes',
@@ -135,9 +134,6 @@ class Bot:
   owners: list[int]
   """This bot's owner IDs."""
 
-  banner_url: Optional[str]
-  """This bot's banner URL."""
-
   submitted_at: datetime
   """This bot's submission date."""
 
@@ -179,7 +175,6 @@ class Bot:
     self.website = truthy_only(json.get('website'))
     self.github = truthy_only(json.get('github'))
     self.owners = [int(id) for id in json['owners']]
-    self.banner_url = truthy_only(json.get('bannerUrl'))
     self.submitted_at = datetime.fromisoformat(json['date'].replace('Z', '+00:00'))
     self.votes = json['points']
     self.monthly_votes = json['monthlyPoints']
