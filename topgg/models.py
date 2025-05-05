@@ -97,7 +97,6 @@ class Bot:
     'monthly_votes',
     'support',
     'avatar',
-    'url',
     'invite',
     'server_count',
     'review_score',
@@ -149,11 +148,11 @@ class Bot:
   avatar: str
   """This bot's avatar URL."""
 
-  url: str
-  """This bot's Top.gg page URL."""
-
   invite: Optional[str]
   """This bot's invite URL."""
+
+  vanity: Optional[str]
+  """This bot's Top.gg vanity code."""
 
   server_count: Optional[str]
   """This bot's posted server count."""
@@ -180,8 +179,8 @@ class Bot:
     self.monthly_votes = json['monthlyPoints']
     self.support = truthy_only(json.get('support'))
     self.avatar = json['avatar']
-    self.url = f'https://top.gg/bot/{json.get("vanity") or self.topgg_id}'
     self.invite = truthy_only(json.get('invite'))
+    self.vanity = truthy_only(json.get('vanity'))
     self.server_count = json.get('server_count')
     self.review_score = json['reviews']['averageScore']
     self.review_count = json['reviews']['count']
