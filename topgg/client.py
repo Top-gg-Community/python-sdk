@@ -69,17 +69,21 @@ class Client:
   :exception ValueError: ``token`` is not a valid API token.
   """
 
+  id: int
+  """This bot's ID."""
+
   __slots__: tuple[str, ...] = (
     '__own_session',
     '__session',
     '__token',
-    '__ratelimiters',
+    '__ratelimiter',
     '__ratelimiters',
     '__current_ratelimit',
     '__autopost_task',
     '__autopost_retrieval_callback',
     '__autopost_success_callbacks',
     '__autopost_error_callbacks',
+    'id',
   )
 
   def __init__(self, token: str, *, session: Optional[ClientSession] = None):
@@ -96,16 +100,16 @@ class Client:
       encoded_json = token.split('.')[1]
       encoded_json += '=' * (4 - (len(encoded_json) % 4))
 
-      int(json.loads(b64decode(encoded_json))['id'])
+      self.id = int(json.loads(b64decode(encoded_json))['id'])
     except (IndexError, ValueError, binascii.Error, json.decoder.JSONDecodeError):
       raise ValueError('Got a malformed API token.')
 
     endpoint_ratelimits = namedtuple('EndpointRatelimits', 'global_ bot')
 
-    self.__ratelimiters = endpoint_ratelimits(
+    self.__ratelimiter = endpoint_ratelimits(
       global_=Ratelimiter(99, 1), bot=Ratelimiter(59, 60)
     )
-    self.__ratelimiters = Ratelimiters(self.__ratelimiters)
+    self.__ratelimiters = Ratelimiters(self.__ratelimiter)
     self.__current_ratelimit = None
 
     self.__autopost_task = None
@@ -138,7 +142,7 @@ class Client:
         self.__current_ratelimit = None
 
     ratelimiter = (
-      self.__ratelimiters if path.startswith('/bots') else self.__ratelimiters.global_
+      self.__ratelimiters if path.startswith('/bots') else self.__ratelimiter.global_
     )
 
     kwargs = {}
@@ -342,7 +346,9 @@ class Client:
 
     return map(
       Voter,
-      await self.__request('GET', '/bots/votes', params={'page': max(page, 1)}),
+      await self.__request(
+        'GET', f'/bots/{self.id}/votes', params={'page': max(page, 1)}
+      ),
     )
 
   async def has_voted(self, id: int) -> bool:

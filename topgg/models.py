@@ -98,6 +98,7 @@ class Bot:
     'support',
     'avatar',
     'invite',
+    'vanity',
     'server_count',
     'review_score',
     'review_count',
