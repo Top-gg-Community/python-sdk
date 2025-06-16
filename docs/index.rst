@@ -49,7 +49,6 @@ Basic examples
       bots = await tg.get_bots(
         limit=250,
         offset=50,
-        username='Shiro',
         sort_by=topgg.SortBy.MONTHLY_VOTES
       )
   

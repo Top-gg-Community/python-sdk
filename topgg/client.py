@@ -217,9 +217,6 @@ class Client:
     limit: Optional[int] = None,
     offset: Optional[int] = None,
     sort_by: Optional[SortBy] = None,
-    votes: Optional[int] = None,
-    monthly_votes: Optional[int] = None,
-    **search: Optional[str],
   ) -> Iterable[Bot]:
     """
     Fetches and yields Discord bots that matches the specified query.
@@ -230,16 +227,6 @@ class Client:
     :type offset: Optional[:py:class:`int`]
     :param sort_by: Sorts results based on a specific criteria. Results will always be descending.
     :type sort_by: Optional[:class:`.SortBy`]
-    :param username: Queries only bots that has this username.
-    :type username: Optional[:py:class:`str`]
-    :param prefix: Queries only bots that has this prefix.
-    :type prefix: Optional[:py:class:`str`]
-    :param votes: Queries only bots that has this vote count.
-    :type votes: Optional[:py:class:`int`]
-    :param monthly_votes: Queries only bots that has this monthly vote count.
-    :type monthly_votes: Optional[:py:class:`int`]
-    :param vanity: Queries only bots that has this Top.gg vanity code.
-    :type vanity: Optional[:py:class:`str`]
 
     :exception Error: The client is already closed.
     :exception RequestError: Received a non-favorable response from the API.
@@ -264,14 +251,6 @@ class Client:
         )
 
       params['sort'] = sort_by.value
-
-    if votes is not None:
-      search['points'] = max(votes, 0)
-
-    if monthly_votes is not None:
-      search['monthlyPoints'] = max(monthly_votes, 0)
-
-    params['search'] = ' '.join(f'{k}: {v}' for k, v in search.items())
 
     bots = await self.__request('GET', '/bots', params=params)
 
