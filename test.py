@@ -46,9 +46,7 @@ async def run() -> None:
     test_attributes(bot)
 
     await asyncio.sleep(1)
-    bots = await tg.get_bots(
-      limit=250, offset=50, sort_by=topgg.SortBy.MONTHLY_VOTES
-    )
+    bots = await tg.get_bots(limit=250, offset=50, sort_by=topgg.SortBy.MONTHLY_VOTES)
 
     for b in bots:
       test_attributes(b)
