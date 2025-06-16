@@ -40,7 +40,7 @@ from .models import Bot, SortBy, Voter
 from .version import VERSION
 
 
-BASE_URL = 'https://top.gg/api'
+BASE_URL = 'https://top.gg/api/v1'
 MAXIMUM_DELAY_THRESHOLD = 5.0
 
 

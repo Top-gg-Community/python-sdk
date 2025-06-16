@@ -4,6 +4,9 @@ Client reference
 .. autoclass:: topgg.client.Client
    :members:
 
+.. automodule:: topgg.widget
+   :members:
+
 .. autoclass:: topgg.models.SortBy()
    :members:
 

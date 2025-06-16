@@ -28,6 +28,7 @@ from .models import Bot, SortBy, Voter
 from .webhooks import Vote, Webhooks
 from .version import VERSION
 from .client import Client
+from . import widget
 
 
 __title__ = 'topggpy'
@@ -49,4 +50,5 @@ __all__ = (
   'Vote',
   'Voter',
   'Webhooks',
+  'widget',
 )
