@@ -26,6 +26,7 @@ SOFTWARE.
 from .errors import Error, RequestError, Ratelimited
 from .models import Bot, SortBy, Voter
 from .webhooks import Vote, Webhooks
+from .widget import WidgetType
 from .version import VERSION
 from .client import Client
 from . import widget
@@ -51,4 +52,5 @@ __all__ = (
   'Voter',
   'Webhooks',
   'widget',
+  'WidgetType',
 )
