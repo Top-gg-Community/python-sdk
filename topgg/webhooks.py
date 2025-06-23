@@ -36,16 +36,13 @@ RawCallback = Callable[[web.Request], Awaitable[web.StreamResponse]]
 class Vote:
   """A dispatched Top.gg vote event."""
 
-  __slots__ = ('receiver_id', 'voter_id', 'is_server', 'is_test', 'is_weekend', 'query')
+  __slots__ = ('receiver_id', 'voter_id', 'is_test', 'is_weekend', 'query')
 
   receiver_id: int
   """The ID of the Discord bot/server that received a vote."""
 
   voter_id: int
   """The ID of the Top.gg user who voted."""
-
-  is_server: bool
-  """Whether this vote's receiver is a Discord server."""
 
   is_test: bool
   """Whether this vote is just a test done from the page settings."""
@@ -57,9 +54,10 @@ class Vote:
   """Query strings found on the vote page."""
 
   def __init__(self, json: dict):
-    self.receiver_id = int(json.get('bot', json['guild']))
+    guild = json.get('guild')
+
+    self.receiver_id = int(json.get('bot', guild))
     self.voter_id = int(json['user'])
-    self.is_server = bool(json.get('guild'))
     self.is_test = json['type'] == 'test'
     self.is_weekend = bool(json.get('isWeekend'))
 
@@ -124,14 +122,12 @@ class Webhooks:
     :rtype: Union[:data:`~.webhooks.OnVoteCallback`, :data:`~.webhooks.OnVoteDecorator`]
     """
 
-    if not isinstance(route, str):
+    if not isinstance(route, str) or not route:
       raise TypeError('Missing route argument.')
 
-    if auth is None:
-      auth = self.__default_auth
+    auth = auth or self.__default_auth
 
-      if auth is None:
-        raise TypeError('Missing password.')
+    assert auth is not None, 'Missing password.'
 
     def decorator(inner_callback: OnVoteCallback) -> RawCallback:
       async def handler(request: web.Request) -> web.Response:
@@ -143,7 +139,7 @@ class Webhooks:
         if isawaitable(response):
           await response
 
-        return web.Response(status=200, text='OK')
+        return web.Response(status=204, text='')
 
       self.__app.router.add_post(route, handler)
 
@@ -167,11 +163,9 @@ class Webhooks:
     """
 
     if not self.running:
-      if port is None:
-        port = self.__default_port
+      port = port or self.__default_port
 
-        if port is None:
-          raise TypeError('Missing port.')
+      assert port is not None, 'Missing port.'
 
       runner = web.AppRunner(self.__app)
       await runner.setup()

@@ -102,7 +102,7 @@ class Client:
 
       self.id = int(json.loads(b64decode(encoded_json))['id'])
     except (IndexError, ValueError, binascii.Error, json.decoder.JSONDecodeError):
-      raise ValueError('Got a malformed API token.')
+      raise ValueError('Got a malformed API token.') from None
 
     endpoint_ratelimits = namedtuple('EndpointRatelimits', 'global_ bot')
 
@@ -473,8 +473,9 @@ class Client:
     """
 
     if not self.autoposter_running:
-      if self.__autopost_retrieval_callback is None:
-        raise TypeError('Missing autopost_retrieval callback.')
+      assert (
+        self.__autopost_retrieval_callback is not None
+      ), 'Missing autopost_retrieval callback.'
 
       self.__autopost_task = asyncio.create_task(self.__autopost_loop(interval))
 
