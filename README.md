@@ -165,10 +165,7 @@ import topgg
 import asyncio
 import os
 
-port = 8080
-secret = os.getenv('MY_TOPGG_WEBHOOK_SECRET')
-
-webhooks = topgg.Webhooks(secret, port)
+webhooks = topgg.Webhooks(os.getenv('MY_TOPGG_WEBHOOK_SECRET'), 8080)
 
 @webhooks.on_vote('/votes')
 def voted(vote: topgg.Vote) -> None:

@@ -24,10 +24,11 @@ SOFTWARE.
 """
 
 from collections.abc import Awaitable, Callable
+from aiohttp import web, ContentTypeError
 from typing import Any, Optional, Union
+from json import JSONDecodeError
 from inspect import isawaitable
 from urllib import parse
-from aiohttp import web
 
 
 RawCallback = Callable[[web.Request], Awaitable[web.StreamResponse]]
@@ -134,7 +135,12 @@ class Webhooks:
         if request.headers.get('Authorization', '') != auth:
           return web.Response(status=401, text='Unauthorized')
 
-        response = inner_callback(Vote(await request.json()))
+        try:
+          vote = Vote(await request.json())
+        except (JSONDecodeError, ContentTypeError):
+          return web.Response(status=400, text='Bad request')
+
+        response = inner_callback(vote)
 
         if isawaitable(response):
           await response
