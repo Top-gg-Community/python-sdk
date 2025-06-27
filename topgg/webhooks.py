@@ -28,53 +28,11 @@ from aiohttp import web, ContentTypeError
 from typing import Any, Optional, Union
 from json import JSONDecodeError
 from inspect import isawaitable
-from urllib import parse
+
+from .models import Vote
 
 
 RawCallback = Callable[[web.Request], Awaitable[web.StreamResponse]]
-
-
-class Vote:
-  """A dispatched Top.gg vote event."""
-
-  __slots__ = ('receiver_id', 'voter_id', 'is_test', 'is_weekend', 'query')
-
-  receiver_id: int
-  """The ID of the Discord bot/server that received a vote."""
-
-  voter_id: int
-  """The ID of the Top.gg user who voted."""
-
-  is_test: bool
-  """Whether this vote is just a test done from the page settings."""
-
-  is_weekend: bool
-  """Whether the weekend multiplier is active, where a single vote counts as two."""
-
-  query: dict[str, str]
-  """Query strings found on the vote page."""
-
-  def __init__(self, json: dict):
-    guild = json.get('guild')
-
-    self.receiver_id = int(json.get('bot', guild))
-    self.voter_id = int(json['user'])
-    self.is_test = json['type'] == 'test'
-    self.is_weekend = bool(json.get('isWeekend'))
-
-    if query := json.get('query'):
-      self.query = {
-        k: v[0] for k, v in parse.parse_qs(parse.urlsplit(query).query).items()
-      }
-    else:
-      self.query = {}
-
-  def __repr__(self) -> str:
-    return (
-      f'<{__class__.__name__} receiver_id={self.receiver_id} voter_id={self.voter_id}>'
-    )
-
-
 OnVoteCallback = Callable[[Vote], Any]
 OnVoteDecorator = Callable[[OnVoteCallback], RawCallback]
 

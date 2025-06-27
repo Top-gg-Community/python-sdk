@@ -110,7 +110,7 @@ def get_server_count() -> int:
 
 @client.autopost_success
 def success(server_count: int) -> None:
-  print(f'Successfully posted {server_count} servers to the API!')
+  print(f'Successfully posted {server_count} servers to Top.gg!')
 
 @client.autopost_error
 def error(error: topgg.Error) -> None:
