@@ -60,7 +60,22 @@ class Client:
   """
   Interact with the API's endpoints.
 
-  :param token: The API token to use. To retrieve it, see https://github.com/top-gg/rust-sdk/assets/60427892/d2df5bd3-bc48-464c-b878-a04121727bff.
+  Examples:
+
+  .. code-block:: python
+
+    # Explicit cleanup
+    client = topgg.Client(os.getenv('TOPGG_TOKEN'))
+
+    # ...
+
+    await client.close()
+
+    # Implicit cleanup
+    async with topgg.Client(os.getenv('TOPGG_TOKEN')) as client:
+      # ...
+
+  :param token: Your Top.gg API token. To retrieve it, see https://github.com/top-gg-community/rust-sdk/assets/60427892/d2df5bd3-bc48-464c-b878-a04121727bff.
   :type token: :py:class:`str`
   :param session: Whether to use an existing :class:`~aiohttp.ClientSession` for requesting or not. Defaults to :py:obj:`None` (creates a new one instead)
   :type session: Optional[:class:`~aiohttp.ClientSession`]
@@ -198,7 +213,13 @@ class Client:
     """
     Fetches a Discord bot from its ID.
 
-    :param id: The requested ID.
+    Example:
+
+    .. code-block:: python
+
+      bot = await client.get_bot(432610292342587392)
+
+    :param id: The bot's ID.
     :type id: :py:class:`int`
 
     :exception Error: The client is already closed.
@@ -219,20 +240,33 @@ class Client:
     sort_by: Optional[SortBy] = None,
   ) -> Iterable[Bot]:
     """
-    Fetches and yields Discord bots that matches the specified query.
+    Fetches Discord bots that matches the specified query.
 
-    :param limit: The maximum amount of bots to be queried.
+    Examples:
+
+    .. code-block:: python
+
+      # With defaults
+      bots = await client.get_bots()
+
+      # With explicit arguments
+      bots = await client.get_bots(limit=250, offset=50, sort_by=topgg.SortBy.MONTHLY_VOTES)
+
+      for bot in bots:
+        print(bot)
+
+    :param limit: The maximum amount of bots to be returned.
     :type limit: Optional[:py:class:`int`]
     :param offset: The amount of bots to be skipped.
     :type offset: Optional[:py:class:`int`]
-    :param sort_by: Sorts results based on a specific criteria. Results will always be descending.
+    :param sort_by: The criteria to sort results by. Results will always be descending.
     :type sort_by: Optional[:class:`.SortBy`]
 
     :exception Error: The client is already closed.
     :exception RequestError: Received a non-favorable response from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
 
-    :returns: A generator of matching bots.
+    :returns: The requested bots.
     :rtype: Iterable[:class:`.Bot`]
     """
 
@@ -260,11 +294,17 @@ class Client:
     """
     Fetches your Discord bot's posted server count.
 
+    Example:
+
+    .. code-block:: python
+
+      posted_server_count = await client.get_server_count()
+
     :exception Error: The client is already closed.
     :exception RequestError: Received a non-favorable response from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
 
-    :returns: The posted server count. This can be :py:obj:`None` if it does not exist.
+    :returns: The posted server count.
     :rtype: Optional[:py:class:`int`]
     """
 
@@ -274,9 +314,15 @@ class Client:
 
   async def post_server_count(self, new_server_count: int) -> None:
     """
-    Posts your Discord bot's server count to the API. This will update the server count in your bot's Top.gg page.
+    Updates the server count in your Discord bot's Top.gg page.
 
-    :param new_server_count: The new server count to post. This cannot be zero.
+    Example:
+
+    .. code-block:: python
+
+      await client.post_server_count(bot.server_count)
+
+    :param new_server_count: The updated server count. This cannot be zero.
     :type new_server_count: :py:class:`int`
 
     :exception ValueError: The new_server_count argument is zero or lower.
@@ -296,6 +342,12 @@ class Client:
     """
     Checks if the weekend multiplier is active, where a single vote counts as two.
 
+    Example:
+
+    .. code-block:: python
+
+      is_weekend = await client.is_weekend()
+
     :exception Error: The client is already closed.
     :exception RequestError: Received a non-favorable response from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
@@ -310,7 +362,20 @@ class Client:
 
   async def get_voters(self, page: int = 1) -> Iterable[Voter]:
     """
-    Fetches and yields your Discord bot's recent 100 unique voters.
+    Fetches your Discord bot's recent unique voters.
+
+    Examples:
+
+    .. code-block:: python
+
+      # First page
+      voters = await client.get_voters()
+
+      # Subsequent pages
+      voters = await client.get_voters(2)
+
+      for voter in voters:
+        print(voter)
 
     :param page: The page number. Each page can only have at most 100 voters. Defaults to 1.
     :type page: :py:class:`int`
@@ -319,7 +384,7 @@ class Client:
     :exception RequestError: Received a non-favorable response from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
 
-    :returns: A generator of your bot's recent unique voters.
+    :returns: The requested voters.
     :rtype: Iterable[:class:`.Voter`]
     """
 
@@ -332,16 +397,22 @@ class Client:
 
   async def has_voted(self, id: int) -> bool:
     """
-    Checks if the specified Discord user has voted your Discord bot.
+    Checks if a Discord user has voted for your Discord bot in the past 12 hours.
 
-    :param id: The requested user's ID.
+    Example:
+
+    .. code-block:: python
+
+      has_voted = await client.has_voted(661200758510977084)
+
+    :param id: The user's ID.
     :type id: :py:class:`int`
 
     :exception Error: The client is already closed.
     :exception RequestError: The specified user has not logged in to Top.gg or the client has received other non-favorable responses from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
 
-    :returns: Whether the specified user has voted your bot.
+    :returns: Whether the user has voted in the past 12 hours.
     :rtype: :py:class:`bool`
     """
 
@@ -385,7 +456,15 @@ class Client:
     self, callback: Optional[AutopostRetrievalCallback] = None
   ) -> Union[AutopostRetrievalCallback, AutopostRetrievalDecorator]:
     """
-    Registers an autopost server count retrieval callback. This callback is required for autoposting.
+    Registers an autopost server count retrieval callback.
+
+    Example:
+
+    .. code-block:: python
+
+      @client.autopost_retrieval
+      def get_server_count() -> int:
+        return bot.server_count
 
     :param callback: The autopost server count retrieval callback. This can be asynchronous or synchronous, as long as it eventually returns an :py:class:`int`.
     :type callback: Optional[:data:`~.client.AutopostRetrievalCallback`]
@@ -410,7 +489,15 @@ class Client:
     self, callback: Optional[AutopostSuccessCallback] = None
   ) -> Union[AutopostSuccessCallback, AutopostSuccessDecorator]:
     """
-    Adds an autopost on success callback. Several callbacks are possible.
+    Registers an autopost on success callback. Several callbacks are possible.
+
+    Example:
+
+    .. code-block:: python
+
+      @client.autopost_success
+      def success(server_count: int) -> None:
+        print(f'Successfully posted {server_count} servers to Top.gg!')
 
     :param callback: The autopost on success callback. This can be asynchronous or synchronous, as long as it accepts a :py:class:`int` argument for the posted server count.
     :type callback: Optional[:data:`~.client.AutopostSuccessCallback`]
@@ -435,7 +522,15 @@ class Client:
     self, callback: Optional[AutopostErrorCallback] = None
   ) -> Union[AutopostErrorCallback, AutopostErrorDecorator]:
     """
-    Adds an autopost on error handler. Several callbacks are possible.
+    Registers an autopost on error handler. Several callbacks are possible.
+
+    Example:
+
+    .. code-block:: python
+
+      @client.autopost_error
+      def error(error: topgg.Error) -> None:
+        print(f'Error: {error!r}')
 
     :param callback: The autopost on error handler. This can be asynchronous or synchronous, as long as it accepts an :class:`.Error` argument for the request exception.
     :type callback: Optional[:data:`~.client.AutopostErrorCallback`]
@@ -464,9 +559,15 @@ class Client:
 
   def start_autoposter(self, interval: Optional[float] = None) -> None:
     """
-    Starts the autoposter. Has no effect if the autoposter is already running.
+    Starts the autoposter, which automatically updates the server count in your Discord bot's Top.gg page every few minutes.
 
-    :param interval: The interval between posting in seconds. Defaults to 15 minutes.
+    Example:
+
+    .. code-block:: python
+
+      client.start_autoposter()
+
+    :param interval: The delay between updates in seconds.
     :type interval: Optional[:py:class:`float`]
 
     :exception TypeError: The server count retrieval callback does not exist.
@@ -481,7 +582,13 @@ class Client:
 
   def stop_autoposter(self) -> None:
     """
-    Stops the autoposter. Has no effect if the autoposter is already stopped.
+    Stops the autoposter.
+
+    Example:
+
+    .. code-block:: python
+
+      client.stop_autoposter()
     """
 
     if self.autoposter_running:
@@ -489,7 +596,15 @@ class Client:
       self.__autopost_task = None
 
   async def close(self) -> None:
-    """Closes the client. Nothing will happen if the client uses a pre-existing :class:`~aiohttp.ClientSession` or if the session is already closed."""
+    """
+    Closes the client.
+
+    Example:
+
+    .. code-block:: python
+
+      await client.close()
+    """
 
     self.stop_autoposter()
 

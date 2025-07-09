@@ -25,8 +25,8 @@ SOFTWARE.
 
 from .errors import Error, RequestError, Ratelimited
 from .models import Bot, SortBy, Vote, Voter
-from .webhooks import Webhooks
 from .widget import WidgetType
+from .webhooks import Webhooks
 from .version import VERSION
 from .client import Client
 from . import widget

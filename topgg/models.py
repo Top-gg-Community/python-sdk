@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from datetime import datetime, timezone
 from typing import Optional, TypeVar
+from datetime import datetime
 from urllib import parse
 from enum import Enum
 
@@ -37,10 +37,6 @@ def truthy_only(value: Optional[T]) -> Optional[T]:
     return value
 
 
-def timestamp_from_id(id: int) -> datetime:
-  return datetime.fromtimestamp(((id >> 22) + 1420070400000) // 1000, tz=timezone.utc)
-
-
 class Vote:
   """A dispatched Top.gg vote event."""
 
@@ -50,7 +46,7 @@ class Vote:
   """The ID of the Discord bot/server that received a vote."""
 
   voter_id: int
-  """The ID of the Top.gg user who voted."""
+  """The ID of the Discord user who voted."""
 
   is_test: bool
   """Whether this vote is just a test done from the page settings."""
@@ -113,12 +109,6 @@ class Voter:
 
     return NotImplemented
 
-  @property
-  def created_at(self) -> datetime:
-    """This voter's creation date."""
-
-    return timestamp_from_id(self.id)
-
 
 class Bot:
   """A Discord bot listed on Top.gg."""
@@ -162,7 +152,7 @@ class Bot:
   """This bot's short description."""
 
   long_description: Optional[str]
-  """This bot's long description. This can contain HTML and/or Markdown."""
+  """This bot's HTML/Markdown long description."""
 
   tags: list[str]
   """This bot's tags."""
@@ -239,12 +229,6 @@ class Bot:
       return self.id == other.id
 
     return NotImplemented
-
-  @property
-  def created_at(self) -> datetime:
-    """This bot's creation date."""
-
-    return timestamp_from_id(self.id)
 
 
 class SortBy(Enum):

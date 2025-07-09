@@ -27,7 +27,7 @@ from typing import Optional
 
 
 class Error(Exception):
-  """The base error class. Extends :py:class:`Exception`."""
+  """An error coming from this SDK. Extends :py:class:`Exception`."""
 
   __slots__: tuple[str, ...] = ()
 
@@ -54,18 +54,18 @@ class RequestError(Error):
 
 
 class Ratelimited(Error):
-  """HTTP request failure due to the client being ratelimited. Because of this, the client is not allowed to make requests for an hour. Extends :class:`.Error`."""
+  """Ratelimited from sending more requests. Extends :class:`.Error`."""
 
   __slots__: tuple[str, ...] = ('retry_after',)
 
   retry_after: float
-  """How long the client should wait (in seconds) before it can make a request to the API again."""
+  """How long the client should wait in seconds before it could send requests again without receiving a 429."""
 
   def __init__(self, retry_after: float):
     self.retry_after = retry_after
 
     super().__init__(
-      f'Blocked by the API for an hour. Please try again in {retry_after} seconds.'
+      f'Blocked from sending more requests, try again in {retry_after} seconds.'
     )
 
   def __repr__(self) -> str:

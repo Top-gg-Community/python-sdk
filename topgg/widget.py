@@ -16,6 +16,12 @@ def large(type: WidgetType, id: int) -> str:
   """
   Generates a large widget URL.
 
+  Example:
+
+  .. code-block:: python
+
+    widget_url = topgg.widget.large(topgg.WidgetType.DISCORD_BOT, 574652751745777665)
+
   :param type: The widget type.
   :type type: :class:`.WidgetType`
   :param id: The requested ID.
@@ -31,6 +37,12 @@ def large(type: WidgetType, id: int) -> str:
 def votes(type: WidgetType, id: int) -> str:
   """
   Generates a small widget URL for displaying votes.
+
+  Example:
+
+  .. code-block:: python
+
+    widget_url = topgg.widget.votes(topgg.WidgetType.DISCORD_BOT, 574652751745777665)
 
   :param type: The widget type.
   :type type: :class:`.WidgetType`
@@ -48,6 +60,12 @@ def owner(type: WidgetType, id: int) -> str:
   """
   Generates a small widget URL for displaying an entity's owner.
 
+  Example:
+
+  .. code-block:: python
+
+    widget_url = topgg.widget.owner(topgg.WidgetType.DISCORD_BOT, 574652751745777665)
+
   :param type: The widget type.
   :type type: :class:`.WidgetType`
   :param id: The requested ID.
@@ -63,6 +81,12 @@ def owner(type: WidgetType, id: int) -> str:
 def social(type: WidgetType, id: int) -> str:
   """
   Generates a small widget URL for displaying social stats.
+
+  Example:
+
+  .. code-block:: python
+
+    widget_url = topgg.widget.social(topgg.WidgetType.DISCORD_BOT, 574652751745777665)
 
   :param type: The widget type.
   :type type: :class:`.WidgetType`

@@ -41,6 +41,12 @@ class Webhooks:
   """
   Receive events from the Top.gg servers.
 
+  Example:
+
+  .. code-block:: python
+
+    webhooks = topgg.Webhooks(os.getenv('MY_TOPGG_WEBHOOK_SECRET'), 8080)
+
   :param auth: The default password to use.
   :type auth: Optional[:py:class:`str`]
   :param port: The default port to use.
@@ -66,7 +72,15 @@ class Webhooks:
     callback: Optional[OnVoteCallback] = None,
   ) -> Union[OnVoteCallback, OnVoteDecorator]:
     """
-    Registers a handler to receive whenever your Discord bot/server receives a vote.
+    Registers a route that gets called whenever your Discord bot/server receives a vote.
+
+    Example:
+
+    .. code-block:: python
+
+      @webhooks.on_vote('/votes')
+      def voted(vote: topgg.Vote) -> None:
+        print(f'A user with the ID of {vote.voter_id} has voted us on Top.gg!')
 
     :param route: The route to use.
     :type route: :py:class:`str`
@@ -118,7 +132,13 @@ class Webhooks:
 
   async def start(self, port: Optional[int] = None) -> None:
     """
-    Starts the webhook server. Has no effect if the server is already running.
+    Starts the webhook server.
+
+    Example:
+
+    .. code-block:: python
+
+      await webhooks.start()
 
     :param port: The port to override and use. Defaults to the default port provided in the constructor call.
     :type port: Optional[:py:class:`int`]
@@ -141,7 +161,13 @@ class Webhooks:
 
   async def close(self) -> None:
     """
-    Closes the webhook server. Has no effect if the server is already closed.
+    Closes the webhook server.
+
+    Example:
+
+    .. code-block:: python
+
+      await webhooks.close()
     """
 
     if self.running:

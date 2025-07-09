@@ -4,11 +4,14 @@ Client reference
 .. autoclass:: topgg.client.Client
    :members:
 
-.. automodule:: topgg.widget
+.. autoclass:: topgg.widget.WidgetType()
    :members:
+   :undoc-members:
 
-.. autoclass:: topgg.models.SortBy()
-   :members:
+.. autofunction:: topgg.widget.large
+.. autofunction:: topgg.widget.owner
+.. autofunction:: topgg.widget.social
+.. autofunction:: topgg.widget.votes
 
 .. autoclass:: topgg.errors.Error()
 
