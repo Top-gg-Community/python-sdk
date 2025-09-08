@@ -19,7 +19,7 @@ load_dotenv()
 
 # Bot Configuration
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-COMMANDS_TOKEN = os.getenv('Commands-TK')
+COMMANDS_TOKEN = os.getenv('Commands-TK') # Token for Top.gg command updates ie using the v1 Token acquire from Integrations and API section on your bot profile 
 APPLICATION_ID = os.getenv('APPLICATION_ID')
 
 # Setup logging
