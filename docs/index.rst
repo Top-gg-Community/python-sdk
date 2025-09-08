@@ -22,7 +22,6 @@ Implicit cleanup
 
    import os
 
-
    async with topgg.Client(os.getenv('TOPGG_TOKEN')) as client:
      # ...
 
@@ -34,7 +33,6 @@ Explicit cleanup
    import topgg
 
    import os
-
 
    client = topgg.Client(os.getenv('TOPGG_TOKEN'))
 
@@ -75,8 +73,8 @@ With explicit arguments
    for bot in bots:
      print(bot)
 
-Getting your bot's voters
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Getting your project’s voters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First page
 ^^^^^^^^^^
@@ -98,49 +96,99 @@ Subsequent pages
    for voter in voters:
      print(voter)
 
-Check if a user has voted for your bot
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Getting your project’s vote information of a user
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Discord ID
+^^^^^^^^^^
 
 .. code-block:: python
 
-   has_voted = await client.has_voted(661200758510977084)
+   vote = await client.get_vote(661200758510977084)
 
-Getting your bot's server count
+   if vote:
+     print(f'User has voted: {vote!r}')
+
+Top.gg ID
+^^^^^^^^^
+
+.. code-block:: python
+
+   vote = await client.get_vote(8226924471638491136, source=topgg.UserSource.TOPGG)
+
+   if vote:
+     print(f'User has voted: {vote!r}')
+
+Getting your bot’s server count
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
-   posted_server_count = await client.get_server_count()
+   posted_server_count = await client.get_bot_server_count()
 
-Posting your bot's server count
+Posting your bot’s server count
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
-   await client.post_server_count(bot.server_count)
+   await client.post_bot_server_count(bot.server_count)
 
-Automatically posting your bot's server count every few minutes
+Posting your bot’s application commands list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Discord.py/Pycord/Nextcord/Disnake
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   app_id = bot.user.id
+   commands = await bot.http.get_global_commands(app_id)
+
+   await client.post_bot_commands(commands)
+
+Hikari
+^^^^^^
+
+.. code-block:: python
+
+   app_id = ...
+   commands = await bot.rest.request('GET', f'/applications/{app_id}/commands')
+
+   await client.post_bot_commands(commands)
+
+Discord.http
+^^^^^^^^^^^^
+
+.. code-block:: python
+
+   http = discordhttp.HTTP(f'BOT {os.getenv("BOT_TOKEN")}')
+   app_id = ...
+   commands = await http.get(f'/applications/{app_id}/commands')
+
+   await client.post_bot_commands(commands)
+
+Automatically posting your bot’s server count every few minutes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
-   @client.autopost_retrieval
+   @client.bot_autopost_retrieval
    def get_server_count() -> int:
      return bot.server_count
 
-   @client.autopost_success
+   @client.bot_autopost_success
    def success(server_count: int) -> None:
      print(f'Successfully posted {server_count} servers to Top.gg!')
 
-   @client.autopost_error
+   @client.bot_autopost_error
    def error(error: topgg.Error) -> None:
      print(f'Error: {error!r}')
 
-   client.start_autoposter()
+   client.start_bot_autoposter()
 
    # ...
 
-   client.stop_autoposter() # Optional
+   client.stop_bot_autoposter() # Optional
 
 Checking if the weekend vote multiplier is active
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -183,8 +231,8 @@ Social
 Webhooks
 ~~~~~~~~
 
-Being notified whenever someone voted for your bot
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Being notified whenever someone voted for your project
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -193,11 +241,10 @@ Being notified whenever someone voted for your bot
    import asyncio
    import os
 
-
    webhooks = topgg.Webhooks(os.getenv('MY_TOPGG_WEBHOOK_SECRET'), 8080)
 
    @webhooks.on_vote('/votes')
-   def voted(vote: topgg.Vote) -> None:
+   def voted(vote: topgg.VoteEvent) -> None:
      print(f'A user with the ID of {vote.voter_id} has voted us on Top.gg!')
 
    async def main() -> None:

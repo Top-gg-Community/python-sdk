@@ -52,10 +52,13 @@ async def run() -> None:
       test_attributes(b)
 
     await asyncio.sleep(1)
-    await tg.post_server_count(2)
+    await tg.post_bot_commands([{'name': 'test', 'description': 'command description'}])
 
     await asyncio.sleep(1)
-    posted_server_count = await tg.get_server_count()
+    await tg.post_bot_server_count(2)
+
+    await asyncio.sleep(1)
+    posted_server_count = await tg.get_bot_server_count()
 
     assert posted_server_count == 2
 
@@ -66,9 +69,10 @@ async def run() -> None:
       test_attributes(voter)
 
     await asyncio.sleep(1)
-    has_voted = await tg.has_voted(661200758510977084)
+    await tg.get_vote(661200758510977084)
 
-    assert isinstance(has_voted, bool)
+    await asyncio.sleep(1)
+    await tg.get_vote(8226924471638491136, source=topgg.UserSource.TOPGG)
 
     await asyncio.sleep(1)
     is_weekend = await tg.is_weekend()

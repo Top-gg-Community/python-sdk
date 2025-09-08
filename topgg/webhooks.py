@@ -29,11 +29,11 @@ from typing import Any, Optional, Union
 from json import JSONDecodeError
 from inspect import isawaitable
 
-from .models import Vote
+from .models import VoteEvent
 
 
 RawCallback = Callable[[web.Request], Awaitable[web.StreamResponse]]
-OnVoteCallback = Callable[[Vote], Any]
+OnVoteCallback = Callable[[VoteEvent], Any]
 OnVoteDecorator = Callable[[OnVoteCallback], RawCallback]
 
 
@@ -72,14 +72,14 @@ class Webhooks:
     callback: Optional[OnVoteCallback] = None,
   ) -> Union[OnVoteCallback, OnVoteDecorator]:
     """
-    Registers a route that gets called whenever your Discord bot/server receives a vote.
+    Registers a route that gets called whenever your project receives a vote.
 
     Example:
 
     .. code-block:: python
 
       @webhooks.on_vote('/votes')
-      def voted(vote: topgg.Vote) -> None:
+      def voted(vote: topgg.VoteEvent) -> None:
         print(f'A user with the ID of {vote.voter_id} has voted us on Top.gg!')
 
     :param route: The route to use.
@@ -108,7 +108,7 @@ class Webhooks:
           return web.Response(status=401, text='Unauthorized')
 
         try:
-          vote = Vote(await request.json())
+          vote = VoteEvent(await request.json())
         except (JSONDecodeError, ContentTypeError):
           return web.Response(status=400, text='Bad request')
 

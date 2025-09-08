@@ -4,6 +4,10 @@ Client reference
 .. autoclass:: topgg.client.Client
    :members:
 
+.. autoclass:: topgg.models.UserSource()
+   :members:
+   :undoc-members:
+
 .. autoclass:: topgg.widget.WidgetType()
    :members:
    :undoc-members:
@@ -21,11 +25,11 @@ Client reference
 .. autoclass:: topgg.errors.Ratelimited()
    :members:
 
-.. autodata:: topgg.client.AutopostRetrievalCallback
-.. autodata:: topgg.client.AutopostRetrievalDecorator
+.. autodata:: topgg.client.BotAutopostRetrievalCallback
+.. autodata:: topgg.client.BotAutopostRetrievalDecorator
 
-.. autodata:: topgg.client.AutopostSuccessCallback
-.. autodata:: topgg.client.AutopostSuccessDecorator
+.. autodata:: topgg.client.BotAutopostSuccessCallback
+.. autodata:: topgg.client.BotAutopostSuccessDecorator
 
-.. autodata:: topgg.client.AutopostErrorCallback
-.. autodata:: topgg.client.AutopostErrorDecorator
+.. autodata:: topgg.client.BotAutopostErrorCallback
+.. autodata:: topgg.client.BotAutopostErrorDecorator

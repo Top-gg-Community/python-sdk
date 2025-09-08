@@ -31,29 +31,34 @@ from inspect import isawaitable
 from base64 import b64decode
 from time import time
 import binascii
+import warnings
 import asyncio
 import json
 
 from .ratelimiter import Ratelimiter, Ratelimiters
 from .errors import Error, RequestError, Ratelimited
-from .models import Bot, SortBy, Voter
+from .models import Bot, SortBy, UserSource, Vote, Voter
 from .version import VERSION
 
 
-BASE_URL = 'https://top.gg/api/v1'
+BASE_URL = 'https://top.gg/api'
 MAXIMUM_DELAY_THRESHOLD = 5.0
 
 
-AutopostRetrievalCallback = Callable[[], Union[int, Coroutine[None, None, int]]]
-AutopostRetrievalDecorator = Callable[
-  [AutopostRetrievalCallback], AutopostRetrievalCallback
+BotAutopostRetrievalCallback = Callable[[], Union[int, Coroutine[None, None, int]]]
+BotAutopostRetrievalDecorator = Callable[
+  [BotAutopostRetrievalCallback], BotAutopostRetrievalCallback
 ]
 
-AutopostSuccessCallback = Callable[[int], Any]
-AutopostSuccessDecorator = Callable[[AutopostSuccessCallback], AutopostSuccessCallback]
+BotAutopostSuccessCallback = Callable[[int], Any]
+BotAutopostSuccessDecorator = Callable[
+  [BotAutopostSuccessCallback], BotAutopostSuccessCallback
+]
 
-AutopostErrorCallback = Callable[[Error], Any]
-AutopostErrorDecorator = Callable[[AutopostErrorCallback], AutopostErrorCallback]
+BotAutopostErrorCallback = Callable[[Error], Any]
+BotAutopostErrorDecorator = Callable[
+  [BotAutopostErrorCallback], BotAutopostErrorCallback
+]
 
 
 class Client:
@@ -75,7 +80,7 @@ class Client:
     async with topgg.Client(os.getenv('TOPGG_TOKEN')) as client:
       # ...
 
-  :param token: Your Top.gg API token. To retrieve it, see https://github.com/top-gg-community/rust-sdk/assets/60427892/d2df5bd3-bc48-464c-b878-a04121727bff.
+  :param token: Your Top.gg API token.
   :type token: :py:class:`str`
   :param session: Whether to use an existing :class:`~aiohttp.ClientSession` for requesting or not. Defaults to :py:obj:`None` (creates a new one instead)
   :type session: Optional[:class:`~aiohttp.ClientSession`]
@@ -85,7 +90,10 @@ class Client:
   """
 
   id: int
-  """This bot's ID."""
+  """This project's ID."""
+
+  legacy: bool
+  """Whether this client is using a legacy API token."""
 
   __slots__: tuple[str, ...] = (
     '__own_session',
@@ -94,11 +102,12 @@ class Client:
     '__ratelimiter',
     '__ratelimiters',
     '__current_ratelimit',
-    '__autopost_task',
-    '__autopost_retrieval_callback',
-    '__autopost_success_callbacks',
-    '__autopost_error_callbacks',
+    '__bot_autopost_task',
+    '__bot_autopost_retrieval_callback',
+    '__bot_autopost_success_callbacks',
+    '__bot_autopost_error_callbacks',
     'id',
+    'legacy',
   )
 
   def __init__(self, token: str, *, session: Optional[ClientSession] = None):
@@ -114,8 +123,10 @@ class Client:
     try:
       encoded_json = token.split('.')[1]
       encoded_json += '=' * (4 - (len(encoded_json) % 4))
+      encoded_json = json.loads(b64decode(encoded_json))
 
-      self.id = int(json.loads(b64decode(encoded_json))['id'])
+      self.id = int(encoded_json['id'])
+      self.legacy = '_t' not in encoded_json
     except (IndexError, ValueError, binascii.Error, json.decoder.JSONDecodeError):
       raise ValueError('Got a malformed API token.') from None
 
@@ -127,10 +138,10 @@ class Client:
     self.__ratelimiters = Ratelimiters(self.__ratelimiter)
     self.__current_ratelimit = None
 
-    self.__autopost_task = None
-    self.__autopost_retrieval_callback = None
-    self.__autopost_success_callbacks = set()
-    self.__autopost_error_callbacks = set()
+    self.__bot_autopost_task = None
+    self.__bot_autopost_retrieval_callback = None
+    self.__bot_autopost_success_callbacks = set()
+    self.__bot_autopost_error_callbacks = set()
 
   def __repr__(self) -> str:
     return f'<{__class__.__name__} {self.__session!r}>'
@@ -178,7 +189,7 @@ class Client:
           method,
           BASE_URL + path,
           headers={
-            'Authorization': self.__token,
+            'Authorization': f'Bearer {self.__token}',
             'Content-Type': 'application/json',
             'User-Agent': f'topggpy (https://github.com/top-gg-community/python-sdk {VERSION}) Python/',
           },
@@ -187,7 +198,7 @@ class Client:
           status = resp.status
           retry_after = float(resp.headers.get('Retry-After', 0))
 
-          if 'application/json' in resp.headers['Content-Type']:
+          if 'json' in resp.headers['Content-Type']:
             try:
               output = await resp.json()
             except json.decoder.JSONDecodeError:
@@ -207,7 +218,9 @@ class Client:
 
           return await self.__request(method, path)
 
-        raise RequestError(output and output.get('message'), status) from None
+        raise RequestError(
+          output and output.get('message', output.get('detail')), status
+        ) from None
 
   async def get_bot(self, id: int) -> Bot:
     """
@@ -290,7 +303,7 @@ class Client:
 
     return map(Bot, bots.get('results', ()))
 
-  async def get_server_count(self) -> Optional[int]:
+  async def get_bot_server_count(self) -> Optional[int]:
     """
     Fetches your Discord bot's posted server count.
 
@@ -298,7 +311,7 @@ class Client:
 
     .. code-block:: python
 
-      posted_server_count = await client.get_server_count()
+      posted_server_count = await client.get_bot_server_count()
 
     :exception Error: The client is already closed.
     :exception RequestError: Received a non-favorable response from the API.
@@ -312,7 +325,7 @@ class Client:
 
     return stats.get('server_count')
 
-  async def post_server_count(self, new_server_count: int) -> None:
+  async def post_bot_server_count(self, new_server_count: int) -> None:
     """
     Updates the server count in your Discord bot's Top.gg page.
 
@@ -320,12 +333,12 @@ class Client:
 
     .. code-block:: python
 
-      await client.post_server_count(bot.server_count)
+      await client.post_bot_server_count(bot.server_count)
 
     :param new_server_count: The updated server count. This cannot be zero.
     :type new_server_count: :py:class:`int`
 
-    :exception ValueError: The new_server_count argument is zero or lower.
+    :exception ValueError: ``new_server_count`` is zero or lower.
     :exception Error: The client is already closed.
     :exception RequestError: Received a non-favorable response from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
@@ -362,7 +375,7 @@ class Client:
 
   async def get_voters(self, page: int = 1) -> Iterable[Voter]:
     """
-    Fetches your Discord bot's recent unique voters.
+    Fetches your project's recent 100 unique voters.
 
     Examples:
 
@@ -397,7 +410,10 @@ class Client:
 
   async def has_voted(self, id: int) -> bool:
     """
-    Checks if a Discord user has voted for your Discord bot in the past 12 hours.
+    .. deprecated:: 3.0.0
+      Legacy API. Use a v1 API token with :meth:`.Client.get_vote` instead.
+
+    Checks if a Top.gg user has voted for your project in the past 12 hours.
 
     Example:
 
@@ -416,24 +432,124 @@ class Client:
     :rtype: :py:class:`bool`
     """
 
+    warnings.warn(
+      '`has_voted()` is deprecated. Use a v1 API token with `get_vote()` instead.',
+      DeprecationWarning,
+    )
+
     response = await self.__request('GET', '/bots/check', params={'userId': id})
 
     return bool(response['voted'])
 
-  async def __autopost_loop(self, interval: Optional[float]) -> None:
+  async def get_vote(
+    self, id: int, source: UserSource = UserSource.DISCORD
+  ) -> Optional[Vote]:
+    """
+    Fetches the latest vote information of a Top.gg user on your project.
+
+    Example:
+
+    .. code-block:: python
+
+      # Discord ID
+      vote = await client.get_vote(661200758510977084)
+
+      if vote:
+        print(f'User has voted: {vote!r}')
+
+      # Top.gg ID
+      vote = await client.get_vote(8226924471638491136, source=topgg.UserSource.TOPGG)
+
+      if vote:
+        print(f'User has voted: {vote!r}')
+
+    :param id: The user's ID.
+    :type id: :py:class:`int`
+    :param source: The ID type to use. Defaults to :attr:`.UserSource.DISCORD`.
+    :type source: :class:`.UserSource`
+
+    :exception Error: A legacy API token is used or the client is already closed.
+    :exception TypeError: ``source`` is not an instance of :class:`.UserSource`.
+    :exception RequestError: The specified user has not logged in to Top.gg or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+
+    :returns: The user's latest vote information on your project or :py:obj:`None` if the user has not voted for your project in the past 12 hours.
+    :rtype: Optional[:class:`.Vote`]
+    """
+
+    if self.legacy:
+      raise Error('This endpoint is inaccessible with legacy API tokens.')
+    elif not isinstance(source, UserSource):
+      raise TypeError('Expected source to be an instance of UserSource.')
+
+    try:
+      response = await self.__request(
+        'GET', f'/v1/projects/@me/votes/{id}', params={'source': source.value}
+      )
+
+      return Vote(response, self.id, id)
+    except RequestError as err:
+      if err.message == 'User has not voted in the last 12 hours.':
+        return
+
+      raise
+
+  async def post_bot_commands(self, commands: list[dict]) -> None:
+    """
+    Updates the application commands list in your Discord bot's Top.gg page.
+
+    Examples:
+
+    .. code-block:: python
+
+      # Discord.py/Pycord/Nextcord/Disnake:
+      app_id = bot.user.id
+      commands = await bot.http.get_global_commands(app_id)
+
+      # Hikari:
+      app_id = ...
+      commands = await bot.rest.request('GET', f'/applications/{app_id}/commands')
+
+      # Discord.http:
+      http = discordhttp.HTTP(f'BOT {os.getenv("BOT_TOKEN")}')
+      app_id = ...
+      commands = await http.get(f'/applications/{app_id}/commands')
+
+      await client.post_bot_commands(commands)
+
+    :param commands: A list of application commands in raw Discord API JSON dicts. This cannot be empty.
+    :type commands: list[:py:class:`dict`]
+
+    :exception Error: A legacy API token is used or the client is already closed.
+    :exception TypeError: ``commands`` is not a list of raw Discord API JSON dicts.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+    """
+
+    if self.legacy:
+      raise Error('This endpoint is inaccessible with legacy API tokens.')
+    elif not (
+      isinstance(commands, list)
+      and all(isinstance(command, dict) for command in commands)
+    ):
+      raise TypeError('Expected commands to be a list of raw Discord API JSON dicts.')
+
+    await self.__request('POST', '/v1/projects/@me/commands', body=commands)
+
+  async def __bot_autopost_loop(self, interval: Optional[float]) -> None:
     # The following line should not be changed, as it could affect test_autoposter.py.
     interval = max(interval or 900.0, 900.0)
 
     while True:
       try:
-        server_count = self.__autopost_retrieval_callback()
+        server_count = self.__bot_autopost_retrieval_callback()
 
         if isawaitable(server_count):
           server_count = await server_count
 
-        await self.post_server_count(server_count)
+        await self.post_bot_server_count(server_count)
 
-        for success_callback in self.__autopost_success_callbacks:
+        for success_callback in self.__bot_autopost_success_callbacks:
           success_callback_result = success_callback(server_count)
 
           if isawaitable(success_callback_result):
@@ -442,7 +558,7 @@ class Client:
         await asyncio.sleep(interval)
       except Exception as err:
         if isinstance(err, Error):
-          for error_callback in self.__autopost_error_callbacks:
+          for error_callback in self.__bot_autopost_error_callbacks:
             error_callback_result = error_callback(err)
 
             if isawaitable(error_callback_result):
@@ -452,29 +568,31 @@ class Client:
         else:
           raise
 
-  def autopost_retrieval(
-    self, callback: Optional[AutopostRetrievalCallback] = None
-  ) -> Union[AutopostRetrievalCallback, AutopostRetrievalDecorator]:
+  def bot_autopost_retrieval(
+    self, callback: Optional[BotAutopostRetrievalCallback] = None
+  ) -> Union[BotAutopostRetrievalCallback, BotAutopostRetrievalDecorator]:
     """
-    Registers an autopost server count retrieval callback.
+    Registers a bot autopost server count retrieval callback.
 
     Example:
 
     .. code-block:: python
 
-      @client.autopost_retrieval
+      @client.bot_autopost_retrieval
       def get_server_count() -> int:
         return bot.server_count
 
     :param callback: The autopost server count retrieval callback. This can be asynchronous or synchronous, as long as it eventually returns an :py:class:`int`.
-    :type callback: Optional[:data:`~.client.AutopostRetrievalCallback`]
+    :type callback: Optional[:data:`~.client.BotAutopostRetrievalCallback`]
 
     :returns: The function itself or a decorated function depending on the argument.
-    :rtype: Union[:data:`~.client.AutopostRetrievalCallback`, :data:`~.client.AutopostRetrievalDecorator`]
+    :rtype: Union[:data:`~.client.BotAutopostRetrievalCallback`, :data:`~.client.BotAutopostRetrievalDecorator`]
     """
 
-    def decorator(callback: AutopostRetrievalCallback) -> AutopostRetrievalCallback:
-      self.__autopost_retrieval_callback = callback
+    def decorator(
+      callback: BotAutopostRetrievalCallback,
+    ) -> BotAutopostRetrievalCallback:
+      self.__bot_autopost_retrieval_callback = callback
 
       return callback
 
@@ -485,29 +603,29 @@ class Client:
 
     return decorator
 
-  def autopost_success(
-    self, callback: Optional[AutopostSuccessCallback] = None
-  ) -> Union[AutopostSuccessCallback, AutopostSuccessDecorator]:
+  def bot_autopost_success(
+    self, callback: Optional[BotAutopostSuccessCallback] = None
+  ) -> Union[BotAutopostSuccessCallback, BotAutopostSuccessDecorator]:
     """
-    Registers an autopost on success callback. Several callbacks are possible.
+    Registers a bot autopost on success callback. Several callbacks are possible.
 
     Example:
 
     .. code-block:: python
 
-      @client.autopost_success
+      @client.bot_autopost_success
       def success(server_count: int) -> None:
         print(f'Successfully posted {server_count} servers to Top.gg!')
 
     :param callback: The autopost on success callback. This can be asynchronous or synchronous, as long as it accepts a :py:class:`int` argument for the posted server count.
-    :type callback: Optional[:data:`~.client.AutopostSuccessCallback`]
+    :type callback: Optional[:data:`~.client.BotAutopostSuccessCallback`]
 
     :returns: The function itself or a decorated function depending on the argument.
-    :rtype: Union[:data:`~.client.AutopostSuccessCallback`, :data:`~.client.AutopostSuccessDecorator`]
+    :rtype: Union[:data:`~.client.BotAutopostSuccessCallback`, :data:`~.client.BotAutopostSuccessDecorator`]
     """
 
-    def decorator(callback: AutopostSuccessCallback) -> AutopostSuccessCallback:
-      self.__autopost_success_callbacks.add(callback)
+    def decorator(callback: BotAutopostSuccessCallback) -> BotAutopostSuccessCallback:
+      self.__bot_autopost_success_callbacks.add(callback)
 
       return callback
 
@@ -518,29 +636,29 @@ class Client:
 
     return decorator
 
-  def autopost_error(
-    self, callback: Optional[AutopostErrorCallback] = None
-  ) -> Union[AutopostErrorCallback, AutopostErrorDecorator]:
+  def bot_autopost_error(
+    self, callback: Optional[BotAutopostErrorCallback] = None
+  ) -> Union[BotAutopostErrorCallback, BotAutopostErrorDecorator]:
     """
-    Registers an autopost on error handler. Several callbacks are possible.
+    Registers a bot autopost on error handler. Several callbacks are possible.
 
     Example:
 
     .. code-block:: python
 
-      @client.autopost_error
+      @client.bot_autopost_error
       def error(error: topgg.Error) -> None:
         print(f'Error: {error!r}')
 
     :param callback: The autopost on error handler. This can be asynchronous or synchronous, as long as it accepts an :class:`.Error` argument for the request exception.
-    :type callback: Optional[:data:`~.client.AutopostErrorCallback`]
+    :type callback: Optional[:data:`~.client.BotAutopostErrorCallback`]
 
     :returns: The function itself or a decorated function depending on the argument.
-    :rtype: Union[:data:`~.client.AutopostErrorCallback`, :data:`~.client.AutopostErrorDecorator`]
+    :rtype: Union[:data:`~.client.BotAutopostErrorCallback`, :data:`~.client.BotAutopostErrorDecorator`]
     """
 
-    def decorator(callback: AutopostErrorCallback) -> AutopostErrorCallback:
-      self.__autopost_error_callbacks.add(callback)
+    def decorator(callback: BotAutopostErrorCallback) -> BotAutopostErrorCallback:
+      self.__bot_autopost_error_callbacks.add(callback)
 
       return callback
 
@@ -552,20 +670,20 @@ class Client:
     return decorator
 
   @property
-  def autoposter_running(self) -> bool:
-    """Whether the autoposter is running."""
+  def bot_autoposter_running(self) -> bool:
+    """Whether the Discord bot autoposter is running."""
 
-    return self.__autopost_task is not None
+    return self.__bot_autopost_task is not None
 
-  def start_autoposter(self, interval: Optional[float] = None) -> None:
+  def start_bot_autoposter(self, interval: Optional[float] = None) -> None:
     """
-    Starts the autoposter, which automatically updates the server count in your Discord bot's Top.gg page every few minutes.
+    Starts the Discord bot autoposter, which automatically updates the server count in your Discord bot's Top.gg page every few minutes.
 
     Example:
 
     .. code-block:: python
 
-      client.start_autoposter()
+      client.start_bot_autoposter()
 
     :param interval: The delay between updates in seconds.
     :type interval: Optional[:py:class:`float`]
@@ -573,27 +691,27 @@ class Client:
     :exception TypeError: The server count retrieval callback does not exist.
     """
 
-    if not self.autoposter_running:
+    if not self.bot_autoposter_running:
       assert (
-        self.__autopost_retrieval_callback is not None
-      ), 'Missing autopost_retrieval callback.'
+        self.__bot_autopost_retrieval_callback is not None
+      ), 'Missing bot_autopost_retrieval callback.'
 
-      self.__autopost_task = asyncio.create_task(self.__autopost_loop(interval))
+      self.__bot_autopost_task = asyncio.create_task(self.__bot_autopost_loop(interval))
 
-  def stop_autoposter(self) -> None:
+  def stop_bot_autoposter(self) -> None:
     """
-    Stops the autoposter.
+    Stops the Discord bot autoposter.
 
     Example:
 
     .. code-block:: python
 
-      client.stop_autoposter()
+      client.stop_bot_autoposter()
     """
 
-    if self.autoposter_running:
-      self.__autopost_task.cancel()
-      self.__autopost_task = None
+    if self.bot_autoposter_running:
+      self.__bot_autopost_task.cancel()
+      self.__bot_autopost_task = None
 
   async def close(self) -> None:
     """
@@ -606,7 +724,7 @@ class Client:
       await client.close()
     """
 
-    self.stop_autoposter()
+    self.stop_bot_autoposter()
 
     if self.__own_session and not self.__session.closed:
       await self.__session.close()

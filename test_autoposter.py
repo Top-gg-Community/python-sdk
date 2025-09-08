@@ -25,19 +25,19 @@ async def run() -> None:
   try:
     async with topgg.Client(os.getenv('TOPGG_TOKEN')) as tg:
 
-      @tg.autopost_retrieval
+      @tg.bot_autopost_retrieval
       def get_server_count() -> int:
         return 2
 
-      @tg.autopost_success
+      @tg.bot_autopost_success
       def success(server_count: int) -> None:
         print(f'Successfully posted {server_count} servers to the API!')
 
-      @tg.autopost_error
+      @tg.bot_autopost_error
       def error(error: topgg.Error) -> None:
         print(f'Error: {error!r}')
 
-      tg.start_autoposter(5.0)
+      tg.start_bot_autoposter(5.0)
 
       await asyncio.sleep(15)
   finally:

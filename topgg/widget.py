@@ -31,7 +31,7 @@ def large(type: WidgetType, id: int) -> str:
   :rtype: :py:class:`str`
   """
 
-  return f'{BASE_URL}/widgets/large/{type.value}/{id}'
+  return f'{BASE_URL}/v1/widgets/large/{type.value}/{id}'
 
 
 def votes(type: WidgetType, id: int) -> str:
@@ -53,12 +53,12 @@ def votes(type: WidgetType, id: int) -> str:
   :rtype: :py:class:`str`
   """
 
-  return f'{BASE_URL}/widgets/small/votes/{type.value}/{id}'
+  return f'{BASE_URL}/v1/widgets/small/votes/{type.value}/{id}'
 
 
 def owner(type: WidgetType, id: int) -> str:
   """
-  Generates a small widget URL for displaying an entity's owner.
+  Generates a small widget URL for displaying a project's owner.
 
   Example:
 
@@ -75,7 +75,7 @@ def owner(type: WidgetType, id: int) -> str:
   :rtype: :py:class:`str`
   """
 
-  return f'{BASE_URL}/widgets/small/owner/{type.value}/{id}'
+  return f'{BASE_URL}/v1/widgets/small/owner/{type.value}/{id}'
 
 
 def social(type: WidgetType, id: int) -> str:
@@ -97,4 +97,4 @@ def social(type: WidgetType, id: int) -> str:
   :rtype: :py:class:`str`
   """
 
-  return f'{BASE_URL}/widgets/small/social/{type.value}/{id}'
+  return f'{BASE_URL}/v1/widgets/small/social/{type.value}/{id}'
