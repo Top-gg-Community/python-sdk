@@ -1,54 +1,266 @@
-.. topggpy documentation master file, created by
-   sphinx-quickstart on Thu Feb  8 18:32:44 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Top.gg Python SDK
+=================
 
-#####################
-Top.gg Python Library
-#####################
-
-.. image:: https://img.shields.io/pypi/v/topggpy.svg
-   :target: https://pypi.python.org/pypi/topggpy
-   :alt: View on PyPI
-.. image:: https://img.shields.io/pypi/dm/topggpy?style=flat-square
-   :target: https://topggpy.readthedocs.io/en/latest/?badge=latest
-   :alt: Monthly PyPI downloads
-
-A simple API wrapper for `Top.gg <https://top.gg/>`_ written in Python.
+The community-maintained Python library for Top.gg.
 
 Installation
 ------------
 
-.. code:: bash
+.. code-block:: shell
 
-    pip install topggpy
+   $ pip install topggpy
 
-Features
---------
+Setting up
+----------
 
-* POST server count
-* GET bot info, server count, upvote info
-* GET user info
-* GET widgets (large and small) including custom ones. See `docs.top.gg <https://docs.top.gg/>`_ for more info.
-* GET weekend status
-* Built-in webhook to handle Top.gg votes
-* Automated server count posting
-* Searching for bots via the API
+Implicit cleanup
+~~~~~~~~~~~~~~~~
 
-Additional information
-----------------------
+.. code-block:: python
 
-* Before using the webhook provided by this library, make sure that you have specified port open.
-* Optimal values for port are between 1024 and 49151.
-* If you happen to need help implementing topggpy in your bot, feel free to ask in the ``#development`` or ``#api`` channels in our `Discord server <https://discord.gg/EYHTgJX>`_.
+   import topgg
+
+   import os
+
+   async with topgg.Client(os.getenv('TOPGG_TOKEN')) as client:
+     # ...
+
+Explicit cleanup
+~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   import topgg
+
+   import os
+
+   client = topgg.Client(os.getenv('TOPGG_TOKEN'))
+
+   # ...
+
+   await client.close()
+
+Usage
+-----
+
+Getting a bot
+~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   bot = await client.get_bot(432610292342587392)
+
+Getting several bots
+~~~~~~~~~~~~~~~~~~~~
+
+With defaults
+^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   bots = await client.get_bots()
+
+   for bot in bots:
+     print(bot)
+
+With explicit arguments
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   bots = await client.get_bots(limit=250, offset=50, sort_by=topgg.SortBy.MONTHLY_VOTES)
+
+   for bot in bots:
+     print(bot)
+
+Getting your project’s voters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+First page
+^^^^^^^^^^
+
+.. code-block:: python
+
+   voters = await client.get_voters()
+
+   for voter in voters:
+     print(voter)
+
+Subsequent pages
+^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   voters = await client.get_voters(2)
+
+   for voter in voters:
+     print(voter)
+
+Getting your project’s vote information of a user
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Discord ID
+^^^^^^^^^^
+
+.. code-block:: python
+
+   vote = await client.get_vote(661200758510977084)
+
+   if vote:
+     print(f'User has voted: {vote!r}')
+
+Top.gg ID
+^^^^^^^^^
+
+.. code-block:: python
+
+   vote = await client.get_vote(8226924471638491136, source=topgg.UserSource.TOPGG)
+
+   if vote:
+     print(f'User has voted: {vote!r}')
+
+Getting your bot’s server count
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   posted_server_count = await client.get_bot_server_count()
+
+Posting your bot’s server count
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   await client.post_bot_server_count(bot.server_count)
+
+Posting your bot’s application commands list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Discord.py/Pycord/Nextcord/Disnake
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   app_id = bot.user.id
+   commands = await bot.http.get_global_commands(app_id)
+
+   await client.post_bot_commands(commands)
+
+Hikari
+^^^^^^
+
+.. code-block:: python
+
+   app_id = ...
+   commands = await bot.rest.request('GET', f'/applications/{app_id}/commands')
+
+   await client.post_bot_commands(commands)
+
+Discord.http
+^^^^^^^^^^^^
+
+.. code-block:: python
+
+   http = discordhttp.HTTP(f'BOT {os.getenv("BOT_TOKEN")}')
+   app_id = ...
+   commands = await http.get(f'/applications/{app_id}/commands')
+
+   await client.post_bot_commands(commands)
+
+Automatically posting your bot’s server count every few minutes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   @client.bot_autopost_retrieval
+   def get_server_count() -> int:
+     return bot.server_count
+
+   @client.bot_autopost_success
+   def success(server_count: int) -> None:
+     print(f'Successfully posted {server_count} servers to Top.gg!')
+
+   @client.bot_autopost_error
+   def error(error: topgg.Error) -> None:
+     print(f'Error: {error!r}')
+
+   client.start_bot_autoposter()
+
+   # ...
+
+   client.stop_bot_autoposter() # Optional
+
+Checking if the weekend vote multiplier is active
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   is_weekend = await client.is_weekend()
+
+Generating widget URLs
+~~~~~~~~~~~~~~~~~~~~~~
+
+Large
+^^^^^
+
+.. code-block:: python
+
+   widget_url = topgg.widget.large(topgg.WidgetType.DISCORD_BOT, 574652751745777665)
+
+Votes
+^^^^^
+
+.. code-block:: python
+
+   widget_url = topgg.widget.votes(topgg.WidgetType.DISCORD_BOT, 574652751745777665)
+
+Owner
+^^^^^
+
+.. code-block:: python
+
+   widget_url = topgg.widget.owner(topgg.WidgetType.DISCORD_BOT, 574652751745777665)
+
+Social
+^^^^^^
+
+.. code-block:: python
+
+   widget_url = topgg.widget.social(topgg.WidgetType.DISCORD_BOT, 574652751745777665)
+
+Webhooks
+~~~~~~~~
+
+Being notified whenever someone voted for your project
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   import topgg
+
+   import asyncio
+   import os
+
+   webhooks = topgg.Webhooks(os.getenv('MY_TOPGG_WEBHOOK_SECRET'), 8080)
+
+   @webhooks.on_vote('/votes')
+   def voted(vote: topgg.VoteEvent) -> None:
+     print(f'A user with the ID of {vote.voter_id} has voted us on Top.gg!')
+
+   async def main() -> None:
+     await webhooks.start() # Starts the server
+     await asyncio.Event().wait() # Keeps the server alive through indefinite blocking
+
+   if __name__ == '__main__':
+     asyncio.run(main())
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
+  :maxdepth: 2
+  :hidden:
 
-   api/index.rst
-   examples/index.rst
-   whats-new
-   support-server
-   repository
-   raw-api-reference
+  client
+  data
+  webhooks
+  support-server
+  repository
+  raw-api-reference

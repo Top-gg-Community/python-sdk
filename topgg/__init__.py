@@ -1,24 +1,58 @@
 """
-Top.gg Python API Wrapper
-~~~~~~~~~~~~~~~~~~~~~~~~~
-A basic wrapper for the Top.gg API.
-:copyright: (c) 2021 Assanali Mukhanov & Top.gg
-:copyright: (c) 2024-2025 null8626 & Top.gg
-:license: MIT, see LICENSE for more details.
+The MIT License (MIT)
+
+Copyright (c) 2021 Assanali Mukhanov & Top.gg
+Copyright (c) 2024-2025 null8626 & Top.gg
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
-__title__ = "topggpy"
-__author__ = "null8626"
-__license__ = "MIT"
-__version__ = "2.0.1"
+from .models import Bot, SortBy, UserSource, Vote, VoteEvent, Voter
+from .errors import Error, RequestError, Ratelimited
+from .widget import WidgetType
+from .webhooks import Webhooks
+from .version import VERSION
+from .client import Client
+from . import widget
 
-from .autopost import *
-from .client import *
-from .data import *
-from .errors import *
-from .http import *
 
-# can't be added to __all__ since they'd clash with automodule
-from .types import *
-from .types import BotVoteData, GuildVoteData
-from .webhook import *
+__title__ = 'topggpy'
+__author__ = 'null8626 & Top.gg'
+__credits__ = ('null8626', 'Top.gg')
+__maintainer__ = 'null8626'
+__status__ = 'Production'
+__license__ = 'MIT'
+__copyright__ = 'Copyright (c) 2021 Assanali Mukhanov & Top.gg; Copyright (c) 2024-2025 null8626 & Top.gg'
+__version__ = VERSION
+__all__ = (
+  'Bot',
+  'Client',
+  'Error',
+  'Ratelimited',
+  'RequestError',
+  'SortBy',
+  'UserSource',
+  'VERSION',
+  'Vote',
+  'VoteEvent',
+  'Voter',
+  'Webhooks',
+  'widget',
+  'WidgetType',
+)
