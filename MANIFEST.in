@@ -1,3 +1,6 @@
-include LICENSE
-include requirements.txt
-include README.rst
+prune .github
+prune .ruff_cache
+exclude .gitignore
+exclude .readthedocs.yml
+exclude ruff.toml
+exclude LICENSE
