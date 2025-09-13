@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from datetime import datetime, timezone
 from typing import Optional, TypeVar
+from datetime import datetime
 from urllib import parse
 from enum import Enum
 
@@ -35,46 +35,6 @@ T = TypeVar('T')
 def truthy_only(value: Optional[T]) -> Optional[T]:
   if value:
     return value
-
-
-class Vote:
-  """A Top.gg vote."""
-
-  __slots__ = ('receiver_id', 'voter_id', 'voted_at', 'expires_at', 'weight')
-
-  receiver_id: int
-  """The ID of the project that received a vote."""
-
-  voter_id: int
-  """The ID of the Top.gg user who voted."""
-
-  weight: int
-  """This vote's weight. 1 during weekdays, 2 during weekends.."""
-
-  voted_at: datetime
-  """When the vote was cast."""
-
-  expires_at: datetime
-  """When the vote expires and the user is required to vote again."""
-
-  def __init__(self, json: dict, receiver_id: int, voter_id: int):
-    self.receiver_id = receiver_id
-    self.voter_id = voter_id
-    self.weight = json['weight']
-    self.voted_at = datetime.fromisoformat(json['created_at'])
-    self.expires_at = datetime.fromisoformat(json['expires_at'])
-
-  def __repr__(self) -> str:
-    return f'<{__class__.__name__} receiver_id={self.receiver_id} voter_id={self.voter_id} weight={self.weight} voted_at={self.voted_at!r} expires_at={self.expires_at!r}>'
-
-  def __bool__(self) -> bool:
-    return self.expired
-
-  @property
-  def expired(self) -> bool:
-    """Whether this vote is now expired."""
-
-    return datetime.now(tz=timezone.utc) >= self.expires_at
 
 
 class VoteEvent:
@@ -284,10 +244,3 @@ class SortBy(Enum):
 
   MONTHLY_VOTES = 'monthlyPoints'
   """Sorts results based on each bot's monthly vote count."""
-
-
-class UserSource(Enum):
-  """A user account from an external platform that is linked to a Top.gg user account."""
-
-  DISCORD = 'discord'
-  TOPGG = 'topgg'

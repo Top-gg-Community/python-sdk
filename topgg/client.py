@@ -31,13 +31,12 @@ from inspect import isawaitable
 from base64 import b64decode
 from time import time
 import binascii
-import warnings
 import asyncio
 import json
 
 from .ratelimiter import Ratelimiter, Ratelimiters
 from .errors import Error, RequestError, Ratelimited
-from .models import Bot, SortBy, UserSource, Vote, Voter
+from .models import Bot, SortBy, Voter
 from .version import VERSION
 
 
@@ -410,9 +409,6 @@ class Client:
 
   async def has_voted(self, id: int) -> bool:
     """
-    .. deprecated:: 3.0.0
-      Legacy API. Use a v1 API token with :meth:`.Client.get_vote` instead.
-
     Checks if a Top.gg user has voted for your project in the past 12 hours.
 
     Example:
@@ -432,109 +428,9 @@ class Client:
     :rtype: :py:class:`bool`
     """
 
-    warnings.warn(
-      '`has_voted()` is deprecated. Use a v1 API token with `get_vote()` instead.',
-      DeprecationWarning,
-    )
-
     response = await self.__request('GET', '/bots/check', params={'userId': id})
 
     return bool(response['voted'])
-
-  async def get_vote(
-    self, id: int, source: UserSource = UserSource.DISCORD
-  ) -> Optional[Vote]:
-    """
-    Fetches the latest vote information of a Top.gg user on your project.
-
-    Example:
-
-    .. code-block:: python
-
-      # Discord ID
-      vote = await client.get_vote(661200758510977084)
-
-      if vote:
-        print(f'User has voted: {vote!r}')
-
-      # Top.gg ID
-      vote = await client.get_vote(8226924471638491136, source=topgg.UserSource.TOPGG)
-
-      if vote:
-        print(f'User has voted: {vote!r}')
-
-    :param id: The user's ID.
-    :type id: :py:class:`int`
-    :param source: The ID type to use. Defaults to :attr:`.UserSource.DISCORD`.
-    :type source: :class:`.UserSource`
-
-    :exception Error: A legacy API token is used or the client is already closed.
-    :exception TypeError: ``source`` is not an instance of :class:`.UserSource`.
-    :exception RequestError: The specified user has not logged in to Top.gg or the client has received other non-favorable responses from the API.
-    :exception Ratelimited: Ratelimited from sending more requests.
-
-    :returns: The user's latest vote information on your project or :py:obj:`None` if the user has not voted for your project in the past 12 hours.
-    :rtype: Optional[:class:`.Vote`]
-    """
-
-    if self.legacy:
-      raise Error('This endpoint is inaccessible with legacy API tokens.')
-    elif not isinstance(source, UserSource):
-      raise TypeError('Expected source to be an instance of UserSource.')
-
-    try:
-      response = await self.__request(
-        'GET', f'/v1/projects/@me/votes/{id}', params={'source': source.value}
-      )
-
-      return Vote(response, self.id, id)
-    except RequestError as err:
-      if err.message == 'User has not voted in the last 12 hours.':
-        return
-
-      raise
-
-  async def post_bot_commands(self, commands: list[dict]) -> None:
-    """
-    Updates the application commands list in your Discord bot's Top.gg page.
-
-    Examples:
-
-    .. code-block:: python
-
-      # Discord.py/Pycord/Nextcord/Disnake:
-      app_id = bot.user.id
-      commands = await bot.http.get_global_commands(app_id)
-
-      # Hikari:
-      app_id = ...
-      commands = await bot.rest.request('GET', f'/applications/{app_id}/commands')
-
-      # Discord.http:
-      http = discordhttp.HTTP(f'BOT {os.getenv("BOT_TOKEN")}')
-      app_id = ...
-      commands = await http.get(f'/applications/{app_id}/commands')
-
-      await client.post_bot_commands(commands)
-
-    :param commands: A list of application commands in raw Discord API JSON dicts. This cannot be empty.
-    :type commands: list[:py:class:`dict`]
-
-    :exception Error: A legacy API token is used or the client is already closed.
-    :exception TypeError: ``commands`` is not a list of raw Discord API JSON dicts.
-    :exception RequestError: Received a non-favorable response from the API.
-    :exception Ratelimited: Ratelimited from sending more requests.
-    """
-
-    if self.legacy:
-      raise Error('This endpoint is inaccessible with legacy API tokens.')
-    elif not (
-      isinstance(commands, list)
-      and all(isinstance(command, dict) for command in commands)
-    ):
-      raise TypeError('Expected commands to be a list of raw Discord API JSON dicts.')
-
-    await self.__request('POST', '/v1/projects/@me/commands', body=commands)
 
   async def __bot_autopost_loop(self, interval: Optional[float]) -> None:
     # The following line should not be changed, as it could affect test_autoposter.py.

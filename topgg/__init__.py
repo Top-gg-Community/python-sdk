@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from .models import Bot, SortBy, UserSource, Vote, VoteEvent, Voter
 from .errors import Error, RequestError, Ratelimited
+from .models import Bot, SortBy, VoteEvent, Voter
 from .webhooks import Webhooks
 from .version import VERSION
 from .client import Client
@@ -45,9 +45,7 @@ __all__ = (
   'Ratelimited',
   'RequestError',
   'SortBy',
-  'UserSource',
   'VERSION',
-  'Vote',
   'VoteEvent',
   'Voter',
   'Webhooks',
