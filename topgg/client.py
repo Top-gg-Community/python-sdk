@@ -1,387 +1,736 @@
-# -*- coding: utf-8 -*-
+"""
+The MIT License (MIT)
 
-# The MIT License (MIT)
+Copyright (c) 2021 Assanali Mukhanov & Top.gg
+Copyright (c) 2024-2025 null8626 & Top.gg
 
-# Copyright (c) 2021 Assanali Mukhanov
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
+from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from collections.abc import Iterable, Callable, Coroutine
+from typing import Any, Optional, Union
+from collections import namedtuple
+from inspect import isawaitable
+from base64 import b64decode
+from time import time
+import binascii
+import warnings
+import asyncio
+import json
 
-__all__ = ["DBLClient"]
-
-import typing as t
-
-import aiohttp
-
-from . import errors, types
-from .autopost import AutoPoster
-from .data import DataContainerMixin
-from .http import HTTPClient
+from .ratelimiter import Ratelimiter, Ratelimiters
+from .errors import Error, RequestError, Ratelimited
+from .models import Bot, SortBy, UserSource, Vote, Voter
+from .version import VERSION
 
 
-class DBLClient(DataContainerMixin):
-    """Represents a client connection that connects to Top.gg.
+BASE_URL = 'https://top.gg/api'
+MAXIMUM_DELAY_THRESHOLD = 5.0
 
-    This class is used to interact with the Top.gg API.
 
-    .. _aiohttp session: https://aiohttp.readthedocs.io/en/stable/client_reference.html#client-session
+BotAutopostRetrievalCallback = Callable[[], Union[int, Coroutine[None, None, int]]]
+BotAutopostRetrievalDecorator = Callable[
+  [BotAutopostRetrievalCallback], BotAutopostRetrievalCallback
+]
 
-    Args:
-        token (:obj:`str`): Your bot's Top.gg API Token.
+BotAutopostSuccessCallback = Callable[[int], Any]
+BotAutopostSuccessDecorator = Callable[
+  [BotAutopostSuccessCallback], BotAutopostSuccessCallback
+]
 
-    Keyword Args:
-        default_bot_id (:obj:`typing.Optional` [ :obj:`int` ])
-            The default bot_id. You can override this by passing it when calling a method.
-        session (:class:`aiohttp.ClientSession`)
-            An `aiohttp session`_ to use for requests to the API.
-        **kwargs:
-            Arbitrary kwargs to be passed to :class:`aiohttp.ClientSession` if session was not provided.
+BotAutopostErrorCallback = Callable[[Error], Any]
+BotAutopostErrorDecorator = Callable[
+  [BotAutopostErrorCallback], BotAutopostErrorCallback
+]
+
+
+class Client:
+  """
+  Interact with the API's endpoints.
+
+  Examples:
+
+  .. code-block:: python
+
+    # Explicit cleanup
+    client = topgg.Client(os.getenv('TOPGG_TOKEN'))
+
+    # ...
+
+    await client.close()
+
+    # Implicit cleanup
+    async with topgg.Client(os.getenv('TOPGG_TOKEN')) as client:
+      # ...
+
+  :param token: Your Top.gg API token.
+  :type token: :py:class:`str`
+  :param session: Whether to use an existing :class:`~aiohttp.ClientSession` for requesting or not. Defaults to :py:obj:`None` (creates a new one instead)
+  :type session: Optional[:class:`~aiohttp.ClientSession`]
+
+  :exception TypeError: ``token`` is not a :py:class:`str` or is empty.
+  :exception ValueError: ``token`` is not a valid API token.
+  """
+
+  id: int
+  """This project's ID."""
+
+  legacy: bool
+  """Whether this client is using a legacy API token."""
+
+  __slots__: tuple[str, ...] = (
+    '__own_session',
+    '__session',
+    '__token',
+    '__ratelimiter',
+    '__ratelimiters',
+    '__current_ratelimit',
+    '__bot_autopost_task',
+    '__bot_autopost_retrieval_callback',
+    '__bot_autopost_success_callbacks',
+    '__bot_autopost_error_callbacks',
+    'id',
+    'legacy',
+  )
+
+  def __init__(self, token: str, *, session: Optional[ClientSession] = None):
+    if not isinstance(token, str) or not token:
+      raise TypeError('An API token is required to use this API.')
+
+    self.__own_session = session is None
+    self.__session = session or ClientSession(
+      timeout=ClientTimeout(total=MAXIMUM_DELAY_THRESHOLD * 1000.0)
+    )
+    self.__token = token
+
+    try:
+      encoded_json = token.split('.')[1]
+      encoded_json += '=' * (4 - (len(encoded_json) % 4))
+      encoded_json = json.loads(b64decode(encoded_json))
+
+      self.id = int(encoded_json['id'])
+      self.legacy = '_t' not in encoded_json
+    except (IndexError, ValueError, binascii.Error, json.decoder.JSONDecodeError):
+      raise ValueError('Got a malformed API token.') from None
+
+    endpoint_ratelimits = namedtuple('EndpointRatelimits', 'global_ bot')
+
+    self.__ratelimiter = endpoint_ratelimits(
+      global_=Ratelimiter(99, 1), bot=Ratelimiter(59, 60)
+    )
+    self.__ratelimiters = Ratelimiters(self.__ratelimiter)
+    self.__current_ratelimit = None
+
+    self.__bot_autopost_task = None
+    self.__bot_autopost_retrieval_callback = None
+    self.__bot_autopost_success_callbacks = set()
+    self.__bot_autopost_error_callbacks = set()
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} {self.__session!r}>'
+
+  def __int__(self) -> int:
+    return self.id
+
+  async def __request(
+    self,
+    method: str,
+    path: str,
+    params: Optional[dict] = None,
+    body: Optional[dict] = None,
+  ) -> dict:
+    if self.__session.closed:
+      raise Error('Client session is already closed.')
+
+    if self.__current_ratelimit is not None:
+      current_time = time()
+
+      if current_time < self.__current_ratelimit:
+        raise Ratelimited(self.__current_ratelimit - current_time)
+      else:
+        self.__current_ratelimit = None
+
+    ratelimiter = (
+      self.__ratelimiters if path.startswith('/bots') else self.__ratelimiter.global_
+    )
+
+    kwargs = {}
+
+    if body:
+      kwargs['json'] = body
+
+    if params:
+      kwargs['params'] = params
+
+    status = None
+    retry_after = None
+    output = None
+
+    async with ratelimiter:
+      try:
+        async with self.__session.request(
+          method,
+          BASE_URL + path,
+          headers={
+            'Authorization': self.__token,
+            'Content-Type': 'application/json',
+            'User-Agent': f'topggpy (https://github.com/top-gg-community/python-sdk {VERSION}) Python/',
+          },
+          **kwargs,
+        ) as resp:
+          status = resp.status
+          retry_after = float(resp.headers.get('Retry-After', 0))
+
+          if 'json' in resp.headers['Content-Type']:
+            try:
+              output = await resp.json()
+            except json.decoder.JSONDecodeError:
+              pass
+
+          resp.raise_for_status()
+
+          return output
+      except ClientResponseError:
+        if status == 429:
+          if retry_after > MAXIMUM_DELAY_THRESHOLD:
+            self.__current_ratelimit = time() + retry_after
+
+            raise Ratelimited(retry_after) from None
+
+          await asyncio.sleep(retry_after)
+
+          return await self.__request(method, path)
+
+        raise RequestError(
+          output and output.get('message', output.get('detail')), status
+        ) from None
+
+  async def get_bot(self, id: int) -> Bot:
+    """
+    Fetches a Discord bot from its ID.
+
+    Example:
+
+    .. code-block:: python
+
+      bot = await client.get_bot(432610292342587392)
+
+    :param id: The bot's ID.
+    :type id: :py:class:`int`
+
+    :exception Error: The client is already closed.
+    :exception RequestError: Such query does not exist or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+
+    :returns: The requested bot.
+    :rtype: :class:`.Bot`
     """
 
-    __slots__ = ("http", "default_bot_id", "_token", "_is_closed", "_autopost")
-    http: HTTPClient
+    return Bot(await self.__request('GET', f'/bots/{id}'))
 
-    def __init__(
-        self,
-        token: str,
-        *,
-        default_bot_id: t.Optional[int] = None,
-        session: t.Optional[aiohttp.ClientSession] = None,
-        **kwargs: t.Any,
-    ) -> None:
-        super().__init__()
-        self._token = token
-        self.default_bot_id = default_bot_id
-        self._is_closed = False
-        if session is not None:
-            self.http = HTTPClient(token, session=session)
-        self._autopost: t.Optional[AutoPoster] = None
+  async def get_bots(
+    self,
+    *,
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+    sort_by: Optional[SortBy] = None,
+  ) -> Iterable[Bot]:
+    """
+    Fetches Discord bots that matches the specified query.
 
-    @property
-    def is_closed(self) -> bool:
-        return self._is_closed
+    Examples:
 
-    async def _ensure_session(self) -> None:
-        if self.is_closed:
-            raise errors.ClientStateException("client has been closed.")
+    .. code-block:: python
 
-        if not hasattr(self, "http"):
-            self.http = HTTPClient(self._token, session=None)
+      # With defaults
+      bots = await client.get_bots()
 
-    def _validate_and_get_bot_id(self, bot_id: t.Optional[int]) -> int:
-        bot_id = bot_id or self.default_bot_id
-        if bot_id is None:
-            raise errors.ClientException("bot_id or default_bot_id is unset.")
+      # With explicit arguments
+      bots = await client.get_bots(limit=250, offset=50, sort_by=topgg.SortBy.MONTHLY_VOTES)
 
-        return bot_id
+      for bot in bots:
+        print(bot)
 
-    async def get_weekend_status(self) -> bool:
-        """Gets weekend status from Top.gg.
+    :param limit: The maximum amount of bots to be returned.
+    :type limit: Optional[:py:class:`int`]
+    :param offset: The amount of bots to be skipped.
+    :type offset: Optional[:py:class:`int`]
+    :param sort_by: The criteria to sort results by. Results will always be descending.
+    :type sort_by: Optional[:class:`.SortBy`]
 
-        Returns:
-            :obj:`bool`: The boolean value of weekend status.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
-        Raises:
-            :obj:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        await self._ensure_session()
-        data = await self.http.get_weekend_status()
-        return data["is_weekend"]
+    :returns: The requested bots.
+    :rtype: Iterable[:class:`.Bot`]
+    """
 
-    @t.overload
-    async def post_guild_count(self, stats: types.StatsWrapper) -> None:
-        ...
+    params = {}
 
-    @t.overload
-    async def post_guild_count(
-        self,
-        *,
-        guild_count: t.Union[int, t.List[int]],
-        shard_count: t.Optional[int] = None,
-        shard_id: t.Optional[int] = None,
-    ) -> None:
-        ...
+    if limit is not None:
+      params['limit'] = max(min(limit, 500), 1)
 
-    async def post_guild_count(
-        self,
-        stats: t.Any = None,
-        *,
-        guild_count: t.Any = None,
-        shard_count: t.Any = None,
-        shard_id: t.Any = None,
-    ) -> None:
-        """Posts your bot's guild count and shards info to Top.gg.
+    if offset is not None:
+      params['offset'] = max(min(offset, 499), 0)
 
-        .. _0 based indexing : https://en.wikipedia.org/wiki/Zero-based_numbering
+    if sort_by is not None:
+      if not isinstance(sort_by, SortBy):
+        raise TypeError(
+          f'Expected sort_by to be a SortBy enum, got {sort_by.__class__.__name__}.'
+        )
 
-        Warning:
-            You can't provide both args and kwargs at once.
+      params['sort'] = sort_by.value
 
-        Args:
-            stats (:obj:`~.types.StatsWrapper`)
-                An instance of StatsWrapper containing guild_count, shard_count, and shard_id.
+    bots = await self.__request('GET', '/bots', params=params)
 
-        Keyword Arguments:
-            guild_count (:obj:`typing.Optional` [:obj:`typing.Union` [ :obj:`int`, :obj:`list` [ :obj:`int` ]]])
-                Number of guilds the bot is in. Applies the number to a shard instead if shards are specified.
-                If not specified, length of provided client's property `.guilds` will be posted.
-            shard_count (:obj:`.typing.Optional` [ :obj:`int` ])
-                The total number of shards.
-            shard_id (:obj:`.typing.Optional` [ :obj:`int` ])
-                The index of the current shard. Top.gg uses `0 based indexing`_ for shards.
+    return map(Bot, bots.get('results', ()))
 
-        Raises:
-            TypeError
-                If no argument is provided.
-            :obj:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        if stats:
-            guild_count = stats.guild_count
-            shard_count = stats.shard_count
-            shard_id = stats.shard_id
-        elif guild_count is None:
-            raise TypeError("stats or guild_count must be provided.")
-        await self._ensure_session()
-        await self.http.post_guild_count(guild_count, shard_count, shard_id)
+  async def get_bot_server_count(self) -> Optional[int]:
+    """
+    Fetches your Discord bot's posted server count.
 
-    async def get_guild_count(
-        self, bot_id: t.Optional[int] = None
-    ) -> types.BotStatsData:
-        """Gets a bot's guild count and shard info from Top.gg.
+    Example:
 
-        Args:
-            bot_id (int)
-                ID of the bot you want to look up. Defaults to the provided Client object.
+    .. code-block:: python
 
-        Returns:
-            :obj:`~.types.BotStatsData`:
-                The guild count and shards of a bot on Top.gg.
+      posted_server_count = await client.get_bot_server_count()
 
-        Raises:
-            :obj:`~.errors.ClientException`
-                If neither bot_id or default_bot_id was set.
-            :obj:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        bot_id = self._validate_and_get_bot_id(bot_id)
-        await self._ensure_session()
-        response = await self.http.get_guild_count(bot_id)
-        return types.BotStatsData(**response)
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
-    async def get_bot_votes(self) -> t.List[types.BriefUserData]:
-        """Gets information about last 1000 votes for your bot on Top.gg.
+    :returns: The posted server count.
+    :rtype: Optional[:py:class:`int`]
+    """
 
-        Note:
-            This API endpoint is only available to the bot's owner.
+    stats = await self.__request('GET', '/bots/stats')
 
-        Returns:
-            :obj:`list` [ :obj:`~.types.BriefUserData` ]:
-                Users who voted for your bot.
+    return stats.get('server_count')
 
-        Raises:
-            :obj:`~.errors.ClientException`
-                If default_bot_id isn't provided when constructing the client.
-            :obj:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        if not self.default_bot_id:
-            raise errors.ClientException(
-                "you must set default_bot_id when constructing the client."
-            )
-        await self._ensure_session()
-        response = await self.http.get_bot_votes(self.default_bot_id)
-        return [types.BriefUserData(**user) for user in response]
+  async def post_bot_server_count(self, new_server_count: int) -> None:
+    """
+    Updates the server count in your Discord bot's Top.gg page.
 
-    async def get_bot_info(self, bot_id: t.Optional[int] = None) -> types.BotData:
-        """This function is a coroutine.
+    Example:
 
-        Gets information about a bot from Top.gg.
+    .. code-block:: python
 
-        Args:
-            bot_id (int)
-                ID of the bot to look up. Defaults to the provided Client object.
+      await client.post_bot_server_count(bot.server_count)
 
-        Returns:
-            :obj:`~.types.BotData`:
-                Information on the bot you looked up. Returned data can be found
-                `here <https://docs.top.gg/api/bot/#bot-structure>`_.
+    :param new_server_count: The updated server count. This cannot be zero.
+    :type new_server_count: :py:class:`int`
 
-        Raises:
-            :obj:`~.errors.ClientException`
-                If neither bot_id or default_bot_id was set.
-            :obj:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        bot_id = self._validate_and_get_bot_id(bot_id)
-        await self._ensure_session()
-        response = await self.http.get_bot_info(bot_id)
-        return types.BotData(**response)
+    :exception ValueError: ``new_server_count`` is zero or lower.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+    """
 
-    async def get_bots(
-        self,
-        limit: int = 50,
-        offset: int = 0,
-        sort: t.Optional[str] = None,
-        search: t.Optional[t.Dict[str, t.Any]] = None,
-        fields: t.Optional[t.List[str]] = None,
-    ) -> types.DataDict[str, t.Any]:
-        """This function is a coroutine.
+    if new_server_count <= 0:
+      raise ValueError(
+        f'Posted server count cannot be zero or lower, got {new_server_count}.'
+      )
 
-        Gets information about listed bots on Top.gg.
+    await self.__request('POST', '/bots/stats', body={'server_count': new_server_count})
 
-        Args:
-            limit (int)
-                The number of results to look up. Defaults to 50. Max 500 allowed.
-            offset (int)
-                The amount of bots to skip. Defaults to 0.
-            sort (str)
-                The field to sort by. Prefix with ``-`` to reverse the order.
-            search (:obj:`dict` [ :obj:`str`, :obj:`typing.Any` ])
-                The search data.
-            fields (:obj:`list` [ :obj:`str` ])
-                Fields to output.
+  async def is_weekend(self) -> bool:
+    """
+    Checks if the weekend multiplier is active, where a single vote counts as two.
 
-        Returns:
-            :obj:`~.types.DataDict`:
-                Info on bots that match the search query on Top.gg.
+    Example:
 
-        Raises:
-            :obj:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        sort = sort or ""
-        search = search or {}
-        fields = fields or []
-        await self._ensure_session()
-        response = await self.http.get_bots(limit, offset, sort, search, fields)
-        response["results"] = [
-            types.BotData(**bot_data) for bot_data in response["results"]
-        ]
-        return types.DataDict(**response)
+    .. code-block:: python
 
-    async def get_user_info(self, user_id: int) -> types.UserData:
-        """This function is a coroutine.
+      is_weekend = await client.is_weekend()
 
-        Gets information about a user on Top.gg.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
-        Args:
-            user_id (int)
-                ID of the user to look up.
+    :returns: Whether the weekend multiplier is active.
+    :rtype: :py:class:`bool`
+    """
 
-        Returns:
-            :obj:`~.types.UserData`:
-                Information about a Top.gg user.
+    response = await self.__request('GET', '/weekend')
 
-        Raises:
-            :obj:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        await self._ensure_session()
-        response = await self.http.get_user_info(user_id)
-        return types.UserData(**response)
+    return response['is_weekend']
 
-    async def get_user_vote(self, user_id: int) -> bool:
-        """Gets information about a user's vote for your bot on Top.gg.
+  async def get_voters(self, page: int = 1) -> Iterable[Voter]:
+    """
+    Fetches your project's recent 100 unique voters.
 
-        Args:
-            user_id (int)
-                ID of the user.
+    Examples:
 
-        Returns:
-            :obj:`bool`: Info about the user's vote.
+    .. code-block:: python
 
-        Raises:
-            :obj:`~.errors.ClientException`
-                If default_bot_id isn't provided when constructing the client.
-            :obj:`~.errors.ClientStateException`
-                If the client has been closed.
-        """
-        if not self.default_bot_id:
-            raise errors.ClientException(
-                "you must set default_bot_id when constructing the client."
-            )
+      # First page
+      voters = await client.get_voters()
 
-        await self._ensure_session()
-        data = await self.http.get_user_vote(self.default_bot_id, user_id)
-        return bool(data["voted"])
+      # Subsequent pages
+      voters = await client.get_voters(2)
 
-    def generate_widget(self, *, options: types.WidgetOptions) -> str:
-        """
-        Generates a Top.gg widget from the provided :obj:`~.types.WidgetOptions` object.
+      for voter in voters:
+        print(voter)
 
-        Keyword Arguments:
-            options (:obj:`~.types.WidgetOptions`)
-                A :obj:`~.types.WidgetOptions` object containing widget parameters.
+    :param page: The page number. Each page can only have at most 100 voters. Defaults to 1.
+    :type page: :py:class:`int`
 
-        Returns:
-            str: Generated widget URL.
+    :exception Error: The client is already closed.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
-        Raises:
-            :obj:`~.errors.ClientException`
-                If bot_id or default_bot_id is unset.
-            TypeError:
-                If options passed is not of type WidgetOptions.
-        """
-        if not isinstance(options, types.WidgetOptions):
-            raise TypeError(
-                "options argument passed to generate_widget must be of type WidgetOptions"
-            )
+    :returns: The requested voters.
+    :rtype: Iterable[:class:`.Voter`]
+    """
 
-        bot_id = options.id or self.default_bot_id
-        if bot_id is None:
-            raise errors.ClientException("bot_id or default_bot_id is unset.")
+    return map(
+      Voter,
+      await self.__request(
+        'GET', f'/bots/{self.id}/votes', params={'page': max(page, 1)}
+      ),
+    )
 
-        widget_query = f"noavatar={str(options.noavatar).lower()}"
-        for key, value in options.colors.items():
-            widget_query += f"&{key.lower()}{'' if key.lower().endswith('color') else 'color'}={value:x}"
-        widget_format = options.format
-        widget_type = f"/{options.type}" if options.type else ""
+  async def has_voted(self, id: int) -> bool:
+    """
+    .. deprecated:: 3.0.0
+      Legacy API. Use a v1 API token with :meth:`.Client.get_vote` instead.
 
-        url = f"""https://top.gg/api/widget{widget_type}/{bot_id}.{widget_format}?{widget_query}"""
-        return url
+    Checks if a Top.gg user has voted for your project in the past 12 hours.
 
-    async def close(self) -> None:
-        """Closes all connections."""
-        if self.is_closed:
-            return
+    Example:
 
-        if hasattr(self, "http"):
-            await self.http.close()
+    .. code-block:: python
 
-        if self._autopost:
-            self._autopost.cancel()
+      has_voted = await client.has_voted(661200758510977084)
 
-        self._is_closed = True
+    :param id: The user's ID.
+    :type id: :py:class:`int`
 
-    def autopost(self) -> AutoPoster:
-        """Returns a helper instance for auto-posting.
+    :exception Error: The client is already closed.
+    :exception RequestError: The specified user has not logged in to Top.gg or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
 
-        Note:
-            The second time you call this method, it'll return the same instance
-            as the one returned from the first call.
+    :returns: Whether the user has voted in the past 12 hours.
+    :rtype: :py:class:`bool`
+    """
 
-        Returns:
-            :obj:`~.autopost.AutoPoster`: An instance of AutoPoster.
-        """
-        if self._autopost is not None:
-            return self._autopost
+    warnings.warn(
+      '`has_voted()` is deprecated. Use a v1 API token with `get_vote()` instead.',
+      DeprecationWarning,
+    )
 
-        self._autopost = AutoPoster(self)
-        return self._autopost
+    response = await self.__request('GET', '/bots/check', params={'userId': id})
+
+    return bool(response['voted'])
+
+  async def get_vote(
+    self, id: int, source: UserSource = UserSource.DISCORD
+  ) -> Optional[Vote]:
+    """
+    Fetches the latest vote information of a Top.gg user on your project.
+
+    Example:
+
+    .. code-block:: python
+
+      # Discord ID
+      vote = await client.get_vote(661200758510977084)
+
+      if vote:
+        print(f'User has voted: {vote!r}')
+
+      # Top.gg ID
+      vote = await client.get_vote(8226924471638491136, source=topgg.UserSource.TOPGG)
+
+      if vote:
+        print(f'User has voted: {vote!r}')
+
+    :param id: The user's ID.
+    :type id: :py:class:`int`
+    :param source: The ID type to use. Defaults to :attr:`.UserSource.DISCORD`.
+    :type source: :class:`.UserSource`
+
+    :exception Error: A legacy API token is used or the client is already closed.
+    :exception TypeError: ``source`` is not an instance of :class:`.UserSource`.
+    :exception RequestError: The specified user has not logged in to Top.gg or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+
+    :returns: The user's latest vote information on your project or :py:obj:`None` if the user has not voted for your project in the past 12 hours.
+    :rtype: Optional[:class:`.Vote`]
+    """
+
+    if self.legacy:
+      raise Error('This endpoint is inaccessible with legacy API tokens.')
+    elif not isinstance(source, UserSource):
+      raise TypeError('Expected source to be an instance of UserSource.')
+
+    try:
+      response = await self.__request(
+        'GET', f'/v1/projects/@me/votes/{id}', params={'source': source.value}
+      )
+
+      return Vote(response, self.id, id)
+    except RequestError as err:
+      if err.message == 'User has not voted in the last 12 hours.':
+        return
+
+      raise
+
+  async def post_bot_commands(self, commands: list[dict]) -> None:
+    """
+    Updates the application commands list in your Discord bot's Top.gg page.
+
+    Examples:
+
+    .. code-block:: python
+
+      # Discord.py/Pycord/Nextcord/Disnake:
+      app_id = bot.user.id
+      commands = await bot.http.get_global_commands(app_id)
+
+      # Hikari:
+      app_id = ...
+      commands = await bot.rest.request('GET', f'/applications/{app_id}/commands')
+
+      # Discord.http:
+      http = discordhttp.HTTP(f'BOT {os.getenv("BOT_TOKEN")}')
+      app_id = ...
+      commands = await http.get(f'/applications/{app_id}/commands')
+
+      await client.post_bot_commands(commands)
+
+    :param commands: A list of application commands in raw Discord API JSON dicts. This cannot be empty.
+    :type commands: list[:py:class:`dict`]
+
+    :exception Error: A legacy API token is used or the client is already closed.
+    :exception TypeError: ``commands`` is not a list of raw Discord API JSON dicts.
+    :exception RequestError: Received a non-favorable response from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+    """
+
+    if self.legacy:
+      raise Error('This endpoint is inaccessible with legacy API tokens.')
+    elif not (
+      isinstance(commands, list)
+      and all(isinstance(command, dict) for command in commands)
+    ):
+      raise TypeError('Expected commands to be a list of raw Discord API JSON dicts.')
+
+    await self.__request('POST', '/v1/projects/@me/commands', body=commands)
+
+  async def __bot_autopost_loop(self, interval: Optional[float]) -> None:
+    # The following line should not be changed, as it could affect test_autoposter.py.
+    interval = max(interval or 900.0, 900.0)
+
+    while True:
+      try:
+        server_count = self.__bot_autopost_retrieval_callback()
+
+        if isawaitable(server_count):
+          server_count = await server_count
+
+        await self.post_bot_server_count(server_count)
+
+        for success_callback in self.__bot_autopost_success_callbacks:
+          success_callback_result = success_callback(server_count)
+
+          if isawaitable(success_callback_result):
+            await success_callback_result
+
+        await asyncio.sleep(interval)
+      except Exception as err:
+        if isinstance(err, Error):
+          for error_callback in self.__bot_autopost_error_callbacks:
+            error_callback_result = error_callback(err)
+
+            if isawaitable(error_callback_result):
+              await error_callback_result
+        elif isinstance(err, asyncio.CancelledError):
+          return
+        else:
+          raise
+
+  def bot_autopost_retrieval(
+    self, callback: Optional[BotAutopostRetrievalCallback] = None
+  ) -> Union[BotAutopostRetrievalCallback, BotAutopostRetrievalDecorator]:
+    """
+    Registers a bot autopost server count retrieval callback.
+
+    Example:
+
+    .. code-block:: python
+
+      @client.bot_autopost_retrieval
+      def get_server_count() -> int:
+        return bot.server_count
+
+    :param callback: The autopost server count retrieval callback. This can be asynchronous or synchronous, as long as it eventually returns an :py:class:`int`.
+    :type callback: Optional[:data:`~.client.BotAutopostRetrievalCallback`]
+
+    :returns: The function itself or a decorated function depending on the argument.
+    :rtype: Union[:data:`~.client.BotAutopostRetrievalCallback`, :data:`~.client.BotAutopostRetrievalDecorator`]
+    """
+
+    def decorator(
+      callback: BotAutopostRetrievalCallback,
+    ) -> BotAutopostRetrievalCallback:
+      self.__bot_autopost_retrieval_callback = callback
+
+      return callback
+
+    if callback is not None:
+      decorator(callback)
+
+      return callback
+
+    return decorator
+
+  def bot_autopost_success(
+    self, callback: Optional[BotAutopostSuccessCallback] = None
+  ) -> Union[BotAutopostSuccessCallback, BotAutopostSuccessDecorator]:
+    """
+    Registers a bot autopost on success callback. Several callbacks are possible.
+
+    Example:
+
+    .. code-block:: python
+
+      @client.bot_autopost_success
+      def success(server_count: int) -> None:
+        print(f'Successfully posted {server_count} servers to Top.gg!')
+
+    :param callback: The autopost on success callback. This can be asynchronous or synchronous, as long as it accepts a :py:class:`int` argument for the posted server count.
+    :type callback: Optional[:data:`~.client.BotAutopostSuccessCallback`]
+
+    :returns: The function itself or a decorated function depending on the argument.
+    :rtype: Union[:data:`~.client.BotAutopostSuccessCallback`, :data:`~.client.BotAutopostSuccessDecorator`]
+    """
+
+    def decorator(callback: BotAutopostSuccessCallback) -> BotAutopostSuccessCallback:
+      self.__bot_autopost_success_callbacks.add(callback)
+
+      return callback
+
+    if callback is not None:
+      decorator(callback)
+
+      return self
+
+    return decorator
+
+  def bot_autopost_error(
+    self, callback: Optional[BotAutopostErrorCallback] = None
+  ) -> Union[BotAutopostErrorCallback, BotAutopostErrorDecorator]:
+    """
+    Registers a bot autopost on error handler. Several callbacks are possible.
+
+    Example:
+
+    .. code-block:: python
+
+      @client.bot_autopost_error
+      def error(error: topgg.Error) -> None:
+        print(f'Error: {error!r}')
+
+    :param callback: The autopost on error handler. This can be asynchronous or synchronous, as long as it accepts an :class:`.Error` argument for the request exception.
+    :type callback: Optional[:data:`~.client.BotAutopostErrorCallback`]
+
+    :returns: The function itself or a decorated function depending on the argument.
+    :rtype: Union[:data:`~.client.BotAutopostErrorCallback`, :data:`~.client.BotAutopostErrorDecorator`]
+    """
+
+    def decorator(callback: BotAutopostErrorCallback) -> BotAutopostErrorCallback:
+      self.__bot_autopost_error_callbacks.add(callback)
+
+      return callback
+
+    if callback is not None:
+      decorator(callback)
+
+      return self
+
+    return decorator
+
+  @property
+  def bot_autoposter_running(self) -> bool:
+    """Whether the Discord bot autoposter is running."""
+
+    return self.__bot_autopost_task is not None
+
+  def start_bot_autoposter(self, interval: Optional[float] = None) -> None:
+    """
+    Starts the Discord bot autoposter, which automatically updates the server count in your Discord bot's Top.gg page every few minutes.
+
+    Example:
+
+    .. code-block:: python
+
+      client.start_bot_autoposter()
+
+    :param interval: The delay between updates in seconds.
+    :type interval: Optional[:py:class:`float`]
+
+    :exception TypeError: The server count retrieval callback does not exist.
+    """
+
+    if not self.bot_autoposter_running:
+      assert (
+        self.__bot_autopost_retrieval_callback is not None
+      ), 'Missing bot_autopost_retrieval callback.'
+
+      self.__bot_autopost_task = asyncio.create_task(self.__bot_autopost_loop(interval))
+
+  def stop_bot_autoposter(self) -> None:
+    """
+    Stops the Discord bot autoposter.
+
+    Example:
+
+    .. code-block:: python
+
+      client.stop_bot_autoposter()
+    """
+
+    if self.bot_autoposter_running:
+      self.__bot_autopost_task.cancel()
+      self.__bot_autopost_task = None
+
+  async def close(self) -> None:
+    """
+    Closes the client.
+
+    Example:
+
+    .. code-block:: python
+
+      await client.close()
+    """
+
+    self.stop_bot_autoposter()
+
+    if self.__own_session and not self.__session.closed:
+      await self.__session.close()
+
+  async def __aenter__(self) -> 'Client':
+    return self
+
+  async def __aexit__(self, *_, **__) -> None:
+    await self.close()
