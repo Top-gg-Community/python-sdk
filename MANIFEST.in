@@ -3,4 +3,8 @@ prune .ruff_cache
 exclude .gitignore
 exclude .readthedocs.yml
 exclude ruff.toml
+exclude test.py
+exclude test_autoposter.py
 exclude LICENSE
+exclude ISSUE_TEMPLATE.md
+exclude PULL_REQUEST_TEMPLATE.md

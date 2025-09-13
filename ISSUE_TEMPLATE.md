@@ -1,6 +1,6 @@
-This issue tracker is **ONLY** used for reporting bugs with __topggpy__. Feel free to share your suggestions in the #api channel in our [Discord server](https://discord.gg/EYHTgJX)!
+This issue tracker is **ONLY** used for reporting bugs with __topggpy__. Feel free to share your suggestions in the #api channel in our [Discord server](https://discord.gg/dbl)!
 
-For help with general Python issues, use [StackOverflow](https://stackoverflow.com), our [#development channel](https://discord.gg/EYHTgJX), or the [Python Discord server](https://discord.gg/python).
+For help with general Python issues, use [StackOverflow](https://stackoverflow.com), our [#development channel](https://discord.gg/dbl), or the [Python Discord server](https://discord.gg/python).
 
 
 <!--- Provide a general summary of the issue in the title above. -->
