@@ -10,6 +10,9 @@ from topgg.autopost import AutoPoster
 from topgg.errors import HTTPException, TopGGException
 
 
+MOCK_TOKEN = ".eyJfdCI6IiIsImlkIjoiMzY0ODA2MDI5ODc2NTU1Nzc2In0=."
+
+
 @pytest.fixture
 def session() -> ClientSession:
     return mock.Mock(ClientSession)
@@ -17,7 +20,7 @@ def session() -> ClientSession:
 
 @pytest.fixture
 def autopost(session: ClientSession) -> AutoPoster:
-    return AutoPoster(DBLClient("", session=session))
+    return AutoPoster(DBLClient(MOCK_TOKEN, session=session))
 
 
 @pytest.mark.asyncio
@@ -33,7 +36,7 @@ async def test_AutoPoster_breaks_autopost_loop_on_401(
     )
 
     callback = mock.Mock()
-    autopost = DBLClient("", session=session).autopost().stats(callback)
+    autopost = DBLClient(MOCK_TOKEN, session=session).autopost().stats(callback)
     assert isinstance(autopost, AutoPoster)
     assert not isinstance(autopost.stats()(callback), AutoPoster)
 
