@@ -34,9 +34,8 @@ import aiohttp
 import asyncio
 import json
 
-from . import errors, types
-from .version import VERSION
 from .autopost import AutoPoster
+from . import errors, types, VERSION
 from .data import DataContainerMixin
 from .ratelimiter import Ratelimiter, Ratelimiters
 
