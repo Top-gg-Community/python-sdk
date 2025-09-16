@@ -8,17 +8,18 @@ A basic wrapper for the Top.gg API.
 :license: MIT, see LICENSE for more details.
 """
 
+from .version import VERSION
+
 __title__ = "topggpy"
 __author__ = "Assanali Mukhanov"
 __maintainer__ = "Norizon"
 __license__ = "MIT"
-__version__ = "2.0.0a1"
+__version__ = VERSION
 
 from .autopost import *
 from .client import *
 from .data import *
 from .errors import *
-from .http import *
 
 # can't be added to __all__ since they'd clash with automodule
 from .types import *

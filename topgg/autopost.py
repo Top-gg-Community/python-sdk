@@ -269,7 +269,7 @@ class AutoPoster:
                     await self.client.post_guild_count(stats)
                 except Exception as err:
                     await self.client._invoke_callback(self._error, err)
-                    if isinstance(err, errors.Unauthorized):
+                    if isinstance(err, errors.HTTPException) and err.code == 401:
                         raise err from None
                 else:
                     on_success = getattr(self, "_success", None)
