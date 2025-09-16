@@ -79,7 +79,7 @@ class HTTPException(TopGGException):
             The response of the failed HTTP request.
         text (str)
             The text of the error. Could be an empty string.
-        code (Optional[int])
+        code (int)
             The response status code.
     """
 
@@ -87,15 +87,11 @@ class HTTPException(TopGGException):
 
     def __init__(self, response: "ClientResponse", message: Union[dict, str]) -> None:
         self.response = response
-
-        if isinstance(message, dict):
-            self.text = message.get("message", message.get("detail", ""))
-            self.code = message.get("code", message.get("status"))
-        else:
-            self.text = message
-            self.code = None
+        self.code = response.status
+        self.text = message.get("message", message.get("detail", "")) if isinstance(message, dict) else message
 
         fmt = f"{self.response.reason} (status code: {self.response.status})"
+
         if self.text:
             fmt = f"{fmt}: {self.text}"
 
