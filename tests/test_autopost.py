@@ -5,9 +5,9 @@ import pytest
 from aiohttp import ClientSession
 from pytest_mock import MockerFixture
 
-from topgg import DBLClient, StatsWrapper
+from topgg import DBLClient
 from topgg.autopost import AutoPoster
-from topgg.errors import ServerError, TopGGException, Unauthorized
+from topgg.errors import HTTPException, TopGGException
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ async def test_AutoPoster_breaks_autopost_loop_on_401(
     response.status = 401
 
     mocker.patch(
-        "topgg.DBLClient.post_guild_count", side_effect=Unauthorized(response, {})
+        "topgg.DBLClient.post_guild_count", side_effect=HTTPException(response, {})
     )
 
     callback = mock.Mock()
@@ -37,7 +37,7 @@ async def test_AutoPoster_breaks_autopost_loop_on_401(
     assert isinstance(autopost, AutoPoster)
     assert not isinstance(autopost.stats()(callback), AutoPoster)
 
-    with pytest.raises(Unauthorized):
+    with pytest.raises(HTTPException):
         await autopost.start()
 
     callback.assert_called_once()
@@ -73,7 +73,7 @@ async def test_AutoPoster_error_callback(
     response = mock.Mock("reason, status")
     response.reason = "Internal Server Error"
     response.status = 500
-    side_effect = ServerError(response, {})
+    side_effect = HTTPException(response, {})
 
     mocker.patch("topgg.DBLClient.post_guild_count", side_effect=side_effect)
     task = autopost.on_error(error_callback).stats(mock.Mock()).start()
