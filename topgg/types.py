@@ -192,7 +192,7 @@ class BotData:
     donatebotguildid: int
     """This bot's donatebot setup server ID."""
 
-    server_count: t.Optional[str]
+    server_count: t.Optional[int]
     """This bot's posted server count."""
 
     review_score: float
