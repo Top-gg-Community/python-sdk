@@ -1,385 +1,486 @@
-# -*- coding: utf-8 -*-
+"""
+The MIT License (MIT)
 
-# The MIT License (MIT)
+Copyright (c) 2021 Assanali Mukhanov & Top.gg
+Copyright (c) 2024-2025 null8626 & Top.gg
 
-# Copyright (c) 2021 Assanali Mukhanov
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-
-__all__ = ["WidgetOptions", "StatsWrapper"]
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 
 import dataclasses
 import typing as t
+import warnings
+
 from datetime import datetime
-
-KT = t.TypeVar("KT")
-VT = t.TypeVar("VT")
-Colors = t.Dict[str, int]
-Colours = Colors
+from enum import Enum
 
 
-def camel_to_snake(string: str) -> str:
-    return "".join(["_" + c.lower() if c.isupper() else c for c in string]).lstrip("_")
+T = t.TypeVar('T')
 
 
-def parse_vote_dict(d: dict) -> dict:
-    data = d.copy()
-
-    query = data.get("query", "").lstrip("?")
-    if query:
-        query_dict = {k: v for k, v in [pair.split("=") for pair in query.split("&")]}
-        data["query"] = DataDict(**query_dict)
-    else:
-        data["query"] = {}
-
-    if "bot" in data:
-        data["bot"] = int(data["bot"])
-
-    elif "guild" in data:
-        data["guild"] = int(data["guild"])
-
-    for key, value in data.copy().items():
-        converted_key = camel_to_snake(key)
-        if key != converted_key:
-            del data[key]
-            data[converted_key] = value
-
-    return data
+def truthy_only(value: t.Optional[T]) -> t.Optional[T]:
+    if value:
+        return value
 
 
-def parse_dict(d: dict) -> dict:
-    data = d.copy()
+class WidgetProjectType(Enum):
+    """A Top.gg widget's project type."""
 
-    for key, value in data.copy().items():
-        if "id" in key.lower():
-            if value == "":
-                value = None
-            else:
-                if isinstance(value, str) and value.isdigit():
-                    value = int(value)
-                else:
-                    continue
-        elif value == "":
-            value = None
+    __slots__: tuple[str, ...] = ()
 
-        converted_key = camel_to_snake(key)
-        if key != converted_key:
-            del data[key]
-        data[converted_key] = value
-
-    return data
+    DISCORD_BOT = 'discord/bot'
+    DISCORD_SERVER = 'discord/server'
 
 
-def parse_bot_dict(d: dict) -> dict:
-    data = parse_dict(d.copy())
+class WidgetType(Enum):
+    """A Top.gg widget's type."""
 
-    if data.get("date") and not isinstance(data["date"], datetime):
-        data["date"] = datetime.strptime(data["date"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    __slots__: tuple[str, ...] = ()
 
-    if data.get("owners"):
-        data["owners"] = [int(e) for e in data["owners"]]
-    if data.get("guilds"):
-        data["guilds"] = [int(e) for e in data["guilds"]]
-
-    for key, value in data.copy().items():
-        converted_key = camel_to_snake(key)
-        if key != converted_key:
-            del data[key]
-        data[converted_key] = value
-
-    return data
+    LARGE = 'large'
+    VOTES = 'votes'
+    OWNER = 'owner'
+    SOCIAL = 'social'
 
 
-def parse_user_dict(d: dict) -> dict:
-    data = d.copy()
+class WidgetOptions:
+    """Top.gg widget creation options."""
 
-    data["social"] = SocialData(**data.get("social", {}))
+    __slots__: tuple[str, ...] = ('id', 'project_type', 'type')
 
-    return data
+    id: int
+    """This widget's project ID."""
 
+    project_type: WidgetProjectType
+    """This widget's project type."""
 
-def parse_bot_stats_dict(d: dict) -> dict:
-    data = d.copy()
-
-    if "server_count" not in data:
-        data["server_count"] = None
-    if "shards" not in data:
-        data["shards"] = []
-    if "shard_count" not in data:
-        data["shard_count"] = None
-
-    return data
-
-
-class DataDict(dict, t.MutableMapping[KT, VT]):
-    """Base class used to represent received data from the API.
-
-    Every data model subclasses this class.
-    """
-
-    def __init__(self, **kwargs: VT) -> None:
-        super().__init__(**parse_dict(kwargs))
-        self.__dict__ = self
-
-
-class WidgetOptions(DataDict[str, t.Any]):
-    """Model that represents widget options that are passed to Top.gg widget URL generated via
-    :meth:`DBLClient.generate_widget`."""
-
-    id: t.Optional[int]
-    """ID of a bot to generate the widget for. Must resolve to an ID of a listed bot when converted to a string."""
-    colors: Colors
-    """A dictionary consisting of a parameter as a key and HEX color (type `int`) as value. ``color`` will be 
-    appended to the key in case it doesn't end with ``color``."""
-    noavatar: bool
-    """Indicates whether to exclude the bot's avatar from short widgets. Must be of type ``bool``. Defaults to 
-    ``False``."""
-    format: str
-    """Format to apply to the widget. Must be either ``png`` and ``svg``. Defaults to ``png``."""
-    type: str
-    """Type of a short widget (``status``, ``servers``, ``upvotes``, and ``owner``). For large widget, 
-    must be an empty string."""
+    type: WidgetType
+    """This widget's type."""
 
     def __init__(
         self,
-        id: t.Optional[int] = None,
-        format: t.Optional[str] = None,
-        type: t.Optional[str] = None,
-        noavatar: bool = False,
-        colors: t.Optional[Colors] = None,
-        colours: t.Optional[Colors] = None,
+        id: int,
+        project_type: WidgetProjectType,
+        type: WidgetType,
+        *args,
+        **kwargs,
     ):
-        super().__init__(
-            id=id or None,
-            format=format or "png",
-            type=type or "",
-            noavatar=noavatar or False,
-            colors=colors or colours or {},
-        )
+        self.id = id
+        self.project_type = project_type
+        self.type = type
 
-    @property
-    def colours(self) -> Colors:
-        return self.colors
+        for arg in args:
+            warnings.warn(f'Ignored extra argument: {arg!r}', DeprecationWarning)
 
-    @colours.setter
-    def colours(self, value: Colors) -> None:
-        self.colors = value
+        for key in kwargs.keys():
+            warnings.warn(f'Ignored keyword argument: {key}', DeprecationWarning)
 
-    def __setitem__(self, key: str, value: t.Any) -> None:
-        if key == "colours":
-            key = "colors"
-        super().__setitem__(key, value)
-
-    def __getitem__(self, item: str) -> t.Any:
-        if item == "colours":
-            item = "colors"
-        return super().__getitem__(item)
-
-    def get(self, key: str, default: t.Any = None) -> t.Any:
-        """:meta private:"""
-        if key == "colours":
-            key = "colors"
-        return super().get(key, default)
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} id={self.id} project_type={self.project_type!r} type={self.type!r}>'
 
 
-class BotData(DataDict[str, t.Any]):
-    """Model that contains information about a listed bot on top.gg. The data this model contains can be found `here
-    <https://docs.top.gg/api/bot/#bot-structure>`__."""
+class BotData:
+    """A Discord bot listed on Top.gg."""
+
+    __slots__: tuple[str, ...] = (
+        'id',
+        'topgg_id',
+        'username',
+        'discriminator',
+        'avatar',
+        'def_avatar',
+        'prefix',
+        'shortdesc',
+        'longdesc',
+        'tags',
+        'website',
+        'support',
+        'github',
+        'owners',
+        'guilds',
+        'invite',
+        'date',
+        'certified_bot',
+        'vanity',
+        'points',
+        'monthly_points',
+        'donatebotguildid',
+        'server_count',
+        'review_score',
+        'review_count',
+    )
 
     id: int
-    """The ID of the bot."""
+    """This bot's Discord ID."""
+
+    topgg_id: int
+    """This bot's Top.gg ID."""
 
     username: str
-    """The username of the bot."""
+    """This bot's username."""
 
     discriminator: str
-    """The discriminator of the bot."""
+    """This bot's discriminator."""
 
-    avatar: t.Optional[str]
-    """The avatar hash of the bot."""
+    avatar: str
+    """This bot's avatar URL."""
 
     def_avatar: str
-    """The avatar hash of the bot's default avatar."""
+    """This bot's default avatar hash."""
 
     prefix: str
-    """The prefix of the bot."""
+    """This bot's prefix."""
 
     shortdesc: str
-    """The brief description of the bot."""
+    """This bot's short description."""
 
     longdesc: t.Optional[str]
-    """The long description of the bot."""
+    """This bot's HTML/Markdown long description."""
 
-    tags: t.List[str]
-    """The tags the bot has."""
+    tags: list[str]
+    """This bot's tags."""
 
     website: t.Optional[str]
-    """The website of the bot."""
+    """This bot's website URL."""
 
     support: t.Optional[str]
-    """The invite code of the bot's support server."""
+    """This bot's support URL."""
 
     github: t.Optional[str]
-    """The GitHub URL of the repo of the bot."""
+    """This bot's GitHub repository URL."""
 
-    owners: t.List[int]
-    """The IDs of the owners of the bot."""
+    owners: list[int]
+    """This bot's owner IDs."""
 
-    guilds: t.List[int]
-    """The guilds the bot is in."""
+    guilds: list[int]
+    """This bot's list of servers."""
 
     invite: t.Optional[str]
-    """The invite URL of the bot."""
+    """This bot's invite URL."""
 
     date: datetime
-    """The time the bot was added."""
+    """This bot's submission date."""
 
     certified_bot: bool
-    """Whether or not the bot is certified."""
+    """Whether this bot is certified."""
 
     vanity: t.Optional[str]
-    """The vanity URL of the bot."""
+    """This bot's Top.gg vanity code."""
 
     points: int
-    """The amount of the votes the bot has."""
+    """The amount of votes this bot has."""
 
     monthly_points: int
-    """The amount of the votes the bot has this month."""
+    """The amount of votes this bot has this month."""
 
     donatebotguildid: int
-    """The guild ID for the donatebot setup."""
+    """This bot's donatebot setup server ID."""
 
-    def __init__(self, **kwargs: t.Any):
-        super().__init__(**parse_bot_dict(kwargs))
+    server_count: t.Optional[str]
+    """This bot's posted server count."""
+
+    review_score: float
+    """This bot's average review score out of 5."""
+
+    review_count: int
+    """This bot's review count."""
+
+    def __init__(self, json: dict):
+        self.id = int(json['clientid'])
+        self.topgg_id = int(json['id'])
+        self.username = json['username']
+        self.discriminator = '0'
+        self.avatar = json['avatar']
+        self.def_avatar = ''
+        self.prefix = json['prefix']
+        self.shortdesc = json['shortdesc']
+        self.longdesc = truthy_only(json.get('longdesc'))
+        self.tags = json['tags']
+        self.website = truthy_only(json.get('website'))
+        self.support = truthy_only(json.get('support'))
+        self.github = truthy_only(json.get('github'))
+        self.owners = [int(id) for id in json['owners']]
+        self.guilds = []
+        self.invite = truthy_only(json.get('invite'))
+        self.date = datetime.fromisoformat(json['date'].replace('Z', '+00:00'))
+        self.certified_bot = False
+        self.vanity = truthy_only(json.get('vanity'))
+        self.points = json['points']
+        self.monthly_points = json['monthlyPoints']
+        self.donatebotguildid = 0
+        self.server_count = json.get('server_count')
+        self.review_score = json['reviews']['averageScore']
+        self.review_count = json['reviews']['count']
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} id={self.id} username={self.username!r} points={self.points} monthly_points={self.monthly_points} server_count={self.server_count}>'
+
+    def __int__(self) -> int:
+        return self.id
+
+    def __eq__(self, other: 'BotData') -> bool:
+        if isinstance(other, __class__):
+            return self.id == other.id
+
+        return NotImplemented
 
 
-class BotStatsData(DataDict[str, t.Any]):
-    """Model that contains information about a listed bot's guild and shard count."""
+class BotsData:
+    """A list of Discord bot's listed on Top.gg."""
+
+    __slots__: tuple[str, ...] = ('results', 'limit', 'offset', 'count', 'total')
+
+    results: list[BotData]
+    """The list of bots returned."""
+
+    limit: int
+    """The maximum amount of bots returned."""
+
+    offset: int
+    """The amount of bots skipped."""
+
+    count: int
+    """The amount of bots returned. Akin to len(results)."""
+
+    total: int
+    """The amount of bots that matches the specified query. May be equal or greater than count or len(results)."""
+
+    def __init__(self, json: dict):
+        self.results = [BotData(bot) for bot in json['results']]
+        self.limit = json['limit']
+        self.offset = json['offset']
+        self.count = json['count']
+        self.total = json['total']
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} results={self.results!r} count={self.count} total={self.total}>'
+
+    def __iter__(self) -> t.Iterable[BotData]:
+        return iter(self.results)
+
+    def __len__(self) -> int:
+        return self.count
+
+
+class BotStatsData:
+    """A Discord bot's statistics."""
+
+    __slots__: tuple[str, ...] = ('server_count', 'shards', 'shard_count')
 
     server_count: t.Optional[int]
     """The amount of servers the bot is in."""
-    shards: t.List[int]
+
+    shards: list[int]
     """The amount of servers the bot is in per shard."""
+
     shard_count: t.Optional[int]
-    """The amount of shards a bot has."""
+    """The amount of shards the bot has."""
 
-    def __init__(self, **kwargs: t.Any):
-        super().__init__(**parse_bot_stats_dict(kwargs))
+    def __init__(self, json: dict):
+        self.server_count = json.get('server_count')
+        self.shards = []
+        self.shard_count = None
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} server_count={self.server_count}>'
+
+    def __int__(self) -> int:
+        return self.server_count
+
+    def __eq__(self, other: 'BotStatsData') -> bool:
+        if isinstance(other, __class__):
+            return self.server_count == other.server_count
+
+        return NotImplemented
 
 
-class BriefUserData(DataDict[str, t.Any]):
-    """Model that contains brief information about a Top.gg user."""
+class BriefUserData:
+    """A Top.gg user's brief information."""
+
+    __slots__: tuple[str, ...] = ('id', 'username', 'avatar')
 
     id: int
-    """The Discord ID of the user."""
+    """This user's ID."""
+
     username: str
-    """The Discord username of the user."""
+    """This user's username."""
+
     avatar: str
-    """The Discord avatar URL of the user."""
+    """This user's avatar URL."""
 
-    def __init__(self, **kwargs: t.Any):
-        if kwargs["id"].isdigit():
-            kwargs["id"] = int(kwargs["id"])
-        super().__init__(**kwargs)
+    def __init__(self, json: dict):
+        self.id = int(json['id'])
+        self.username = json['username']
+        self.avatar = json['avatar']
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} id={self.id} username={self.username!r}>'
+
+    def __int__(self) -> int:
+        return self.id
+
+    def __eq__(self, other: 'BriefUserData') -> bool:
+        if isinstance(other, __class__):
+            return self.id == other.id
+
+        return NotImplemented
 
 
-class SocialData(DataDict[str, str]):
-    """Model that contains social information about a top.gg user."""
+class SocialData:
+    """A Top.gg user's socials."""
+
+    __slots__: tuple[str, ...] = ('youtube', 'reddit', 'twitter', 'instagram', 'github')
 
     youtube: str
-    """The YouTube channel ID of the user."""
+    """This user's YouTube channel."""
+
     reddit: str
-    """The Reddit username of the user."""
+    """This user's Reddit username."""
+
     twitter: str
-    """The Twitter username of the user."""
+    """This user's Twitter username."""
+
     instagram: str
-    """The Instagram username of the user."""
+    """This user's Instagram username."""
+
     github: str
-    """The GitHub username of the user."""
+    """This user's GitHub username."""
 
 
-class UserData(DataDict[str, t.Any]):
-    """Model that contains information about a top.gg user. The data this model contains can be found `here
-    <https://docs.top.gg/api/user/#structure>`__."""
+class UserData:
+    """A Top.gg user."""
+
+    __slots__: tuple[str, ...] = (
+        'id',
+        'username',
+        'discriminator',
+        'social',
+        'color',
+        'supporter',
+        'certified_dev',
+        'mod',
+        'web_mod',
+        'admin',
+    )
 
     id: int
-    """The ID of the user."""
+    """This user's ID."""
 
     username: str
-    """The username of the user."""
+    """This user's username."""
 
     discriminator: str
-    """The discriminator of the user."""
+    """This user's discriminator."""
 
     social: SocialData
-    """The social data of the user."""
+    """This user's social links."""
 
     color: str
-    """The custom hex color of the user."""
+    """This user's profile color."""
 
     supporter: bool
-    """Whether or not the user is a supporter."""
+    """Whether this user is a Top.gg supporter."""
 
     certified_dev: bool
-    """Whether or not the user is a certified dev."""
+    """Whether this user is a Top.gg certified developer."""
 
     mod: bool
-    """Whether or not the user is a Top.gg mod."""
+    """Whether this user is a Top.gg moderator."""
 
     web_mod: bool
-    """Whether or not the user is a Top.gg web mod."""
+    """Whether this user is a Top.gg website moderator."""
 
     admin: bool
-    """Whether or not the user is a Top.gg admin."""
-
-    def __init__(self, **kwargs: t.Any):
-        super().__init__(**parse_user_dict(kwargs))
+    """Whether this user is a Top.gg website administrator."""
 
 
-class VoteDataDict(DataDict[str, t.Any]):
-    """Base model that represents received information from Top.gg via webhooks."""
+class SortBy(Enum):
+    """Supported sorting criterias in :meth:`.DBLClient.get_bots`."""
+
+    __slots__: tuple[str, ...] = ()
+
+    ID = 'id'
+    """Sorts results based on each bot's ID."""
+
+    SUBMISSION_DATE = 'date'
+    """Sorts results based on each bot's submission date."""
+
+    MONTHLY_VOTES = 'monthlyPoints'
+    """Sorts results based on each bot's monthly vote count."""
+
+
+class VoteDataDict:
+    """A dispatched Top.gg project vote event."""
+
+    __slots__: tuple[str, ...] = ('type', 'user', 'query')
 
     type: str
-    """Type of the action (``upvote`` or ``test``)."""
-    user: int
-    """ID of the voter."""
-    query: DataDict
-    """Query parameters in :obj:`~.DataDict`."""
+    """Vote event type. ``upvote`` (invoked from the vote page by a user) or ``test`` (invoked explicitly by the developer for testing.)"""
 
-    def __init__(self, **kwargs: t.Any):
-        super().__init__(**parse_vote_dict(kwargs))
+    user: int
+    """The ID of the user who voted."""
+
+    query: t.Optional[str]
+    """Query strings found on the vote page."""
+
+    def __init__(self, json: dict):
+        self.type = json['type']
+        self.user = int(json['user'])
+        self.query = json.get('query')
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} type={self.type!r} user={self.user}>'
 
 
 class BotVoteData(VoteDataDict):
-    """Model that contains information about a bot vote."""
+    """A dispatched Top.gg Discord bot vote event. Extends :class:`.VoteDataDict`."""
+
+    __slots__: tuple[str, ...] = ('bot', 'is_weekend')
 
     bot: int
-    """ID of the bot the user voted for."""
+    """The ID of the bot that received a vote."""
+
     is_weekend: bool
-    """Boolean value indicating whether the action was done on a weekend."""
+    """Whether the weekend multiplier is active or not, meaning a single vote counts as two."""
+
+    def __init__(self, json: dict):
+        super().__init__(json)
+
+        self.bot = int(json['bot'])
+        self.is_weekend = json['isWeekend']
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} type={self.type!r} user={self.user} is_weekend={self.is_weekend}>'
 
 
 class GuildVoteData(VoteDataDict):
-    """Model that contains information about a guild vote."""
+    """ "A dispatched Top.gg Discord server vote event. Extends :class:`.VoteDataDict`."""
+
+    __slots__: tuple[str, ...] = ('guild',)
 
     guild: int
-    """ID of the guild the user voted for."""
+    """The ID of the server that received a vote."""
+
+    def __init__(self, json: dict):
+        super().__init__(json)
+
+        self.guild = int(json['guild'])
 
 
 ServerVoteData = GuildVoteData
@@ -387,11 +488,11 @@ ServerVoteData = GuildVoteData
 
 @dataclasses.dataclass
 class StatsWrapper:
-    guild_count: int
-    """The guild count."""
+    server_count: t.Optional[int]
+    """The amount of servers the bot is in."""
 
     shard_count: t.Optional[int] = None
-    """The shard count."""
+    """The amount of shards the bot has."""
 
     shard_id: t.Optional[int] = None
     """The shard ID the guild count belongs to."""

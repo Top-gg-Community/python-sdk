@@ -24,15 +24,14 @@ SOFTWARE.
 """
 
 from collections.abc import Iterable
-from types import TracebackType
 from collections import deque
 from time import time
 import asyncio
+import typing
 
-__all__ = [
-    "Ratelimiter",
-    "Ratelimiters",
-]
+if typing.TYPE_CHECKING:
+    from types import TracebackType
+
 
 class Ratelimiter:
     """Handles ratelimits for a specific endpoint."""
@@ -65,7 +64,7 @@ class Ratelimiter:
         self,
         _exc_type: type[BaseException],
         _exc_val: BaseException,
-        _exc_tb: TracebackType,
+        _exc_tb: 'TracebackType',
     ) -> None:
         """Stores the previous request's timestamp."""
 
@@ -102,7 +101,7 @@ class Ratelimiters:
         self,
         exc_type: type[BaseException],
         exc_val: BaseException,
-        exc_tb: TracebackType,
+        exc_tb: 'TracebackType',
     ) -> None:
         """Stores the previous request's timestamp."""
 
