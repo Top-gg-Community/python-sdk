@@ -1,5 +1,6 @@
 prune .github
 prune .ruff_cache
+prune docs
 prune examples
 exclude .gitignore
 exclude .readthedocs.yml
