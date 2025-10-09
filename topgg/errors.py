@@ -23,77 +23,63 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-__all__ = [
-    "TopGGException",
-    "ClientException",
-    "ClientStateException",
-    "Ratelimited",
-    "HTTPException",
-]
-
-from typing import TYPE_CHECKING, Union
-
-if TYPE_CHECKING:
-    from aiohttp import ClientResponse
+from typing import Optional
 
 
 class TopGGException(Exception):
-    """Base exception class for topggpy.
+    """An error coming from this SDK. Extends :py:class:`Exception`."""
 
-    Ideally speaking, this could be caught to handle any exceptions thrown from this library.
-    """
+    __slots__: tuple[str, ...] = ()
 
 
 class ClientException(TopGGException):
-    """Exception that's thrown when an operation in the :class:`~.DBLClient` fails.
+    """An operation failure in :class:`.DBLClient`. Extends :class:`.TopGGException`."""
 
-    These are usually for exceptions that happened due to user input.
-    """
+    __slots__: tuple[str, ...] = ()
 
 
 class ClientStateException(ClientException):
-    """Exception that's thrown when an operation happens in a closed :obj:`~.DBLClient` instance."""
+    """Attempted operation in a closed :class:`.DBLClient` instance. Extends :class:`.ClientException`."""
 
-
-class Ratelimited(TopGGException):
-    """Exception that's thrown when the client is ratelimited."""
-  
-    __slots__: tuple[str, ...] = ('retry_after',)
-  
-    retry_after: float
-    """How long the client should wait in seconds before it could send requests again without receiving a 429."""
-  
-    def __init__(self, retry_after: float):
-        self.retry_after = retry_after
-  
-        super().__init__(
-            f'Blocked from sending more requests, try again in {retry_after} seconds.'
-        )
+    __slots__: tuple[str, ...] = ()
 
 
 class HTTPException(TopGGException):
-    """Exception that's thrown when an HTTP request operation fails.
+    """HTTP request failure. Extends :class:`.TopGGException`."""
 
-    Attributes:
-        response (:class:`aiohttp.ClientResponse`)
-            The response of the failed HTTP request.
-        text (str)
-            The text of the error. Could be an empty string.
-        code (int)
-            The response status code.
-    """
+    __slots__: tuple[str, ...] = ('message', 'code')
 
-    __slots__ = ("response", "text", "code")
+    message: Optional[str]
+    """The message returned from the API."""
 
-    def __init__(self, response: "ClientResponse", message: Union[dict, str]) -> None:
-        self.response = response
-        self.code = response.status
-        self.text = message.get("message", message.get("detail", "")) if isinstance(message, dict) else message
+    code: Optional[int]
+    """The status code returned from the API."""
 
-        fmt = f"{self.response.reason} (status code: {self.response.status})"
+    def __init__(self, message: Optional[str], code: Optional[int]):
+        self.message = message
+        self.code = code
 
-        if self.text:
-            fmt = f"{fmt}: {self.text}"
+        super().__init__(f'Got {code}: {message!r}')
 
-        super().__init__(fmt)
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} message={self.message!r} code={self.code}>'
 
+
+class Ratelimited(HTTPException):
+    """Ratelimited from sending more requests. Extends :class:`.HTTPException`."""
+
+    __slots__: tuple[str, ...] = ('retry_after',)
+
+    retry_after: float
+    """How long the client should wait in seconds before it could send requests again without receiving a 429."""
+
+    def __init__(self, retry_after: float):
+        super().__init__(
+            f'Blocked from sending more requests, try again in {retry_after} seconds.',
+            429,
+        )
+
+        self.retry_after = retry_after
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} retry_after={self.retry_after}>'
