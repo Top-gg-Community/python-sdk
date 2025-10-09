@@ -50,7 +50,7 @@ class AutoPoster:
     :type client: :class:`.DBLClient`
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         '_error',
         '_success',
         '_interval',

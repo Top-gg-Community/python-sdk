@@ -58,7 +58,7 @@ def data(type_: t.Type[T]) -> T:
 
 
 class Data(t.Generic[T]):
-    __slots__ = ('type',)
+    __slots__: tuple[str, ...] = ('type',)
 
     def __init__(self, type_: t.Type[T]) -> None:
         self.type = type_
@@ -71,7 +71,7 @@ class DataContainerMixin:
     This is useful for injecting some data so that they're available as arguments in your functions.
     """
 
-    __slots__ = ('_data',)
+    __slots__: tuple[str, ...] = ('_data',)
 
     def __init__(self) -> None:
         self._data = {type(self): self}
