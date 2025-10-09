@@ -147,7 +147,7 @@ class DBLClient(DataContainerMixin):
         body: Optional[dict] = None,
     ) -> dict:
         if self.is_closed:
-            raise errors.ClientStateException('DBLClient session is already closed.')
+            raise errors.ClientStateException('Client session is already closed.')
 
         if self.__current_ratelimit is not None:
             current_time = time()
