@@ -1,47 +1,60 @@
-import typing as t
+from typing import TYPE_CHECKING, Dict
 
 import aiohttp
-import mock
 import pytest
+from discord import Client
 
-from topgg import WebhookManager, WebhookType
-from topgg.errors import TopGGException
+from topgg import WebhookManager
+
+if TYPE_CHECKING:
+    from topgg.types import BotVoteData, ServerVoteData
 
 auth = "youshallnotpass"
 
 
 @pytest.fixture
 def webhook_manager() -> WebhookManager:
-    return (
-        WebhookManager()
-        .endpoint()
-        .type(WebhookType.BOT)
-        .auth(auth)
-        .route("/dbl")
-        .callback(print)
-        .add_to_manager()
-        .endpoint()
-        .type(WebhookType.GUILD)
-        .auth(auth)
-        .route("/dsl")
-        .callback(print)
-        .add_to_manager()
-    )
+    return WebhookManager(Client()).dbl_webhook("/dbl", auth).dsl_webhook("/dsl", auth)
 
 
 def test_WebhookManager_routes(webhook_manager: WebhookManager) -> None:
-    assert len(webhook_manager.app.router.routes()) == 2
+    assert len(webhook_manager._webhooks) == 2
+
+
+@pytest.mark.asyncio
+async def test_WebhookManager_run_method(webhook_manager: WebhookManager) -> None:
+    task = webhook_manager.run(5000)
+
+    try:
+        if not task.done():
+            assert await task is None
+
+        assert hasattr(webhook_manager, "_webserver")
+    finally:
+        await webhook_manager.close()
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "headers, result, state",
-    [({"authorization": auth}, 204, True), ({}, 401, False)],
+    [({"authorization": auth}, 200, True), ({}, 401, False)],
 )
 async def test_WebhookManager_validates_auth(
-    webhook_manager: WebhookManager, headers: t.Dict[str, str], result: int, state: bool
+    webhook_manager: WebhookManager, headers: Dict[str, str], result: int, state: bool
 ) -> None:
-    await webhook_manager.start(5000)
+    await webhook_manager.run(5000)
+
+    dbl_state = dsl_state = False
+
+    @webhook_manager.bot.event
+    async def on_dbl_vote(data: "BotVoteData") -> None:
+        nonlocal dbl_state
+        dbl_state = True
+
+    @webhook_manager.bot.event
+    async def on_dsl_vote(data: "ServerVoteData") -> None:
+        nonlocal dsl_state
+        dsl_state = True
 
     try:
         for path in ("dbl", "dsl"):
@@ -49,32 +62,7 @@ async def test_WebhookManager_validates_auth(
                 "POST", f"http://localhost:5000/{path}", headers=headers, json={}
             ) as r:
                 assert r.status == result
+
+            assert locals()[f"{path}_state"] is state
     finally:
         await webhook_manager.close()
-        assert not webhook_manager.is_running
-
-
-def test_WebhookEndpoint_callback_unset(webhook_manager: WebhookManager):
-    with pytest.raises(
-        TopGGException,
-        match="endpoint missing callback.",
-    ):
-        webhook_manager.endpoint().add_to_manager()
-
-
-def test_WebhookEndpoint_route_unset(webhook_manager: WebhookManager):
-    with pytest.raises(
-        TopGGException,
-        match="endpoint missing type.",
-    ):
-        webhook_manager.endpoint().callback(mock.Mock()).add_to_manager()
-
-
-def test_WebhookEndpoint_type_unset(webhook_manager: WebhookManager):
-    with pytest.raises(
-        TopGGException,
-        match="endpoint missing route.",
-    ):
-        webhook_manager.endpoint().callback(mock.Mock()).type(
-            WebhookType.BOT
-        ).add_to_manager()
