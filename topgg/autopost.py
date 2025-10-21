@@ -68,6 +68,12 @@ class AutoPoster:
         self._error = self._default_error_handler
         self._refresh_state()
 
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} is_running={self.is_running}>'
+
+    def __bool__(self) -> bool:
+        return self.is_running
+
     def _default_error_handler(self, exception: Exception) -> None:
         print('Ignoring exception in auto post loop:', file=sys.stderr)
 
@@ -248,7 +254,7 @@ class AutoPoster:
             seconds = seconds.total_seconds()
 
         if seconds < 900:
-            raise ValueError('interval must be greated than 900 seconds.')
+            raise ValueError('interval must be greater than 900 seconds.')
 
         self._interval = seconds
 
@@ -309,7 +315,7 @@ class AutoPoster:
 
         if not hasattr(self, '_stats'):
             raise errors.TopGGException(
-                'you must provide a callback that returns the stats.'
+                'You must provide a callback that returns the stats.'
             )
         elif self.is_running:
             raise errors.TopGGException('The autoposter is already running.')

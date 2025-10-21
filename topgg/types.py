@@ -27,6 +27,7 @@ import dataclasses
 import typing as t
 import warnings
 
+from urllib.parse import parse_qs
 from datetime import datetime
 from enum import Enum
 
@@ -430,22 +431,25 @@ class VoteDataDict:
 
     __slots__: tuple[str, ...] = ('type', 'user', 'query')
 
-    type: str
+    type: t.Optional[str]
     """Vote event type. ``upvote`` (invoked from the vote page by a user) or ``test`` (invoked explicitly by the developer for testing.)"""
 
-    user: int
+    user: t.Optional[int]
     """The ID of the user who voted."""
 
-    query: t.Optional[str]
+    query: dict
     """Query strings found on the vote page."""
 
     def __init__(self, json: dict):
-        self.type = json['type']
-        self.user = int(json['user'])
-        self.query = json.get('query')
+        self.type = json.get('type')
+
+        user = json.get('user')
+        self.user = user and int(user)
+
+        self.query = parse_qs(json.get('query', ''))
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} type={self.type!r} user={self.user}>'
+        return f'<{__class__.__name__} type={self.type!r} user={self.user} query={self.query!r}>'
 
 
 class BotVoteData(VoteDataDict):
@@ -453,7 +457,7 @@ class BotVoteData(VoteDataDict):
 
     __slots__: tuple[str, ...] = ('bot', 'is_weekend')
 
-    bot: int
+    bot: t.Optional[int]
     """The ID of the bot that received a vote."""
 
     is_weekend: bool
@@ -462,8 +466,10 @@ class BotVoteData(VoteDataDict):
     def __init__(self, json: dict):
         super().__init__(json)
 
-        self.bot = int(json['bot'])
-        self.is_weekend = json['isWeekend']
+        bot = json.get('bot')
+        self.bot = bot and int(bot)
+
+        self.is_weekend = json.get('isWeekend', False)
 
     def __repr__(self) -> str:
         return f'<{__class__.__name__} type={self.type!r} user={self.user} is_weekend={self.is_weekend}>'
@@ -474,13 +480,14 @@ class GuildVoteData(VoteDataDict):
 
     __slots__: tuple[str, ...] = ('guild',)
 
-    guild: int
+    guild: t.Optional[int]
     """The ID of the server that received a vote."""
 
     def __init__(self, json: dict):
         super().__init__(json)
 
-        self.guild = int(json['guild'])
+        guild = json.get('guild')
+        self.guild = guild and int(guild)
 
 
 ServerVoteData = GuildVoteData

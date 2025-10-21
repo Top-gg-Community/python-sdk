@@ -28,14 +28,14 @@ import topgg
 
 
 # this can be async too!
-@topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, "youshallnotpass")
+@topgg.endpoint('/dblwebhook', topgg.WebhookType.BOT, 'youshallnotpass')
 def endpoint(
     vote_data: topgg.BotVoteData,
     # uncomment this if you want to get access to client
     # client: discord.Client = topgg.data(discord.Client),
 ):
     # this function will be called whenever someone votes for your bot.
-    print("Received a vote!", vote_data)
+    print('Received a vote!', vote_data)
 
     # do anything with client here
     # client.dispatch("dbl_vote", vote_data)

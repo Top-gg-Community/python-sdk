@@ -35,7 +35,7 @@ def on_autopost_success(
     # client: discord.Client = topgg.data(discord.Client)
 ):
     # will be called whenever it successfully posting
-    print("Successfully posted!")
+    print('Successfully posted!')
 
     # do whatever with client
     # you can dispatch your own event for more callbacks
@@ -48,7 +48,7 @@ def on_autopost_error(
     # client: discord.Client = topgg.data(discord.Client),
 ):
     # will be called whenever it failed posting
-    print("Failed to post:", exception, file=sys.stderr)
+    print('Failed to post:', exception, file=sys.stderr)
 
     # do whatever with client
     # you can dispatch your own event for more callbacks

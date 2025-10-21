@@ -1,6 +1,7 @@
 **/__pycache__/
-topggpy.egg-info/
-docs/_build/
-dist/
 .ruff_cache/
 .vscode/
+build/
+docs/_build/
+dist/
+topggpy.egg-info/

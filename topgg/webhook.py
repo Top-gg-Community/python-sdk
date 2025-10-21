@@ -61,6 +61,9 @@ class WebhookManager(DataContainerMixin):
         self.__app = web.Application()
         self._is_running = False
 
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} is_running={self.is_running}>'
+
     @t.overload
     def endpoint(self, endpoint_: None = None) -> 'BoundWebhookEndpoint': ...
 
@@ -83,10 +86,14 @@ class WebhookManager(DataContainerMixin):
         """
 
         if endpoint_:
-            if not isinstance(endpoint_, WebhookEndpoint):
-                raise TopGGException(
-                    f'endpoint_ must be an instance of WebhookEndpoint, got {endpoint_.__class__.__name__}.'
-                )
+            if not hasattr(endpoint_, '_callback'):
+                raise TopGGException('endpoint missing callback.')
+
+            if not hasattr(endpoint_, '_type'):
+                raise TopGGException('endpoint missing type.')
+
+            if not hasattr(endpoint_, '_route'):
+                raise TopGGException('endpoint missing route.')
 
             self.app.router.add_post(
                 endpoint_._route,
@@ -97,7 +104,7 @@ class WebhookManager(DataContainerMixin):
 
             return self
 
-        return BoundWebhookEndpoint(manager=self)
+        return BoundWebhookEndpoint(self)
 
     async def start(self, port: int) -> None:
         """
@@ -165,6 +172,9 @@ class WebhookEndpoint:
 
     def __call__(self, *args: t.Any, **kwargs: t.Any) -> t.Any:
         return self._callback(*args, **kwargs)
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} type={self._type!r} route={self._route!r}>'
 
     def type(self: T, type_: WebhookType) -> T:
         """
@@ -311,6 +321,9 @@ class BoundWebhookEndpoint(WebhookEndpoint):
         super().__init__()
 
         self.manager = manager
+
+    def __repr__(self) -> str:
+        return f'<{__class__.__name__} manager={self.manager!r}>'
 
     def add_to_manager(self) -> WebhookManager:
         """

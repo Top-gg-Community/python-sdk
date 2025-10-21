@@ -17,6 +17,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install
-        run: python -m pip install . pytest
+        run: python -m pip install . pytest mock pytest-mock pytest-asyncio
       - name: Test with pytest
         run: pytest

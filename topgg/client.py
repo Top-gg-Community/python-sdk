@@ -482,17 +482,21 @@ class DBLClient(DataContainerMixin):
 
             autoposter = client.autopost()
 
+
             @autoposter.stats
             def get_stats() -> int:
                 return topgg.StatsWrapper(bot.server_count)
+
 
             @autoposter.on_success
             def success() -> None:
                 print('Successfully posted statistics to the Top.gg API!')
 
+
             @autoposter.on_error
             def error(exc: Exception) -> None:
                 print(f'Error: {exc!r}')
+
 
             autoposter.start()
 

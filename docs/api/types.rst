@@ -5,10 +5,6 @@ Models API Reference
 .. automodule:: topgg.types
     :members:
 
-.. autoclass:: topgg.types.DataDict
-    :members:
-    :inherited-members:
-
 .. autoclass:: topgg.types.BotData
     :members:
     :show-inheritance:

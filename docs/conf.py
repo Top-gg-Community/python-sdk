@@ -23,7 +23,7 @@ import sys
 
 import alabaster
 
-sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath('../'))
 from topgg import __version__ as version
 
 # import re
@@ -39,44 +39,44 @@ from topgg import __version__ as version
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.autosectionlabel",
-    "sphinx.ext.extlinks",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.napoleon",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.extlinks',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',
 ]
 
-autodoc_member_order = "groupwise"
+autodoc_member_order = 'groupwise'
 
 extlinks = {
-    "issue": ("https://github.com/top-gg/python-sdk/issues/%s", "GH-"),
+    'issue': ('https://github.com/top-gg/python-sdk/issues/%s', 'GH-'),
 }
 
 intersphinx_mapping = {
-    "py": ("https://docs.python.org/3", None),
-    "discord": ("https://discordpy.readthedocs.io/en/latest/", None),
-    "aiohttp": ("https://docs.aiohttp.org/en/stable/", None),
+    'py': ('https://docs.python.org/3', None),
+    'discord': ('https://discordpy.readthedocs.io/en/latest/', None),
+    'aiohttp': ('https://docs.aiohttp.org/en/stable/', None),
 }
 
-releases_github_path = "top-gg/python-sdk"
+releases_github_path = 'top-gg/python-sdk'
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = "index"
+master_doc = 'index'
 
 # General information about the project.
-project = "topggpy"
-copyright = "2021, Assanali Mukhanov"
-author = "Assanali Mukhanov"
+project = 'topggpy'
+copyright = '2021, Assanali Mukhanov'
+author = 'Assanali Mukhanov'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -99,25 +99,25 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build"]
+exclude_patterns = ['_build']
 
 # -- Options for HTML output ----------------------------------------------
 
-html_theme_options = {"navigation_depth": 2}
+html_theme_options = {'navigation_depth': 2}
 html_theme_path = [alabaster.get_path()]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "insegel"
+html_theme = 'insegel'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "topgg.svg"
+html_logo = 'topgg.svg'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = ['_static']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -183,7 +183,7 @@ html_show_copyright = True
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "topggpydoc"
+htmlhelp_basename = 'topggpydoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -206,14 +206,14 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "topggpy.tex", "topggpy Documentation", "Assanali Mukhanov", "manual"),
+    (master_doc, 'topggpy.tex', 'topggpy Documentation', 'Assanali Mukhanov', 'manual'),
 ]
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "topggpy", "topggpy Documentation", [author], 1)]
+man_pages = [(master_doc, 'topggpy', 'topggpy Documentation', [author], 1)]
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -223,11 +223,11 @@ man_pages = [(master_doc, "topggpy", "topggpy Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "topggpy",
-        "topggpy Documentation",
+        'topggpy',
+        'topggpy Documentation',
         author,
-        "topggpy",
-        "One line description of project.",
-        "Miscellaneous",
+        'topggpy',
+        'One line description of project.',
+        'Miscellaneous',
     ),
 ]

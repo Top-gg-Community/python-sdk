@@ -30,7 +30,7 @@ from .callbacks import autopost, webhook
 
 client = discord.Client()
 webhook_manager = topgg.WebhookManager().set_data(client).endpoint(webhook.endpoint)
-dblclient = topgg.DBLClient("TOPGG_TOKEN").set_data(client)
+dblclient = topgg.DBLClient('TOPGG_TOKEN').set_data(client)
 autoposter: topgg.AutoPoster = (
     dblclient.autopost()
     .on_success(autopost.on_autopost_success)
@@ -58,4 +58,4 @@ async def on_ready():
 # TODO: find a way to figure out when the bot shuts down
 # so we can close the client and the webhook manager
 
-client.run("TOKEN")
+client.run('TOKEN')
