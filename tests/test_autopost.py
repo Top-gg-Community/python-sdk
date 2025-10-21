@@ -27,18 +27,18 @@ def autopost(session: ClientSession) -> AutoPoster:
 async def test_AutoPoster_breaks_autopost_loop_on_401(
     mocker: MockerFixture, session: ClientSession
 ) -> None:
-    response = mock.Mock("reason, status")
-    response.reason = "Unauthorized"
-    response.status = 401
-
     mocker.patch(
-        "topgg.DBLClient.post_guild_count", side_effect=HTTPException(response, {})
+        "topgg.DBLClient.post_guild_count",
+        side_effect=HTTPException("Unauthorized", 401),
     )
 
     callback = mock.Mock()
     autopost = DBLClient(MOCK_TOKEN, session=session).autopost().stats(callback)
+
     assert isinstance(autopost, AutoPoster)
     assert not isinstance(autopost.stats()(callback), AutoPoster)
+
+    autopost._interval = 1
 
     with pytest.raises(HTTPException):
         await autopost.start()
@@ -50,7 +50,7 @@ async def test_AutoPoster_breaks_autopost_loop_on_401(
 @pytest.mark.asyncio
 async def test_AutoPoster_raises_missing_stats(autopost: AutoPoster) -> None:
     with pytest.raises(
-        TopGGException, match="you must provide a callback that returns the stats."
+        TopGGException, match="You must provide a callback that returns the stats."
     ):
         await autopost.start()
 
@@ -58,13 +58,13 @@ async def test_AutoPoster_raises_missing_stats(autopost: AutoPoster) -> None:
 @pytest.mark.asyncio
 async def test_AutoPoster_raises_already_running(autopost: AutoPoster) -> None:
     autopost.stats(mock.Mock()).start()
-    with pytest.raises(TopGGException, match="the autopost is already running."):
+    with pytest.raises(TopGGException, match="The autoposter is already running."):
         await autopost.start()
 
 
 @pytest.mark.asyncio
 async def test_AutoPoster_interval_too_short(autopost: AutoPoster) -> None:
-    with pytest.raises(ValueError, match="interval must be greated than 900 seconds."):
+    with pytest.raises(ValueError, match="interval must be greater than 900 seconds."):
         autopost.set_interval(50)
 
 
@@ -73,10 +73,7 @@ async def test_AutoPoster_error_callback(
     mocker: MockerFixture, autopost: AutoPoster
 ) -> None:
     error_callback = mock.Mock()
-    response = mock.Mock("reason, status")
-    response.reason = "Internal Server Error"
-    response.status = 500
-    side_effect = HTTPException(response, {})
+    side_effect = HTTPException("Internal Server Error", 500)
 
     mocker.patch("topgg.DBLClient.post_guild_count", side_effect=side_effect)
     task = autopost.on_error(error_callback).stats(mock.Mock()).start()
