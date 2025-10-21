@@ -23,28 +23,28 @@ def autopost(session: ClientSession) -> AutoPoster:
     return AutoPoster(DBLClient(MOCK_TOKEN, session=session))
 
 
-# @pytest.mark.asyncio
-# async def test_AutoPoster_breaks_autopost_loop_on_401(
-#     mocker: MockerFixture, session: ClientSession
-# ) -> None:
-#     response = mock.Mock("reason, status")
-#     response.reason = "Unauthorized"
-#     response.status = 401
-#
-#     mocker.patch(
-#         "topgg.DBLClient.post_guild_count", side_effect=HTTPException(response, {})
-#     )
-#
-#     callback = mock.Mock()
-#     autopost = DBLClient(MOCK_TOKEN, session=session).autopost().stats(callback)
-#     assert isinstance(autopost, AutoPoster)
-#     assert not isinstance(autopost.stats()(callback), AutoPoster)
-#
-#     with pytest.raises(HTTPException):
-#         await autopost.start()
-#
-#     callback.assert_called_once()
-#     assert not autopost.is_running
+@pytest.mark.asyncio
+async def test_AutoPoster_breaks_autopost_loop_on_401(
+    mocker: MockerFixture, session: ClientSession
+) -> None:
+    mocker.patch(
+        'topgg.DBLClient.post_guild_count',
+        side_effect=HTTPException('Unauthorized', 401),
+    )
+
+    callback = mock.Mock()
+    autopost = DBLClient(MOCK_TOKEN, session=session).autopost().stats(callback)
+
+    assert isinstance(autopost, AutoPoster)
+    assert not isinstance(autopost.stats()(callback), AutoPoster)
+
+    autopost._interval = 1
+
+    with pytest.raises(HTTPException):
+        await autopost.start()
+
+    callback.assert_called_once()
+    assert not autopost.is_running
 
 
 @pytest.mark.asyncio
@@ -73,10 +73,7 @@ async def test_AutoPoster_error_callback(
     mocker: MockerFixture, autopost: AutoPoster
 ) -> None:
     error_callback = mock.Mock()
-    response = mock.Mock('reason, status')
-    response.reason = 'Internal Server Error'
-    response.status = 500
-    side_effect = HTTPException(response, {})
+    side_effect = HTTPException('Internal Server Error', 500)
 
     mocker.patch('topgg.DBLClient.post_guild_count', side_effect=side_effect)
     task = autopost.on_error(error_callback).stats(mock.Mock()).start()
