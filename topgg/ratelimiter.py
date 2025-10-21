@@ -24,20 +24,19 @@ SOFTWARE.
 """
 
 from collections.abc import Iterable
-from types import TracebackType
 from collections import deque
 from time import time
 import asyncio
+import typing
 
-__all__ = [
-    "Ratelimiter",
-    "Ratelimiters",
-]
+if typing.TYPE_CHECKING:
+    from types import TracebackType
+
 
 class Ratelimiter:
     """Handles ratelimits for a specific endpoint."""
 
-    __slots__: tuple[str, ...] = ('__lock', '__max_calls', '__period', '__calls')
+    __slots__: tuple[str, ...] = ("__lock", "__max_calls", "__period", "__calls")
 
     def __init__(
         self,
@@ -49,7 +48,7 @@ class Ratelimiter:
         self.__max_calls = max_calls
         self.__lock = asyncio.Lock()
 
-    async def __aenter__(self) -> 'Ratelimiter':
+    async def __aenter__(self) -> "Ratelimiter":
         """Delays the request to this endpoint if it could lead to a ratelimit."""
 
         async with self.__lock:
@@ -65,7 +64,7 @@ class Ratelimiter:
         self,
         _exc_type: type[BaseException],
         _exc_val: BaseException,
-        _exc_tb: TracebackType,
+        _exc_tb: "TracebackType",
     ) -> None:
         """Stores the previous request's timestamp."""
 
@@ -85,12 +84,12 @@ class Ratelimiter:
 class Ratelimiters:
     """Handles ratelimits for multiple endpoints."""
 
-    __slots__: tuple[str, ...] = ('__ratelimiters',)
+    __slots__: tuple[str, ...] = ("__ratelimiters",)
 
     def __init__(self, ratelimiters: Iterable[Ratelimiter]):
         self.__ratelimiters = ratelimiters
 
-    async def __aenter__(self) -> 'Ratelimiters':
+    async def __aenter__(self) -> "Ratelimiters":
         """Delays the request to this endpoint if it could lead to a ratelimit."""
 
         for ratelimiter in self.__ratelimiters:
@@ -102,7 +101,7 @@ class Ratelimiters:
         self,
         exc_type: type[BaseException],
         exc_val: BaseException,
-        exc_tb: TracebackType,
+        exc_tb: "TracebackType",
     ) -> None:
         """Stores the previous request's timestamp."""
 

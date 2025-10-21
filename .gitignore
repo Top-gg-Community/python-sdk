@@ -1,12 +1,7 @@
-dblpy.egg-info/
-topggpy.egg-info/
-topgg/__pycache__/
+**/__pycache__/
+.ruff_cache/
+.vscode/
 build/
+docs/_build/
 dist/
-/docs/_build
-/docs/_templates
-.vscode
-/.idea/
-__pycache__
-.coverage
-.pytest_cache/
+topggpy.egg-info/
