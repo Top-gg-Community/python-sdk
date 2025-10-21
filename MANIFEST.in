@@ -1,3 +1,18 @@
-include LICENSE
-include requirements.txt
-include README.rst
+prune .github
+prune .pytest_cache
+prune .ruff_cache
+prune build
+prune docs
+prune examples
+prune scripts
+prune tests
+
+exclude .coverage
+exclude .gitignore
+exclude .readthedocs.yml
+exclude ISSUE_TEMPLATE.md
+exclude mypy.ini
+exclude PULL_REQUEST_TEMPLATE.md
+exclude pytest.ini
+exclude ruff.toml
+exclude LICENSE

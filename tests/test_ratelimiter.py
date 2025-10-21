@@ -1,26 +1,26 @@
 import pytest
 
-from topgg.ratelimiter import AsyncRateLimiter
+from topgg.ratelimiter import Ratelimiter
 
 n = period = 10
 
 
 @pytest.fixture
-def limiter() -> AsyncRateLimiter:
-    return AsyncRateLimiter(max_calls=n, period=period)
+def limiter() -> Ratelimiter:
+    return Ratelimiter(max_calls=n, period=period)
 
 
 @pytest.mark.asyncio
-async def test_AsyncRateLimiter_calls(limiter: AsyncRateLimiter) -> None:
+async def test_AsyncRateLimiter_calls(limiter: Ratelimiter) -> None:
     for _ in range(n):
         async with limiter:
             pass
 
-    assert len(limiter.calls) == limiter.max_calls == n
+    assert len(limiter._Ratelimiter__calls) == limiter._Ratelimiter__max_calls == n
 
 
 @pytest.mark.asyncio
-async def test_AsyncRateLimiter_timespan_property(limiter: AsyncRateLimiter) -> None:
+async def test_AsyncRateLimiter_timespan_property(limiter: Ratelimiter) -> None:
     for _ in range(n):
         async with limiter:
             pass
