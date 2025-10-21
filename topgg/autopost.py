@@ -37,7 +37,7 @@ if t.TYPE_CHECKING:
 
 
 CallbackT = t.Callable[..., t.Any]
-StatsCallbackT = t.Callable[[], 'StatsWrapper']
+StatsCallbackT = t.Callable[[], "StatsWrapper"]
 
 
 class AutoPoster:
@@ -51,16 +51,16 @@ class AutoPoster:
     """
 
     __slots__: tuple[str, ...] = (
-        '_error',
-        '_success',
-        '_interval',
-        '_task',
-        'client',
-        '_stats',
-        '_stopping',
+        "_error",
+        "_success",
+        "_interval",
+        "_task",
+        "client",
+        "_stats",
+        "_stopping",
     )
 
-    def __init__(self, client: 'DBLClient') -> None:
+    def __init__(self, client: "DBLClient") -> None:
         super().__init__()
 
         self.client = client
@@ -69,13 +69,13 @@ class AutoPoster:
         self._refresh_state()
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} is_running={self.is_running}>'
+        return f"<{__class__.__name__} is_running={self.is_running}>"
 
     def __bool__(self) -> bool:
         return self.is_running
 
     def _default_error_handler(self, exception: Exception) -> None:
-        print('Ignoring exception in auto post loop:', file=sys.stderr)
+        print("Ignoring exception in auto post loop:", file=sys.stderr)
 
         traceback.print_exception(
             type(exception), exception, exception.__traceback__, file=sys.stderr
@@ -85,9 +85,9 @@ class AutoPoster:
     def on_success(self, callback: None) -> t.Callable[[CallbackT], CallbackT]: ...
 
     @t.overload
-    def on_success(self, callback: CallbackT) -> 'AutoPoster': ...
+    def on_success(self, callback: CallbackT) -> "AutoPoster": ...
 
-    def on_success(self, callback: t.Any = None) -> t.Union[t.Any, 'AutoPoster']:
+    def on_success(self, callback: t.Any = None) -> t.Union[t.Any, "AutoPoster"]:
         """
         Registers an autopost success callback. The callback can be either sync or async.
 
@@ -97,7 +97,7 @@ class AutoPoster:
         .. code-block:: python
 
             # The following are valid.
-            autoposter = client.autopost().on_success(lambda: print('Success!'))
+            autoposter = client.autopost().on_success(lambda: print("Success!"))
 
 
             # Used as decorator, the decorated function will become the AutoPoster object.
@@ -132,9 +132,9 @@ class AutoPoster:
     def on_error(self, callback: None) -> t.Callable[[CallbackT], CallbackT]: ...
 
     @t.overload
-    def on_error(self, callback: CallbackT) -> 'AutoPoster': ...
+    def on_error(self, callback: CallbackT) -> "AutoPoster": ...
 
-    def on_error(self, callback: t.Any = None) -> t.Union[t.Any, 'AutoPoster']:
+    def on_error(self, callback: t.Any = None) -> t.Union[t.Any, "AutoPoster"]:
         """
         Registers an autopost error callback. The callback can be either sync or async.
 
@@ -146,7 +146,7 @@ class AutoPoster:
         .. code-block:: python
 
             # The following are valid.
-            autoposter = client.autopost().on_error(lambda err: print(f'Error! {err!r}'))
+            autoposter = client.autopost().on_error(lambda err: print(f"Error! {err!r}"))
 
 
             # Used as decorator, the decorated function will become the AutoPoster object.
@@ -180,9 +180,9 @@ class AutoPoster:
     def stats(self, callback: None) -> t.Callable[[StatsCallbackT], StatsCallbackT]: ...
 
     @t.overload
-    def stats(self, callback: StatsCallbackT) -> 'AutoPoster': ...
+    def stats(self, callback: StatsCallbackT) -> "AutoPoster": ...
 
-    def stats(self, callback: t.Any = None) -> t.Union[t.Any, 'AutoPoster']:
+    def stats(self, callback: t.Any = None) -> t.Union[t.Any, "AutoPoster"]:
         """
         Registers a function that returns an instance of :class:`.StatsWrapper`. The callback can be either sync or async.
 
@@ -237,7 +237,7 @@ class AutoPoster:
 
         self.set_interval(seconds)
 
-    def set_interval(self, seconds: t.Union[float, datetime.timedelta]) -> 'AutoPoster':
+    def set_interval(self, seconds: t.Union[float, datetime.timedelta]) -> "AutoPoster":
         """
         Sets the interval between posting stats.
 
@@ -254,7 +254,7 @@ class AutoPoster:
             seconds = seconds.total_seconds()
 
         if seconds < 900:
-            raise ValueError('interval must be greater than 900 seconds.')
+            raise ValueError("interval must be greater than 900 seconds.")
 
         self._interval = seconds
 
@@ -270,7 +270,7 @@ class AutoPoster:
         self._task = None
         self._stopping = False
 
-    def _fut_done_callback(self, future: 'asyncio.Future') -> None:
+    def _fut_done_callback(self, future: "asyncio.Future") -> None:
         self._refresh_state()
 
         if future.cancelled():
@@ -291,7 +291,7 @@ class AutoPoster:
                     if isinstance(err, errors.HTTPException) and err.code == 401:
                         raise err from None
                 else:
-                    if on_success := getattr(self, '_success', None):
+                    if on_success := getattr(self, "_success", None):
                         await self.client._invoke_callback(on_success)
 
                 if self._stopping:
@@ -301,7 +301,7 @@ class AutoPoster:
         finally:
             self._refresh_state()
 
-    def start(self) -> 'asyncio.Task[None]':
+    def start(self) -> "asyncio.Task[None]":
         """
         Starts the autoposter loop.
 
@@ -313,12 +313,12 @@ class AutoPoster:
         :rtype: :class:`~asyncio.Task`.
         """
 
-        if not hasattr(self, '_stats'):
+        if not hasattr(self, "_stats"):
             raise errors.TopGGException(
-                'You must provide a callback that returns the stats.'
+                "You must provide a callback that returns the stats."
             )
         elif self.is_running:
-            raise errors.TopGGException('The autoposter is already running.')
+            raise errors.TopGGException("The autoposter is already running.")
 
         self._task = task = asyncio.ensure_future(self._internal_loop())
         task.add_done_callback(self._fut_done_callback)

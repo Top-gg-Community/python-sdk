@@ -28,9 +28,9 @@ import topgg
 
 from .callbacks import autopost, webhook
 
-app = hikari.GatewayBot('TOKEN')
+app = hikari.GatewayBot("TOKEN")
 webhook_manager = topgg.WebhookManager().set_data(app).endpoint(webhook.endpoint)
-dblclient = topgg.DBLClient('TOPGG_TOKEN').set_data(app)
+dblclient = topgg.DBLClient("TOPGG_TOKEN").set_data(app)
 autoposter: topgg.AutoPoster = (
     dblclient.autopost()
     .on_success(autopost.on_autopost_success)

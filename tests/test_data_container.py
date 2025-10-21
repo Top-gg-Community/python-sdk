@@ -7,9 +7,9 @@ from topgg.errors import TopGGException
 @pytest.fixture
 def data_container() -> DataContainerMixin:
     dc = DataContainerMixin()
-    dc.set_data('TEXT')
+    dc.set_data("TEXT")
     dc.set_data(200)
-    dc.set_data({'a': 'b'})
+    dc.set_data({"a": "b"})
     return dc
 
 
@@ -40,9 +40,9 @@ def test_data_container_raises_data_already_exists(data_container: DataContainer
     with pytest.raises(
         TopGGException,
         match="<class 'str'> already exists. If you wish to override it, "
-        'pass True into the override parameter.',
+        "pass True into the override parameter.",
     ):
-        data_container.set_data('TEST')
+        data_container.set_data("TEST")
 
 
 @pytest.mark.asyncio
@@ -52,6 +52,6 @@ async def test_data_container_raises_key_error(data_container: DataContainerMixi
 
 
 def test_data_container_get_data(data_container: DataContainerMixin):
-    assert data_container.get_data(str) == 'TEXT'
+    assert data_container.get_data(str) == "TEXT"
     assert data_container.get_data(float) is None
     assert isinstance(data_container.get_data(set, set()), set)

@@ -47,7 +47,7 @@ class ClientStateException(ClientException):
 class HTTPException(TopGGException):
     """HTTP request failure. Extends :class:`.TopGGException`."""
 
-    __slots__: tuple[str, ...] = ('message', 'code')
+    __slots__: tuple[str, ...] = ("message", "code")
 
     message: Optional[str]
     """The message returned from the API."""
@@ -59,27 +59,27 @@ class HTTPException(TopGGException):
         self.message = message
         self.code = code
 
-        super().__init__(f'Got {code}: {message!r}')
+        super().__init__(f"Got {code}: {message!r}")
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} message={self.message!r} code={self.code}>'
+        return f"<{__class__.__name__} message={self.message!r} code={self.code}>"
 
 
 class Ratelimited(HTTPException):
     """Ratelimited from sending more requests. Extends :class:`.HTTPException`."""
 
-    __slots__: tuple[str, ...] = ('retry_after',)
+    __slots__: tuple[str, ...] = ("retry_after",)
 
     retry_after: float
     """How long the client should wait in seconds before it could send requests again without receiving a 429."""
 
     def __init__(self, retry_after: float):
         super().__init__(
-            f'Blocked from sending more requests, try again in {retry_after} seconds.',
+            f"Blocked from sending more requests, try again in {retry_after} seconds.",
             429,
         )
 
         self.retry_after = retry_after
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} retry_after={self.retry_after}>'
+        return f"<{__class__.__name__} retry_after={self.retry_after}>"

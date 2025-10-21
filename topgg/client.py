@@ -40,7 +40,7 @@ from .data import DataContainerMixin
 from .version import VERSION
 
 
-BASE_URL = 'https://top.gg/api'
+BASE_URL = "https://top.gg/api"
 MAXIMUM_DELAY_THRESHOLD = 5.0
 
 
@@ -76,14 +76,14 @@ class DBLClient(DataContainerMixin):
     """This project's ID."""
 
     __slots__: tuple[str, ...] = (
-        '__own_session',
-        '__session',
-        '__token',
-        '__ratelimiter',
-        '__ratelimiters',
-        '__current_ratelimit',
-        '_autopost',
-        'id',
+        "__own_session",
+        "__session",
+        "__token",
+        "__ratelimiter",
+        "__ratelimiters",
+        "__current_ratelimit",
+        "_autopost",
+        "id",
     )
 
     def __init__(
@@ -92,16 +92,16 @@ class DBLClient(DataContainerMixin):
         super().__init__()
 
         if not isinstance(token, str) or not token:
-            raise TypeError('An API token is required to use this API.')
+            raise TypeError("An API token is required to use this API.")
 
-        if kwargs.pop('default_bot_id', None):
+        if kwargs.pop("default_bot_id", None):
             warnings.warn(
-                'The default bot ID is now derived from the Top.gg API token itself',
+                "The default bot ID is now derived from the Top.gg API token itself",
                 DeprecationWarning,
             )
 
         for key in kwargs.keys():
-            warnings.warn(f'Ignored keyword argument: {key}', DeprecationWarning)
+            warnings.warn(f"Ignored keyword argument: {key}", DeprecationWarning)
 
         self._autopost = None
         self.__own_session = session is None
@@ -111,15 +111,15 @@ class DBLClient(DataContainerMixin):
         self.__token = token
 
         try:
-            encoded_json = token.split('.')[1]
-            encoded_json += '=' * (4 - (len(encoded_json) % 4))
+            encoded_json = token.split(".")[1]
+            encoded_json += "=" * (4 - (len(encoded_json) % 4))
             encoded_json = json.loads(b64decode(encoded_json))
 
-            self.id = int(encoded_json['id'])
+            self.id = int(encoded_json["id"])
         except (IndexError, ValueError, binascii.Error, json.decoder.JSONDecodeError):
-            raise ValueError('Got a malformed API token.') from None
+            raise ValueError("Got a malformed API token.") from None
 
-        endpoint_ratelimits = namedtuple('EndpointRatelimits', 'global_ bot')
+        endpoint_ratelimits = namedtuple("EndpointRatelimits", "global_ bot")
 
         self.__ratelimiter = endpoint_ratelimits(
             global_=Ratelimiter(99, 1), bot=Ratelimiter(59, 60)
@@ -128,7 +128,7 @@ class DBLClient(DataContainerMixin):
         self.__current_ratelimit = None
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} {self.__session!r}>'
+        return f"<{__class__.__name__} {self.__session!r}>"
 
     def __int__(self) -> int:
         return self.id
@@ -147,7 +147,7 @@ class DBLClient(DataContainerMixin):
         body: Optional[dict] = None,
     ) -> dict:
         if self.is_closed:
-            raise errors.ClientStateException('Client session is already closed.')
+            raise errors.ClientStateException("Client session is already closed.")
 
         if self.__current_ratelimit is not None:
             current_time = time()
@@ -159,17 +159,17 @@ class DBLClient(DataContainerMixin):
 
         ratelimiter = (
             self.__ratelimiters
-            if path.startswith('/bots')
+            if path.startswith("/bots")
             else self.__ratelimiter.global_
         )
 
         kwargs = {}
 
         if body:
-            kwargs['json'] = body
+            kwargs["json"] = body
 
         if params:
-            kwargs['params'] = params
+            kwargs["params"] = params
 
         status = None
         retry_after = None
@@ -181,16 +181,16 @@ class DBLClient(DataContainerMixin):
                     method,
                     BASE_URL + path,
                     headers={
-                        'Authorization': f'Bearer {self.__token}',
-                        'Content-Type': 'application/json',
-                        'User-Agent': f'topggpy (https://github.com/top-gg-community/python-sdk {VERSION}) Python/',
+                        "Authorization": f"Bearer {self.__token}",
+                        "Content-Type": "application/json",
+                        "User-Agent": f"topggpy (https://github.com/top-gg-community/python-sdk {VERSION}) Python/",
                     },
                     **kwargs,
                 ) as resp:
                     status = resp.status
-                    retry_after = float(resp.headers.get('Retry-After', 0))
+                    retry_after = float(resp.headers.get("Retry-After", 0))
 
-                    if 'json' in resp.headers['Content-Type']:
+                    if "json" in resp.headers["Content-Type"]:
                         try:
                             output = await resp.json()
                         except json.decoder.JSONDecodeError:
@@ -211,7 +211,7 @@ class DBLClient(DataContainerMixin):
                     return await self.__request(method, path)
 
                 raise errors.HTTPException(
-                    output and output.get('message', output.get('detail')), status
+                    output and output.get("message", output.get("detail")), status
                 ) from None
 
     async def get_bot_info(self, id: Optional[int]) -> types.BotData:
@@ -235,7 +235,7 @@ class DBLClient(DataContainerMixin):
         :rtype: :class:`.BotData`
         """
 
-        return types.BotData(await self.__request('GET', f'/bots/{id or self.id}'))
+        return types.BotData(await self.__request("GET", f"/bots/{id or self.id}"))
 
     async def get_bots(
         self,
@@ -279,34 +279,34 @@ class DBLClient(DataContainerMixin):
         params = {}
 
         if limit is not None:
-            params['limit'] = max(min(limit, 500), 1)
+            params["limit"] = max(min(limit, 500), 1)
 
         if offset is not None:
-            params['offset'] = max(min(offset, 499), 0)
+            params["offset"] = max(min(offset, 499), 0)
 
         if sort is not None:
             if not isinstance(sort, types.SortBy):
                 if isinstance(sort, str) and sort in types.SortBy:
                     warnings.warn(
-                        'The sort argument now expects a SortBy enum, not a str',
+                        "The sort argument now expects a SortBy enum, not a str",
                         DeprecationWarning,
                     )
 
-                    params['sort'] = sort
+                    params["sort"] = sort
                 else:
                     raise TypeError(
-                        f'Expected sort to be a SortBy enum, got {sort.__class__.__name__}.'
+                        f"Expected sort to be a SortBy enum, got {sort.__class__.__name__}."
                     )
             else:
-                params['sort'] = sort.value
+                params["sort"] = sort.value
 
         for arg in args:
-            warnings.warn(f'Ignored extra argument: {arg!r}', DeprecationWarning)
+            warnings.warn(f"Ignored extra argument: {arg!r}", DeprecationWarning)
 
         for key in kwargs.keys():
-            warnings.warn(f'Ignored keyword argument: {key}', DeprecationWarning)
+            warnings.warn(f"Ignored keyword argument: {key}", DeprecationWarning)
 
-        return types.BotsData(await self.__request('GET', '/bots', params=params))
+        return types.BotsData(await self.__request("GET", "/bots", params=params))
 
     async def get_guild_count(self) -> Optional[types.BotStatsData]:
         """
@@ -327,7 +327,7 @@ class DBLClient(DataContainerMixin):
         :rtype: Optional[:py:class:`.BotStatsData`]
         """
 
-        stats = await self.__request('GET', '/bots/stats')
+        stats = await self.__request("GET", "/bots/stats")
 
         return stats and types.BotStatsData(stats)
 
@@ -367,15 +367,15 @@ class DBLClient(DataContainerMixin):
         """
 
         for key in kwargs.keys():
-            warnings.warn(f'Ignored keyword argument: {key}', DeprecationWarning)
+            warnings.warn(f"Ignored keyword argument: {key}", DeprecationWarning)
 
         if isinstance(stats, types.StatsWrapper):
             guild_count = stats.server_count
 
         if not guild_count or guild_count <= 0:
-            raise ValueError(f'Got an invalid server count. Got {guild_count!r}.')
+            raise ValueError(f"Got an invalid server count. Got {guild_count!r}.")
 
-        await self.__request('POST', '/bots/stats', body={'server_count': guild_count})
+        await self.__request("POST", "/bots/stats", body={"server_count": guild_count})
 
     async def get_weekend_status(self) -> bool:
         """
@@ -395,9 +395,9 @@ class DBLClient(DataContainerMixin):
         :rtype: :py:class:`bool`
         """
 
-        response = await self.__request('GET', '/weekend')
+        response = await self.__request("GET", "/weekend")
 
-        return response['is_weekend']
+        return response["is_weekend"]
 
     async def get_bot_votes(self, page: int = 1) -> list[types.BriefUserData]:
         """
@@ -430,7 +430,7 @@ class DBLClient(DataContainerMixin):
         return [
             types.BriefUserData(data)
             for data in await self.__request(
-                'GET', f'/bots/{self.id}/votes', params={'page': max(page, 1)}
+                "GET", f"/bots/{self.id}/votes", params={"page": max(page, 1)}
             )
         ]
 
@@ -443,9 +443,9 @@ class DBLClient(DataContainerMixin):
 
         """
 
-        warnings.warn('get_user_info() is no longer supported', DeprecationWarning)
+        warnings.warn("get_user_info() is no longer supported", DeprecationWarning)
 
-        raise errors.HTTPException('User not found', 404)
+        raise errors.HTTPException("User not found", 404)
 
     async def get_user_vote(self, id: int) -> bool:
         """
@@ -468,9 +468,9 @@ class DBLClient(DataContainerMixin):
         :rtype: :py:class:`bool`
         """
 
-        response = await self.__request('GET', '/bots/check', params={'userId': id})
+        response = await self.__request("GET", "/bots/check", params={"userId": id})
 
-        return bool(response['voted'])
+        return bool(response["voted"])
 
     def autopost(self) -> AutoPoster:
         """
@@ -490,12 +490,12 @@ class DBLClient(DataContainerMixin):
 
             @autoposter.on_success
             def success() -> None:
-                print('Successfully posted statistics to the Top.gg API!')
+                print("Successfully posted statistics to the Top.gg API!")
 
 
             @autoposter.on_error
             def error(exc: Exception) -> None:
-                print(f'Error: {exc!r}')
+                print(f"Error: {exc!r}")
 
 
             autoposter.start()
@@ -525,7 +525,7 @@ class DBLClient(DataContainerMixin):
         if self.__own_session and not self.is_closed:
             await self.__session.close()
 
-    async def __aenter__(self) -> 'DBLClient':
+    async def __aenter__(self) -> "DBLClient":
         return self
 
     async def __aexit__(self, *_, **__) -> None:

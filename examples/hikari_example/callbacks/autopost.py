@@ -30,7 +30,7 @@ import topgg
 
 # from ..events.autopost import AutoPostErrorEvent, AutoPostSuccessEvent
 
-_LOGGER = logging.getLogger('callbacks.autopost')
+_LOGGER = logging.getLogger("callbacks.autopost")
 
 
 # these functions can be async too!
@@ -39,7 +39,7 @@ def on_autopost_success(
     # app: hikari.GatewayBot = topgg.data(hikari.GatewayBot),
 ):
     # will be called whenever it successfully posting
-    _LOGGER.info('Successfully posted!')
+    _LOGGER.info("Successfully posted!")
 
     # do whatever with app
     # you can dispatch your own event for more callbacks
@@ -52,7 +52,7 @@ def on_autopost_error(
     # app: hikari.GatewayBot = topgg.data(hikari.GatewayBot),
 ):
     # will be called whenever it failed posting
-    _LOGGER.error('Failed to post...', exc_info=exception)
+    _LOGGER.error("Failed to post...", exc_info=exception)
 
     # do whatever with app
     # you can dispatch your own event for more callbacks

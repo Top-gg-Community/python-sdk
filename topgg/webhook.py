@@ -34,8 +34,8 @@ from .types import BotVoteData, GuildVoteData
 if t.TYPE_CHECKING:
     from aiohttp.web import Request, StreamResponse
 
-T = t.TypeVar('T', bound='WebhookEndpoint')
-_HandlerT = t.Callable[['Request'], t.Awaitable['StreamResponse']]
+T = t.TypeVar("T", bound="WebhookEndpoint")
+_HandlerT = t.Callable[["Request"], t.Awaitable["StreamResponse"]]
 
 
 class WebhookType(enum.Enum):
@@ -53,7 +53,7 @@ class WebhookType(enum.Enum):
 class WebhookManager(DataContainerMixin):
     """A Top.gg webhook manager."""
 
-    __slots__: tuple[str, ...] = ('__app', '_webserver', '_is_running')
+    __slots__: tuple[str, ...] = ("__app", "_webserver", "_is_running")
 
     def __init__(self) -> None:
         super().__init__()
@@ -62,17 +62,17 @@ class WebhookManager(DataContainerMixin):
         self._is_running = False
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} is_running={self.is_running}>'
+        return f"<{__class__.__name__} is_running={self.is_running}>"
 
     @t.overload
-    def endpoint(self, endpoint_: None = None) -> 'BoundWebhookEndpoint': ...
+    def endpoint(self, endpoint_: None = None) -> "BoundWebhookEndpoint": ...
 
     @t.overload
-    def endpoint(self, endpoint_: 'WebhookEndpoint') -> 'WebhookManager': ...
+    def endpoint(self, endpoint_: "WebhookEndpoint") -> "WebhookManager": ...
 
     def endpoint(
-        self, endpoint_: t.Optional['WebhookEndpoint'] = None
-    ) -> t.Union['WebhookManager', 'BoundWebhookEndpoint']:
+        self, endpoint_: t.Optional["WebhookEndpoint"] = None
+    ) -> t.Union["WebhookManager", "BoundWebhookEndpoint"]:
         """
         A helper method that returns a :class:`.WebhookEndpoint` object.
 
@@ -86,14 +86,14 @@ class WebhookManager(DataContainerMixin):
         """
 
         if endpoint_:
-            if not hasattr(endpoint_, '_callback'):
-                raise TopGGException('endpoint missing callback.')
+            if not hasattr(endpoint_, "_callback"):
+                raise TopGGException("endpoint missing callback.")
 
-            if not hasattr(endpoint_, '_type'):
-                raise TopGGException('endpoint missing type.')
+            if not hasattr(endpoint_, "_type"):
+                raise TopGGException("endpoint missing type.")
 
-            if not hasattr(endpoint_, '_route'):
-                raise TopGGException('endpoint missing route.')
+            if not hasattr(endpoint_, "_route"):
+                raise TopGGException("endpoint missing route.")
 
             self.app.router.add_post(
                 endpoint_._route,
@@ -117,7 +117,7 @@ class WebhookManager(DataContainerMixin):
         runner = web.AppRunner(self.__app)
         await runner.setup()
 
-        self._webserver = web.TCPSite(runner, '0.0.0.0', port)
+        self._webserver = web.TCPSite(runner, "0.0.0.0", port)
         await self._webserver.start()
 
         self._is_running = True
@@ -144,8 +144,8 @@ class WebhookManager(DataContainerMixin):
         self, type_: WebhookType, auth: str, callback: t.Callable[..., t.Any]
     ) -> _HandlerT:
         async def _handler(request: web.Request) -> web.Response:
-            if request.headers.get('Authorization', '') != auth:
-                return web.Response(status=401, text='Unauthorized')
+            if request.headers.get("Authorization", "") != auth:
+                return web.Response(status=401, text="Unauthorized")
 
             data = await request.json()
 
@@ -154,7 +154,7 @@ class WebhookManager(DataContainerMixin):
                 (BotVoteData if type_ is WebhookType.BOT else GuildVoteData)(data),
             )
 
-            return web.Response(status=204, text='')
+            return web.Response(status=204, text="")
 
         return _handler
 
@@ -165,16 +165,16 @@ CallbackT = t.Callable[..., t.Any]
 class WebhookEndpoint:
     """A helper class to setup a Top.gg webhook endpoint."""
 
-    __slots__: tuple[str, ...] = ('_callback', '_auth', '_route', '_type')
+    __slots__: tuple[str, ...] = ("_callback", "_auth", "_route", "_type")
 
     def __init__(self) -> None:
-        self._auth = ''
+        self._auth = ""
 
     def __call__(self, *args: t.Any, **kwargs: t.Any) -> t.Any:
         return self._callback(*args, **kwargs)
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} type={self._type!r} route={self._route!r}>'
+        return f"<{__class__.__name__} type={self._type!r} route={self._route!r}>"
 
     def type(self: T, type_: WebhookType) -> T:
         """
@@ -227,7 +227,7 @@ class WebhookEndpoint:
     @t.overload
     def callback(self: T, callback_: CallbackT) -> T: ...
 
-    def callback(self, callback_: t.Any = None) -> t.Union[t.Any, 'WebhookEndpoint']:
+    def callback(self, callback_: t.Any = None) -> t.Union[t.Any, "WebhookEndpoint"]:
         """
         Registers a vote callback that gets called whenever this endpoint receives POST requests. The callback can be either sync or async.
 
@@ -240,12 +240,12 @@ class WebhookEndpoint:
             endpoint = (
                 topgg.WebhookEndpoint()
                 .type(topgg.WebhookType.BOT)
-                .route('/dblwebhook')
-                .auth('youshallnotpass')
+                .route("/dblwebhook")
+                .auth("youshallnotpass")
             )
 
             # The following are valid.
-            endpoint.callback(lambda vote: print(f'Got a vote: {vote!r}'))
+            endpoint.callback(lambda vote: print(f"Got a vote: {vote!r}"))
 
 
             # Used as decorator, the decorated function will become the WebhookEndpoint object.
@@ -289,12 +289,12 @@ class BoundWebhookEndpoint(WebhookEndpoint):
             topgg.WebhookManager()
             .endpoint()
             .type(topgg.WebhookType.BOT)
-            .route('/dblwebhook')
-            .auth('youshallnotpass')
+            .route("/dblwebhook")
+            .auth("youshallnotpass")
         )
 
         # The following are valid.
-        endpoint.callback(lambda vote: print(f'Got a vote: {vote!r}'))
+        endpoint.callback(lambda vote: print(f"Got a vote: {vote!r}"))
 
 
         # Used as decorator, the decorated function will become the BoundWebhookEndpoint object.
@@ -315,7 +315,7 @@ class BoundWebhookEndpoint(WebhookEndpoint):
     :type manager: :class:`.WebhookManager`
     """
 
-    __slots__: tuple[str, ...] = ('manager',)
+    __slots__: tuple[str, ...] = ("manager",)
 
     def __init__(self, manager: WebhookManager):
         super().__init__()
@@ -323,7 +323,7 @@ class BoundWebhookEndpoint(WebhookEndpoint):
         self.manager = manager
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} manager={self.manager!r}>'
+        return f"<{__class__.__name__} manager={self.manager!r}>"
 
     def add_to_manager(self) -> WebhookManager:
         """
@@ -341,7 +341,7 @@ class BoundWebhookEndpoint(WebhookEndpoint):
 
 
 def endpoint(
-    route: str, type: WebhookType, auth: str = ''
+    route: str, type: WebhookType, auth: str = ""
 ) -> t.Callable[[t.Callable[..., t.Any]], WebhookEndpoint]:
     """
     A decorator factory for instantiating a :class:`.WebhookEndpoint`.
@@ -351,7 +351,7 @@ def endpoint(
         manager = topgg.WebhookManager()
 
 
-        @topgg.endpoint('/dblwebhook', WebhookType.BOT, 'youshallnotpass')
+        @topgg.endpoint("/dblwebhook", WebhookType.BOT, "youshallnotpass")
         async def on_vote(vote: topgg.BotVoteData): ...
 
 

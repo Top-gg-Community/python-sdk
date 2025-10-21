@@ -60,46 +60,46 @@ from .webhook import (
 )
 
 
-__title__ = 'topggpy'
-__author__ = 'null8626 & Top.gg'
-__credits__ = ('null8626', 'Top.gg')
-__maintainer__ = 'null8626'
-__status__ = 'Production'
-__license__ = 'MIT'
-__copyright__ = 'Copyright (c) 2021 Assanali Mukhanov & Top.gg; Copyright (c) 2024-2025 null8626 & Top.gg'
+__title__ = "topggpy"
+__author__ = "null8626 & Top.gg"
+__credits__ = ("null8626", "Top.gg")
+__maintainer__ = "null8626"
+__status__ = "Production"
+__license__ = "MIT"
+__copyright__ = "Copyright (c) 2021 Assanali Mukhanov & Top.gg; Copyright (c) 2024-2025 null8626 & Top.gg"
 __version__ = VERSION
 __all__ = (
-    'AutoPoster',
-    'BotData',
-    'BotsData',
-    'BotStatsData',
-    'BotVoteData',
-    'BoundWebhookEndpoint',
-    'BriefUserData',
-    'ClientException',
-    'ClientStateException',
-    'data',
-    'DataContainerMixin',
-    'DBLClient',
-    'endpoint',
-    'GuildVoteData',
-    'HTTPException',
-    'Ratelimited',
-    'RequestError',
-    'ServerVoteData',
-    'SocialData',
-    'SortBy',
-    'StatsWrapper',
-    'TopGGException',
-    'UserData',
-    'VERSION',
-    'VoteDataDict',
-    'VoteEvent',
-    'Voter',
-    'WebhookEndpoint',
-    'WebhookManager',
-    'WebhookType',
-    'WidgetOptions',
-    'WidgetProjectType',
-    'WidgetType',
+    "AutoPoster",
+    "BotData",
+    "BotsData",
+    "BotStatsData",
+    "BotVoteData",
+    "BoundWebhookEndpoint",
+    "BriefUserData",
+    "ClientException",
+    "ClientStateException",
+    "data",
+    "DataContainerMixin",
+    "DBLClient",
+    "endpoint",
+    "GuildVoteData",
+    "HTTPException",
+    "Ratelimited",
+    "RequestError",
+    "ServerVoteData",
+    "SocialData",
+    "SortBy",
+    "StatsWrapper",
+    "TopGGException",
+    "UserData",
+    "VERSION",
+    "VoteDataDict",
+    "VoteEvent",
+    "Voter",
+    "WebhookEndpoint",
+    "WebhookManager",
+    "WebhookType",
+    "WidgetOptions",
+    "WidgetProjectType",
+    "WidgetType",
 )

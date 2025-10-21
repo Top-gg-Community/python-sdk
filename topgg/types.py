@@ -32,7 +32,7 @@ from datetime import datetime
 from enum import Enum
 
 
-T = t.TypeVar('T')
+T = t.TypeVar("T")
 
 
 def truthy_only(value: t.Optional[T]) -> t.Optional[T]:
@@ -45,8 +45,8 @@ class WidgetProjectType(Enum):
 
     __slots__: tuple[str, ...] = ()
 
-    DISCORD_BOT = 'discord/bot'
-    DISCORD_SERVER = 'discord/server'
+    DISCORD_BOT = "discord/bot"
+    DISCORD_SERVER = "discord/server"
 
 
 class WidgetType(Enum):
@@ -54,16 +54,16 @@ class WidgetType(Enum):
 
     __slots__: tuple[str, ...] = ()
 
-    LARGE = 'large'
-    VOTES = 'votes'
-    OWNER = 'owner'
-    SOCIAL = 'social'
+    LARGE = "large"
+    VOTES = "votes"
+    OWNER = "owner"
+    SOCIAL = "social"
 
 
 class WidgetOptions:
     """Top.gg widget creation options."""
 
-    __slots__: tuple[str, ...] = ('id', 'project_type', 'type')
+    __slots__: tuple[str, ...] = ("id", "project_type", "type")
 
     id: int
     """This widget's project ID."""
@@ -87,44 +87,44 @@ class WidgetOptions:
         self.type = type
 
         for arg in args:
-            warnings.warn(f'Ignored extra argument: {arg!r}', DeprecationWarning)
+            warnings.warn(f"Ignored extra argument: {arg!r}", DeprecationWarning)
 
         for key in kwargs.keys():
-            warnings.warn(f'Ignored keyword argument: {key}', DeprecationWarning)
+            warnings.warn(f"Ignored keyword argument: {key}", DeprecationWarning)
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} id={self.id} project_type={self.project_type!r} type={self.type!r}>'
+        return f"<{__class__.__name__} id={self.id} project_type={self.project_type!r} type={self.type!r}>"
 
 
 class BotData:
     """A Discord bot listed on Top.gg."""
 
     __slots__: tuple[str, ...] = (
-        'id',
-        'topgg_id',
-        'username',
-        'discriminator',
-        'avatar',
-        'def_avatar',
-        'prefix',
-        'shortdesc',
-        'longdesc',
-        'tags',
-        'website',
-        'support',
-        'github',
-        'owners',
-        'guilds',
-        'invite',
-        'date',
-        'certified_bot',
-        'vanity',
-        'points',
-        'monthly_points',
-        'donatebotguildid',
-        'server_count',
-        'review_score',
-        'review_count',
+        "id",
+        "topgg_id",
+        "username",
+        "discriminator",
+        "avatar",
+        "def_avatar",
+        "prefix",
+        "shortdesc",
+        "longdesc",
+        "tags",
+        "website",
+        "support",
+        "github",
+        "owners",
+        "guilds",
+        "invite",
+        "date",
+        "certified_bot",
+        "vanity",
+        "points",
+        "monthly_points",
+        "donatebotguildid",
+        "server_count",
+        "review_score",
+        "review_count",
     )
 
     id: int
@@ -203,39 +203,39 @@ class BotData:
     """This bot's review count."""
 
     def __init__(self, json: dict):
-        self.id = int(json['clientid'])
-        self.topgg_id = int(json['id'])
-        self.username = json['username']
-        self.discriminator = '0'
-        self.avatar = json['avatar']
-        self.def_avatar = ''
-        self.prefix = json['prefix']
-        self.shortdesc = json['shortdesc']
-        self.longdesc = truthy_only(json.get('longdesc'))
-        self.tags = json['tags']
-        self.website = truthy_only(json.get('website'))
-        self.support = truthy_only(json.get('support'))
-        self.github = truthy_only(json.get('github'))
-        self.owners = [int(id) for id in json['owners']]
+        self.id = int(json["clientid"])
+        self.topgg_id = int(json["id"])
+        self.username = json["username"]
+        self.discriminator = "0"
+        self.avatar = json["avatar"]
+        self.def_avatar = ""
+        self.prefix = json["prefix"]
+        self.shortdesc = json["shortdesc"]
+        self.longdesc = truthy_only(json.get("longdesc"))
+        self.tags = json["tags"]
+        self.website = truthy_only(json.get("website"))
+        self.support = truthy_only(json.get("support"))
+        self.github = truthy_only(json.get("github"))
+        self.owners = [int(id) for id in json["owners"]]
         self.guilds = []
-        self.invite = truthy_only(json.get('invite'))
-        self.date = datetime.fromisoformat(json['date'].replace('Z', '+00:00'))
+        self.invite = truthy_only(json.get("invite"))
+        self.date = datetime.fromisoformat(json["date"].replace("Z", "+00:00"))
         self.certified_bot = False
-        self.vanity = truthy_only(json.get('vanity'))
-        self.points = json['points']
-        self.monthly_points = json['monthlyPoints']
+        self.vanity = truthy_only(json.get("vanity"))
+        self.points = json["points"]
+        self.monthly_points = json["monthlyPoints"]
         self.donatebotguildid = 0
-        self.server_count = json.get('server_count')
-        self.review_score = json['reviews']['averageScore']
-        self.review_count = json['reviews']['count']
+        self.server_count = json.get("server_count")
+        self.review_score = json["reviews"]["averageScore"]
+        self.review_count = json["reviews"]["count"]
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} id={self.id} username={self.username!r} points={self.points} monthly_points={self.monthly_points} server_count={self.server_count}>'
+        return f"<{__class__.__name__} id={self.id} username={self.username!r} points={self.points} monthly_points={self.monthly_points} server_count={self.server_count}>"
 
     def __int__(self) -> int:
         return self.id
 
-    def __eq__(self, other: 'BotData') -> bool:
+    def __eq__(self, other: "BotData") -> bool:
         if isinstance(other, __class__):
             return self.id == other.id
 
@@ -245,7 +245,7 @@ class BotData:
 class BotsData:
     """A list of Discord bot's listed on Top.gg."""
 
-    __slots__: tuple[str, ...] = ('results', 'limit', 'offset', 'count', 'total')
+    __slots__: tuple[str, ...] = ("results", "limit", "offset", "count", "total")
 
     results: list[BotData]
     """The list of bots returned."""
@@ -263,14 +263,14 @@ class BotsData:
     """The amount of bots that matches the specified query. May be equal or greater than count or len(results)."""
 
     def __init__(self, json: dict):
-        self.results = [BotData(bot) for bot in json['results']]
-        self.limit = json['limit']
-        self.offset = json['offset']
-        self.count = json['count']
-        self.total = json['total']
+        self.results = [BotData(bot) for bot in json["results"]]
+        self.limit = json["limit"]
+        self.offset = json["offset"]
+        self.count = json["count"]
+        self.total = json["total"]
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} results={self.results!r} count={self.count} total={self.total}>'
+        return f"<{__class__.__name__} results={self.results!r} count={self.count} total={self.total}>"
 
     def __iter__(self) -> t.Iterable[BotData]:
         return iter(self.results)
@@ -282,7 +282,7 @@ class BotsData:
 class BotStatsData:
     """A Discord bot's statistics."""
 
-    __slots__: tuple[str, ...] = ('server_count', 'shards', 'shard_count')
+    __slots__: tuple[str, ...] = ("server_count", "shards", "shard_count")
 
     server_count: t.Optional[int]
     """The amount of servers the bot is in."""
@@ -294,17 +294,17 @@ class BotStatsData:
     """The amount of shards the bot has."""
 
     def __init__(self, json: dict):
-        self.server_count = json.get('server_count')
+        self.server_count = json.get("server_count")
         self.shards = []
         self.shard_count = None
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} server_count={self.server_count}>'
+        return f"<{__class__.__name__} server_count={self.server_count}>"
 
     def __int__(self) -> int:
         return self.server_count
 
-    def __eq__(self, other: 'BotStatsData') -> bool:
+    def __eq__(self, other: "BotStatsData") -> bool:
         if isinstance(other, __class__):
             return self.server_count == other.server_count
 
@@ -314,7 +314,7 @@ class BotStatsData:
 class BriefUserData:
     """A Top.gg user's brief information."""
 
-    __slots__: tuple[str, ...] = ('id', 'username', 'avatar')
+    __slots__: tuple[str, ...] = ("id", "username", "avatar")
 
     id: int
     """This user's ID."""
@@ -326,17 +326,17 @@ class BriefUserData:
     """This user's avatar URL."""
 
     def __init__(self, json: dict):
-        self.id = int(json['id'])
-        self.username = json['username']
-        self.avatar = json['avatar']
+        self.id = int(json["id"])
+        self.username = json["username"]
+        self.avatar = json["avatar"]
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} id={self.id} username={self.username!r}>'
+        return f"<{__class__.__name__} id={self.id} username={self.username!r}>"
 
     def __int__(self) -> int:
         return self.id
 
-    def __eq__(self, other: 'BriefUserData') -> bool:
+    def __eq__(self, other: "BriefUserData") -> bool:
         if isinstance(other, __class__):
             return self.id == other.id
 
@@ -346,7 +346,7 @@ class BriefUserData:
 class SocialData:
     """A Top.gg user's socials."""
 
-    __slots__: tuple[str, ...] = ('youtube', 'reddit', 'twitter', 'instagram', 'github')
+    __slots__: tuple[str, ...] = ("youtube", "reddit", "twitter", "instagram", "github")
 
     youtube: str
     """This user's YouTube channel."""
@@ -368,16 +368,16 @@ class UserData:
     """A Top.gg user."""
 
     __slots__: tuple[str, ...] = (
-        'id',
-        'username',
-        'discriminator',
-        'social',
-        'color',
-        'supporter',
-        'certified_dev',
-        'mod',
-        'web_mod',
-        'admin',
+        "id",
+        "username",
+        "discriminator",
+        "social",
+        "color",
+        "supporter",
+        "certified_dev",
+        "mod",
+        "web_mod",
+        "admin",
     )
 
     id: int
@@ -416,20 +416,20 @@ class SortBy(Enum):
 
     __slots__: tuple[str, ...] = ()
 
-    ID = 'id'
+    ID = "id"
     """Sorts results based on each bot's ID."""
 
-    SUBMISSION_DATE = 'date'
+    SUBMISSION_DATE = "date"
     """Sorts results based on each bot's submission date."""
 
-    MONTHLY_VOTES = 'monthlyPoints'
+    MONTHLY_VOTES = "monthlyPoints"
     """Sorts results based on each bot's monthly vote count."""
 
 
 class VoteDataDict:
     """A dispatched Top.gg project vote event."""
 
-    __slots__: tuple[str, ...] = ('type', 'user', 'query')
+    __slots__: tuple[str, ...] = ("type", "user", "query")
 
     type: t.Optional[str]
     """Vote event type. ``upvote`` (invoked from the vote page by a user) or ``test`` (invoked explicitly by the developer for testing.)"""
@@ -441,21 +441,21 @@ class VoteDataDict:
     """Query strings found on the vote page."""
 
     def __init__(self, json: dict):
-        self.type = json.get('type')
+        self.type = json.get("type")
 
-        user = json.get('user')
+        user = json.get("user")
         self.user = user and int(user)
 
-        self.query = parse_qs(json.get('query', ''))
+        self.query = parse_qs(json.get("query", ""))
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} type={self.type!r} user={self.user} query={self.query!r}>'
+        return f"<{__class__.__name__} type={self.type!r} user={self.user} query={self.query!r}>"
 
 
 class BotVoteData(VoteDataDict):
     """A dispatched Top.gg Discord bot vote event. Extends :class:`.VoteDataDict`."""
 
-    __slots__: tuple[str, ...] = ('bot', 'is_weekend')
+    __slots__: tuple[str, ...] = ("bot", "is_weekend")
 
     bot: t.Optional[int]
     """The ID of the bot that received a vote."""
@@ -466,19 +466,19 @@ class BotVoteData(VoteDataDict):
     def __init__(self, json: dict):
         super().__init__(json)
 
-        bot = json.get('bot')
+        bot = json.get("bot")
         self.bot = bot and int(bot)
 
-        self.is_weekend = json.get('isWeekend', False)
+        self.is_weekend = json.get("isWeekend", False)
 
     def __repr__(self) -> str:
-        return f'<{__class__.__name__} type={self.type!r} user={self.user} is_weekend={self.is_weekend}>'
+        return f"<{__class__.__name__} type={self.type!r} user={self.user} is_weekend={self.is_weekend}>"
 
 
 class GuildVoteData(VoteDataDict):
     """ "A dispatched Top.gg Discord server vote event. Extends :class:`.VoteDataDict`."""
 
-    __slots__: tuple[str, ...] = ('guild',)
+    __slots__: tuple[str, ...] = ("guild",)
 
     guild: t.Optional[int]
     """The ID of the server that received a vote."""
@@ -486,7 +486,7 @@ class GuildVoteData(VoteDataDict):
     def __init__(self, json: dict):
         super().__init__(json)
 
-        guild = json.get('guild')
+        guild = json.get("guild")
         self.guild = guild and int(guild)
 
 

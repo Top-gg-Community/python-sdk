@@ -29,8 +29,8 @@ import typing as t
 from .errors import TopGGException
 
 
-T = t.TypeVar('T')
-DataContainerT = t.TypeVar('DataContainerT', bound='DataContainerMixin')
+T = t.TypeVar("T")
+DataContainerT = t.TypeVar("DataContainerT", bound="DataContainerMixin")
 
 
 def data(type_: t.Type[T]) -> T:
@@ -39,7 +39,7 @@ def data(type_: t.Type[T]) -> T:
 
     .. code-block:: python
 
-        client = topgg.DBLClient(os.getenv('BOT_TOKEN')).set_data(bot)
+        client = topgg.DBLClient(os.getenv("BOT_TOKEN")).set_data(bot)
         autoposter = client.autopost()
 
 
@@ -58,7 +58,7 @@ def data(type_: t.Type[T]) -> T:
 
 
 class Data(t.Generic[T]):
-    __slots__: tuple[str, ...] = ('type',)
+    __slots__: tuple[str, ...] = ("type",)
 
     def __init__(self, type_: t.Type[T]) -> None:
         self.type = type_
@@ -71,7 +71,7 @@ class DataContainerMixin:
     This is useful for injecting some data so that they're available as arguments in your functions.
     """
 
-    __slots__: tuple[str, ...] = ('_data',)
+    __slots__: tuple[str, ...] = ("_data",)
 
     def __init__(self) -> None:
         self._data = {type(self): self}
@@ -97,7 +97,7 @@ class DataContainerMixin:
 
         if not override and type_ in self._data:
             raise TopGGException(
-                f'{type_} already exists. If you wish to override it, pass True into the override parameter.'
+                f"{type_} already exists. If you wish to override it, pass True into the override parameter."
             )
 
         self._data[type_] = data_
