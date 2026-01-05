@@ -35,11 +35,11 @@ def test_WebhookManager_routes(webhook_manager: WebhookManager) -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "headers, result, state",
-    [({"authorization": auth}, 204, True), ({}, 401, False)],
+    "headers, result",
+    [({"authorization": auth}, 200), ({}, 401)],
 )
 async def test_WebhookManager_validates_auth(
-    webhook_manager: WebhookManager, headers: t.Dict[str, str], result: int, state: bool
+    webhook_manager: WebhookManager, headers: t.Dict[str, str], result: int
 ) -> None:
     await webhook_manager.start(5000)
 

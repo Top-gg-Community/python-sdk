@@ -20,7 +20,7 @@ def client(session: ClientSession) -> topgg.DBLClient:
 
 @pytest.mark.asyncio
 async def test_DBLClient_post_guild_count_with_no_args(client: topgg.DBLClient):
-    with pytest.raises(ValueError, match="Got an invalid server count. Got None."):
+    with pytest.raises(TypeError, match="stats or guild_count must be provided."):
         await client.post_guild_count()
 
 

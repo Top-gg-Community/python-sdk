@@ -27,9 +27,12 @@ def autopost(session: ClientSession) -> AutoPoster:
 async def test_AutoPoster_breaks_autopost_loop_on_401(
     mocker: MockerFixture, session: ClientSession
 ) -> None:
+    response = mock.Mock("reason, status")
+    response.reason = "Unauthorized"
+    response.status = 401
+
     mocker.patch(
-        "topgg.DBLClient.post_guild_count",
-        side_effect=HTTPException("Unauthorized", 401),
+        "topgg.DBLClient.post_guild_count", side_effect=HTTPException(response, {})
     )
 
     callback = mock.Mock()
@@ -50,7 +53,7 @@ async def test_AutoPoster_breaks_autopost_loop_on_401(
 @pytest.mark.asyncio
 async def test_AutoPoster_raises_missing_stats(autopost: AutoPoster) -> None:
     with pytest.raises(
-        TopGGException, match="You must provide a callback that returns the stats."
+        TopGGException, match="you must provide a callback that returns the stats."
     ):
         await autopost.start()
 
@@ -58,7 +61,7 @@ async def test_AutoPoster_raises_missing_stats(autopost: AutoPoster) -> None:
 @pytest.mark.asyncio
 async def test_AutoPoster_raises_already_running(autopost: AutoPoster) -> None:
     autopost.stats(mock.Mock()).start()
-    with pytest.raises(TopGGException, match="The autoposter is already running."):
+    with pytest.raises(TopGGException, match="the autopost is already running."):
         await autopost.start()
 
 
@@ -73,7 +76,10 @@ async def test_AutoPoster_error_callback(
     mocker: MockerFixture, autopost: AutoPoster
 ) -> None:
     error_callback = mock.Mock()
-    side_effect = HTTPException("Internal Server Error", 500)
+    response = mock.Mock("reason, status")
+    response.reason = "Internal Server Error"
+    response.status = 500
+    side_effect = HTTPException(response, {})
 
     mocker.patch("topgg.DBLClient.post_guild_count", side_effect=side_effect)
     task = autopost.on_error(error_callback).stats(mock.Mock()).start()

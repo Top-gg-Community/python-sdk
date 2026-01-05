@@ -55,7 +55,7 @@ bot_stats_dict = {"server_count": 2, "shards": [], "shard_count": 0}
 
 @pytest.fixture
 def bot_data() -> types.BotData:
-    return types.BotData(d)
+    return types.BotData(**d)
 
 
 @pytest.fixture
@@ -69,22 +69,22 @@ def widget_options() -> types.WidgetOptions:
 
 @pytest.fixture
 def vote_data() -> types.VoteDataDict:
-    return types.VoteDataDict(vote_data_dict)
+    return types.VoteDataDict(**vote_data_dict)
 
 
 @pytest.fixture
 def bot_vote_data() -> types.BotVoteData:
-    return types.BotVoteData(bot_vote_dict)
+    return types.BotVoteData(**bot_vote_dict)
 
 
 @pytest.fixture
 def server_vote_data() -> types.GuildVoteData:
-    return types.GuildVoteData(server_vote_dict)
+    return types.GuildVoteData(**server_vote_dict)
 
 
 @pytest.fixture
 def bot_stats_data() -> types.BotStatsData:
-    return types.BotStatsData(bot_stats_dict)
+    return types.BotStatsData(**bot_stats_dict)
 
 
 def test_bot_data_fields(bot_data: types.BotData) -> None:
