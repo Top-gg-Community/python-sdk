@@ -241,7 +241,7 @@ class AutoPoster:
             seconds = seconds.total_seconds()
 
         if seconds < 900:
-            raise ValueError("interval must be greated than 900 seconds.")
+            raise ValueError("interval must be greater than 900 seconds.")
 
         self._interval = seconds
         return self
