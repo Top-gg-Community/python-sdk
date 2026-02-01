@@ -37,8 +37,11 @@ async def test_AutoPoster_breaks_autopost_loop_on_401(
 
     callback = mock.Mock()
     autopost = DBLClient(MOCK_TOKEN, session=session).autopost().stats(callback)
+
     assert isinstance(autopost, AutoPoster)
     assert not isinstance(autopost.stats()(callback), AutoPoster)
+
+    autopost._interval = 1
 
     with pytest.raises(HTTPException):
         await autopost.start()
@@ -64,7 +67,7 @@ async def test_AutoPoster_raises_already_running(autopost: AutoPoster) -> None:
 
 @pytest.mark.asyncio
 async def test_AutoPoster_interval_too_short(autopost: AutoPoster) -> None:
-    with pytest.raises(ValueError, match="interval must be greated than 900 seconds."):
+    with pytest.raises(ValueError, match="interval must be greater than 900 seconds."):
         autopost.set_interval(50)
 
 

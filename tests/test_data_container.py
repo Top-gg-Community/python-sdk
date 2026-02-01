@@ -15,18 +15,15 @@ def data_container() -> DataContainerMixin:
 
 async def _async_callback(
     text: str = data(str), number: int = data(int), mapping: dict = data(dict)
-):
-    ...
+): ...
 
 
 def _sync_callback(
     text: str = data(str), number: int = data(int), mapping: dict = data(dict)
-):
-    ...
+): ...
 
 
-def _invalid_callback(number: float = data(float)):
-    ...
+def _invalid_callback(number: float = data(float)): ...
 
 
 @pytest.mark.asyncio
