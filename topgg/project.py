@@ -1,0 +1,126 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 null8626 & Top.gg
+
+from enum import Enum
+
+
+class Platform(Enum):
+  """A project's platform."""
+
+  DISCORD = 'discord'
+
+
+class ProjectType(Enum):
+  """A project's type."""
+
+  DISCORD_BOT = 'bot'
+  DISCORD_SERVER = 'server'
+
+  def _as_widget_path(self) -> str:
+    match self:
+      case self.DISCORD_BOT:
+        return 'discord/bot'
+
+      case self.DISCORD_SERVER:
+        return 'discord/server'
+
+
+class PartialProject:
+  """A brief information on project listed on Top.gg."""
+
+  __slots__: tuple[str, ...] = ('id', 'type', 'platform', 'platform_id')
+
+  id: int
+  """The project's ID."""
+
+  type: ProjectType
+  """The project's type."""
+
+  platform: Platform
+  """The project's platform."""
+
+  platform_id: int
+  """The project's platform ID."""
+
+  def __init__(self, json: dict):
+    self.id = int(json['id'])
+    self.type = ProjectType(json['type'])
+    self.platform = Platform(json['platform'])
+    self.platform_id = int(json['platform_id'])
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} id={self.id} type={self.type!r} platform={self.platform!r} platform_id={self.platform_id}>'
+
+  def __int__(self) -> int:
+    return self.id
+
+  def __eq__(self, other: object) -> bool:
+    return isinstance(other, __class__) and self.id == other.id
+
+
+class Project:
+  """A project listed on Top.gg."""
+
+  __slots__: tuple[str, ...] = (
+    'id',
+    'name',
+    'platform',
+    'type',
+    'headline',
+    'tags',
+    'current_votes',
+    'total_votes',
+    'review_score',
+    'review_count',
+  )
+
+  id: int
+  """The project's ID."""
+
+  name: str
+  """The project's name sourced from the external platform."""
+
+  platform: Platform
+  """The project's platform."""
+
+  type: ProjectType
+  """The project's type."""
+
+  headline: str
+  """The project's short description."""
+
+  tags: list[str]
+  """The project's tag IDs."""
+
+  current_votes: int
+  """The project's current vote count that affects the project's ranking."""
+
+  total_votes: int
+  """The project's total vote count."""
+
+  review_score: float
+  """The project's review score out of 5."""
+
+  review_count: int
+  """The project's total review count."""
+
+  def __init__(self, json: dict):
+    self.id = int(json['id'])
+    self.name = json['name']
+    self.platform = Platform(json['platform'])
+    self.type = ProjectType(json['type'])
+    self.headline = json['headline']
+    self.tags = json['tags']
+    self.current_votes = json['votes']
+    self.total_votes = json['votes_total']
+    self.review_score = json['review_score']
+    self.review_count = json['review_count']
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} id={self.id} name={self.name!r} type={self.type!r} platform={self.platform!r} headline={self.headline!r} current_votes={self.current_votes} total_votes={self.total_votes} review_score={self.review_score!r}>'
+
+  def __int__(self) -> int:
+    return self.id
+
+  def __eq__(self, other: object) -> bool:
+    return isinstance(other, __class__) and self.id == other.id
