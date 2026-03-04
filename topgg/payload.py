@@ -87,7 +87,7 @@ class VoteCreatePayload:
   __slots__: tuple[str, ...] = (
     'id',
     'weight',
-    'created_at',
+    'voted_at',
     'expires_at',
     'project',
     'user',
@@ -99,7 +99,7 @@ class VoteCreatePayload:
   weight: int
   """The number of votes this vote counted for. This is a rounded integer value which determines how many points this individual vote was worth."""
 
-  created_at: datetime
+  voted_at: datetime
   """When the vote was cast."""
 
   expires_at: datetime
@@ -114,13 +114,13 @@ class VoteCreatePayload:
   def __init__(self, json: dict):
     self.id = int(json['id'])
     self.weight = json['weight']
-    self.created_at = datetime.fromisoformat(json['created_at'].replace('Z', '+00:00'))
+    self.voted_at = datetime.fromisoformat(json['created_at'].replace('Z', '+00:00'))
     self.expires_at = datetime.fromisoformat(json['expires_at'].replace('Z', '+00:00'))
     self.project = PartialProject(json['project'])
     self.user = User(json['user'])
 
   def __repr__(self) -> str:
-    return f'<{__class__.__name__} id={self.id} weight={self.weight} created_at={self.created_at!r} expires_at={self.expires_at!r} project={self.project!r} user={self.user!r}>'
+    return f'<{__class__.__name__} id={self.id} weight={self.weight} voted_at={self.voted_at!r} expires_at={self.expires_at!r} project={self.project!r} user={self.user!r}>'
 
   def __int__(self) -> int:
     return self.id
