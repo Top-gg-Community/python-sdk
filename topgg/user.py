@@ -21,14 +21,14 @@ class Vote:
   """A project's vote information."""
 
   __slots__: tuple[str, ...] = (
-    'user_id',
+    'voter_id',
     'platform_id',
     'voted_at',
     'expires_at',
     'weight',
   )
 
-  user_id: int
+  voter_id: int
   """The voter's ID."""
 
   platform_id: int
@@ -44,14 +44,14 @@ class Vote:
   """The number of votes this vote counted for. This is a rounded integer value which determines how many points this individual vote was worth."""
 
   def __init__(self, json: dict):
-    self.user_id = int(json['user_id'])
+    self.voter_id = int(json['user_id'])
     self.platform_id = int(json['platform_id'])
     self.voted_at = datetime.fromisoformat(json['created_at'].replace('Z', '+00:00'))
     self.expires_at = datetime.fromisoformat(json['expires_at'].replace('Z', '+00:00'))
     self.weight = json['weight']
 
   def __repr__(self) -> str:
-    return f'<{__class__.__name__} user_id={self.user_id} platform_id={self.platform_id} voted_at={self.voted_at!r} expires_at={self.expires_at!r} weight={self.weight}>'
+    return f'<{__class__.__name__} voter_id={self.voter_id} platform_id={self.platform_id} voted_at={self.voted_at!r} expires_at={self.expires_at!r} weight={self.weight}>'
 
   def __int__(self) -> int:
     return self.weight
