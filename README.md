@@ -82,7 +82,6 @@ third_page = await second_page.next()
 ```py
 # Array of application commands that
 # can be serialized to Discord API's raw JSON format.
-
 await client.post_commands(
   [
     {
