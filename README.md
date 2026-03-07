@@ -79,6 +79,16 @@ third_page = await second_page.next()
 
 ### Posting your bot's application commands list
 
+#### Discord.py
+
+```py
+commands = [command.to_dict() for command in await bot.tree.fetch_commands()]
+
+await client.post_commands(commands)
+```
+
+#### Raw
+
 ```py
 # Array of application commands that
 # can be serialized to Discord API's raw JSON format.
