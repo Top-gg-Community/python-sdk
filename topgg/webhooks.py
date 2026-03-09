@@ -216,7 +216,7 @@ class Webhooks:
       trace = request.headers.get('x-topgg-trace')
 
       if not signature or not trace:
-        return web.json_response({'error': 'Missing signature'}, status=401)
+        return web.json_response({'error': 'Missing required headers'}, status=401)
 
       fail_status = 400
 
