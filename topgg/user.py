@@ -17,22 +17,10 @@ class UserSource(Enum):
   TOPGG = 'topgg'
 
 
-class Vote:
-  """A project's vote information."""
+class PartialVote:
+  """A brief information of a project's vote."""
 
-  __slots__: tuple[str, ...] = (
-    'voter_id',
-    'platform_id',
-    'voted_at',
-    'expires_at',
-    'weight',
-  )
-
-  voter_id: int
-  """The voter's ID."""
-
-  platform_id: int
-  """The voter's ID on the project's platform."""
+  __slots__: tuple[str, ...] = ('voted_at', 'expires_at', 'weight')
 
   voted_at: datetime
   """When the vote was cast."""
@@ -44,11 +32,36 @@ class Vote:
   """The number of votes this vote counted for. This is a rounded integer value which determines how many points this individual vote was worth."""
 
   def __init__(self, json: dict):
-    self.voter_id = int(json['user_id'])
-    self.platform_id = int(json['platform_id'])
     self.voted_at = datetime.fromisoformat(json['created_at'].replace('Z', '+00:00'))
     self.expires_at = datetime.fromisoformat(json['expires_at'].replace('Z', '+00:00'))
     self.weight = json['weight']
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} voted_at={self.voted_at!r} expires_at={self.expires_at!r} weight={self.weight}>'
+
+  def __int__(self) -> int:
+    return self.weight
+
+
+class Vote(PartialVote):
+  """A project's vote information."""
+
+  __slots__: tuple[str, ...] = (
+    'voter_id',
+    'platform_id',
+  )
+
+  voter_id: int
+  """The voter's ID."""
+
+  platform_id: int
+  """The voter's ID on the project's platform."""
+
+  def __init__(self, json: dict):
+    super().__init__(json)
+
+    self.voter_id = int(json['user_id'])
+    self.platform_id = int(json['platform_id'])
 
   def __repr__(self) -> str:
     return f'<{__class__.__name__} voter_id={self.voter_id} platform_id={self.platform_id} voted_at={self.voted_at!r} expires_at={self.expires_at!r} weight={self.weight}>'
@@ -126,29 +139,3 @@ class User:
 
   def __eq__(self, other: object) -> bool:
     return isinstance(other, __class__) and self.id == other.id
-
-
-class PartialVote:
-  """A brief information of a project's vote."""
-
-  __slots__: tuple[str, ...] = ('voted_at', 'expires_at', 'weight')
-
-  voted_at: datetime
-  """When the vote was cast."""
-
-  expires_at: datetime
-  """When the vote expires and the user is required to vote again."""
-
-  weight: int
-  """The number of votes this vote counted for. This is a rounded integer value which determines how many points this individual vote was worth."""
-
-  def __init__(self, json: dict):
-    self.voted_at = datetime.fromisoformat(json['created_at'].replace('Z', '+00:00'))
-    self.expires_at = datetime.fromisoformat(json['expires_at'].replace('Z', '+00:00'))
-    self.weight = json['weight']
-
-  def __repr__(self) -> str:
-    return f'<{__class__.__name__} voted_at={self.voted_at!r} expires_at={self.expires_at!r} weight={self.weight}>'
-
-  def __int__(self) -> int:
-    return self.weight
