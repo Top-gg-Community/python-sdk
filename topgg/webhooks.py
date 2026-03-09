@@ -223,7 +223,7 @@ class Webhooks:
       try:
         signature = {
           key: value
-          for key, value in map(lambda part: part.split('='), signature.split(','))
+          for key, value in map(lambda pair: pair.split('='), signature.split(','))
         }
 
         fail_status = 422
