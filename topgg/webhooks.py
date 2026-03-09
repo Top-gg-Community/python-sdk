@@ -218,15 +218,13 @@ class Webhooks:
       if not signature or not trace:
         return web.json_response({'error': 'Missing required headers'}, status=401)
 
-      fail_status = 400
+      fail_status = 422
 
       try:
         signature = {
           key: value
           for key, value in map(lambda pair: pair.split('='), signature.split(','))
         }
-
-        fail_status = 422
 
         t = signature['t']
         signature = signature[API_VERSION]
