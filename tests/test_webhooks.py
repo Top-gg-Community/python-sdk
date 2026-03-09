@@ -135,7 +135,7 @@ async def test_Webhooks_error_handling_works(
     )
 
     assert response.status == 401
-    assert (await response.json()).get('error') == 'Missing signature'
+    assert (await response.json()).get('error') == 'Missing required headers'
 
     t, signature = webhook_signature(payload)
 
