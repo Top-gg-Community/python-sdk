@@ -13,7 +13,7 @@ class Widget:
   @staticmethod
   def large(project_type: ProjectType, id: int) -> str:
     """
-    Generate a large widget URL.
+    Generates a large widget URL.
 
     :param project_type: The project's type.
     :type project_type: :class:`.ProjectType`
@@ -34,7 +34,7 @@ class Widget:
   @staticmethod
   def votes(project_type: ProjectType, id: int) -> str:
     """
-    Generate a small widget URL for displaying votes.
+    Generates a small widget URL for displaying votes.
 
     :param project_type: The project's type.
     :type project_type: :class:`.ProjectType`
@@ -55,7 +55,7 @@ class Widget:
   @staticmethod
   def owner(project_type: ProjectType, id: int) -> str:
     """
-    Generate a small widget URL for displaying a project's owner.
+    Generates a small widget URL for displaying a project's owner.
 
     :param project_type: The project's type.
     :type project_type: :class:`.ProjectType`
@@ -76,7 +76,7 @@ class Widget:
   @staticmethod
   def social(project_type: ProjectType, id: int) -> str:
     """
-    Generate a small widget URL for displaying social stats.
+    Generates a small widget URL for displaying social stats.
 
     :param project_type: The project's type.
     :type project_type: :class:`.ProjectType`
