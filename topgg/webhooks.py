@@ -209,8 +209,12 @@ class Webhooks:
         return web.json_response({'error': 'Invalid request body'}, status=422)
       except web.HTTPRequestEntityTooLarge:  # pragma: nocover
         return web.json_response({'error': 'Request body too large'}, status=413)
-      except Exception:
-        return web.json_response({'error': 'Unable to parse request body'}, status=400)
+      except Exception as err:  # pragma: nocover
+        warnings.warn(
+          f'Unable to parse Top.gg webhook payload. Please report this bug to the SDK maintainers.\nCause: {err}\n--- BEGIN BODY DUMP ---\n{body}\n--- END BODY DUMP ---'
+        )
+
+        return web.Response(status=204)
 
       signature = request.headers.get('x-topgg-signature')
       trace = request.headers.get('x-topgg-trace')
