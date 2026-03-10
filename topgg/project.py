@@ -26,7 +26,7 @@ class ProjectType(Enum):
 
 
 class PartialProject:
-  """A brief information on project listed on Top.gg."""
+  """A brief information on a project listed on Top.gg."""
 
   __slots__: tuple[str, ...] = ('id', 'type', 'platform', 'platform_id')
 
