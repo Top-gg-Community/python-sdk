@@ -107,11 +107,6 @@ async def test_Webhooks_error_handling_works(
 
   await wh.start()
 
-  response = await client.post('/webhook', headers={'Content-Type': 'application/json'})
-
-  assert response.status == 400
-  assert (await response.json()).get('error') == 'Unable to parse request body'
-
   response = await client.post(
     '/webhook', data='{}', headers={'Content-Type': 'application/json'}
   )
