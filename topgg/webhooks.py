@@ -114,7 +114,7 @@ class Webhooks:
     self.__host = host
     self.__port = port
     self.secret = secret
-    self.__app = app or web.Application()
+    self.__app = app or web.Application(client_max_size=2 * 1024 * 1024)
     self.__web_server = None
     self.__is_running = False
     self.__listeners = {}
