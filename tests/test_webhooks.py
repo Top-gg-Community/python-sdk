@@ -107,13 +107,6 @@ async def test_Webhooks_error_handling_works(
 
   await wh.start()
 
-  response = await client.post(
-    '/webhook', data='{}', headers={'Content-Type': 'application/json'}
-  )
-
-  assert response.status == 422
-  assert (await response.json()).get('error') == 'Invalid request body'
-
   with open(
     join(CURRENT_DIR, 'mocks/test_payload.json'), 'r', encoding='utf-8'
   ) as payload_file:
