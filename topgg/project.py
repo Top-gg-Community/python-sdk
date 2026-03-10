@@ -13,16 +13,8 @@ class Platform(Enum):
 class ProjectType(Enum):
   """A project's type."""
 
-  DISCORD_BOT = 'bot'
-  DISCORD_SERVER = 'server'
-
-  def _as_widget_path(self) -> str:
-    match self:
-      case self.DISCORD_BOT:
-        return 'discord/bot'
-
-      case self.DISCORD_SERVER:
-        return 'discord/server'
+  BOT = 'bot'
+  SERVER = 'server'
 
 
 class PartialProject:

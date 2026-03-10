@@ -112,25 +112,25 @@ await client.post_commands(
 #### Large
 
 ```py
-widget_url = topgg.Widget.large(topgg.ProjectType.DISCORD_BOT, 1026525568344264724)
+widget_url = topgg.Widget.large(topgg.Platform.DISCORD, topgg.ProjectType.BOT, 1026525568344264724)
 ```
 
 #### Votes
 
 ```py
-widget_url = topgg.Widget.votes(topgg.ProjectType.DISCORD_BOT, 1026525568344264724)
+widget_url = topgg.Widget.votes(topgg.Platform.DISCORD, topgg.ProjectType.BOT, 1026525568344264724)
 ```
 
 #### Owner
 
 ```py
-widget_url = topgg.Widget.owner(topgg.ProjectType.DISCORD_BOT, 1026525568344264724)
+widget_url = topgg.Widget.owner(topgg.Platform.DISCORD, topgg.ProjectType.BOT, 1026525568344264724)
 ```
 
 #### Social
 
 ```py
-widget_url = topgg.Widget.social(topgg.ProjectType.DISCORD_BOT, 1026525568344264724)
+widget_url = topgg.Widget.social(topgg.Platform.DISCORD, topgg.ProjectType.BOT, 1026525568344264724)
 ```
 
 ### Webhooks
