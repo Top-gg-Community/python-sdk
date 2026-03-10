@@ -25,7 +25,7 @@ MAXIMUM_DELAY_THRESHOLD = 5.0
 
 class Client:
   """
-  Interact with API v1's endpoints.
+  Interact with Top.gg API v1's endpoints.
 
   :param token: The API token to use.
   :type token: :py:class:`str`
