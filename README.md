@@ -1,6 +1,6 @@
 # Top.gg Python SDK
 
-> For more information, see the documentation here: https://topggpy.rtfd.io.
+> For more information, see the documentation here: <https://topggpy.rtfd.io>.
 
 The community-maintained Python library for Top.gg.
 
