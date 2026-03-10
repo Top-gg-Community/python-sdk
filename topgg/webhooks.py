@@ -205,8 +205,6 @@ class Webhooks:
 
         payload_type = PayloadType(json_body['type'])
         payload = payload_type._deserialize(json_body['data'])
-      except (KeyError, ValueError):
-        return web.json_response({'error': 'Invalid request body'}, status=422)
       except web.HTTPRequestEntityTooLarge:  # pragma: nocover
         return web.json_response({'error': 'Request body too large'}, status=413)
       except Exception as err:  # pragma: nocover
