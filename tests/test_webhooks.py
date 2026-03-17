@@ -140,8 +140,8 @@ async def test_Webhooks_error_handling_works(
       headers={'Content-Length': '2', 'Content-Type': 'application/json'},
     )
 
-    assert response.status == 400
-    assert (await response.json()).get('error') == 'Malformed request'
+    assert response.status == 408
+    assert (await response.json()).get('error') == 'Request timed out'
 
 
 @cache
