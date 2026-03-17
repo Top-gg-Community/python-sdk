@@ -29,7 +29,9 @@ class Widget:
     """
 
     if not isinstance(project_type, ProjectType) or not isinstance(id, int):
-      raise TypeError("The specified platform, project type, and/or project ID's type is invalid.")
+      raise TypeError(
+        "The specified platform, project type, and/or project ID's type is invalid."
+      )
 
     return f'{BASE_URL}/widgets/large/{platform.value}/{project_type.value}/{id}'
 
@@ -52,7 +54,9 @@ class Widget:
     """
 
     if not isinstance(project_type, ProjectType) or not isinstance(id, int):
-      raise TypeError("The specified platform, project type, and/or project ID's type is invalid.")
+      raise TypeError(
+        "The specified platform, project type, and/or project ID's type is invalid."
+      )
 
     return f'{BASE_URL}/widgets/small/votes/{platform.value}/{project_type.value}/{id}'
 
@@ -75,7 +79,9 @@ class Widget:
     """
 
     if not isinstance(project_type, ProjectType) or not isinstance(id, int):
-      raise TypeError("The specified platform, project type, and/or project ID's type is invalid.")
+      raise TypeError(
+        "The specified platform, project type, and/or project ID's type is invalid."
+      )
 
     return f'{BASE_URL}/widgets/small/owner/{platform.value}/{project_type.value}/{id}'
 
@@ -98,6 +104,8 @@ class Widget:
     """
 
     if not isinstance(project_type, ProjectType) or not isinstance(id, int):
-      raise TypeError("The specified platform, project type, and/or project ID's type is invalid.")
+      raise TypeError(
+        "The specified platform, project type, and/or project ID's type is invalid."
+      )
 
     return f'{BASE_URL}/widgets/small/social/{platform.value}/{project_type.value}/{id}'

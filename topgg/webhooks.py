@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
 from collections.abc import Awaitable, Callable
+from asyncio import wait_for, TimeoutError
 from inspect import iscoroutinefunction
 from aiohttp import test_utils, web
 from typing import Any, TypeAlias
@@ -62,6 +63,8 @@ class Webhooks:
   :type port: :py:class:`int`
   :param app: The :class:`~aiohttp.web.Application` instance to use. Defaults to creating one with default configurations.
   :type app: :class:`~aiohttp.web.Application` | :class:`~aiohttp.test_utils.TestClient` | :py:obj:`None`
+  :param timeout: The timeout for reading payloads in seconds. Defaults to one second.
+  :type timeout: :py:class:`float`
 
   :exception TypeError: One or more specified arguments has an invalid type.
   :exception ValueError: One or more specified arguments is empty.
@@ -77,6 +80,7 @@ class Webhooks:
     '__web_server',
     '__is_running',
     '__listeners',
+    '__timeout',
   )
 
   __route: str
@@ -96,6 +100,7 @@ class Webhooks:
     host: str = '0.0.0.0',
     port: int = 8080,
     app: web.Application | test_utils.TestClient | None = None,
+    timeout: float = 1.0,
   ):
     if (
       not isinstance(secret, str)
@@ -109,6 +114,8 @@ class Webhooks:
       raise ValueError('The specified secret, route, and/or host must not be empty.')
     elif port is not None and not isinstance(port, int):
       raise TypeError('The specified port must be an integer.')
+    elif timeout is not None and not isinstance(timeout, float):
+      raise TypeError('The specified timeout must be a float.')
 
     self.__route = route
     self.__host = host
@@ -118,6 +125,7 @@ class Webhooks:
     self.__web_server = None
     self.__is_running = False
     self.__listeners = {}
+    self.__timeout = timeout
 
   def __repr__(self) -> str:
     return f'<{__class__.__name__} route={self.__route!r} host={self.__host!r} port={self.__port} is_running={self.is_running}>'
@@ -200,11 +208,13 @@ class Webhooks:
       try:
         assert request.body_exists and request.has_body and request.can_read_body
 
-        body = await request.text()
+        body = await wait_for(request.text(), self.__timeout)
         json_body = json.loads(body)
 
         payload_type = PayloadType(json_body['type'])
         payload = payload_type._deserialize(json_body['data'])
+      except TimeoutError:
+        return web.json_response({'error': 'Malformed request'}, status=400)
       except web.HTTPRequestEntityTooLarge:  # pragma: nocover
         return web.json_response({'error': 'Request body too large'}, status=413)
       except Exception as err:  # pragma: nocover
