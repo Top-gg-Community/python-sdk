@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 from functools import cache
 from hashlib import sha256
 from os.path import join
-from os import getenv
 from time import time
 import pytest_asyncio
 import pytest
@@ -15,23 +14,16 @@ import topgg
 from util import _test_attributes, CURRENT_DIR
 
 
+MOCK_SECRET = 'testsecret1234'
 MOCK_TRACE = 'trace'
 WebhooksFixture = tuple[topgg.Webhooks, test_utils.TestClient]
 WebhooksSignatureFixture = Callable[[str], tuple[str, str]]
 
 
-@pytest.fixture
-def webhook_secret() -> str:
-  secret = getenv('TOPGG_WEBHOOK_SECRET')
-
-  assert secret is not None, 'Missing TOPGG_WEBHOOK_SECRET environment variable.'
-  return secret
-
-
 @pytest_asyncio.fixture
-async def webhooks(webhook_secret: str) -> AsyncGenerator[WebhooksFixture, None]:
+async def webhooks() -> AsyncGenerator[WebhooksFixture, None]:
   app = test_utils.TestClient(test_utils.TestServer(web.Application()))
-  webhooks = topgg.Webhooks('/webhook', webhook_secret, app=app)
+  webhooks = topgg.Webhooks('/webhook', MOCK_SECRET, app=app)
 
   for payload_type in topgg.PayloadType:
 
@@ -47,12 +39,12 @@ async def webhooks(webhook_secret: str) -> AsyncGenerator[WebhooksFixture, None]
 
 
 @pytest.fixture
-def webhook_signature(webhook_secret: str) -> WebhooksSignatureFixture:
+def webhook_signature() -> WebhooksSignatureFixture:
   t = str(int(time()))
 
   def generate_webhook_signature(body: str) -> tuple[str, str]:
     return t, hmac.new(
-      webhook_secret.encode('utf-8'),
+      MOCK_SECRET.encode('utf-8'),
       f'{t}.{body}'.encode('utf-8'),
       sha256,
     ).hexdigest()
@@ -63,7 +55,6 @@ def webhook_signature(webhook_secret: str) -> WebhooksSignatureFixture:
 @pytest.mark.asyncio
 async def test_Webhooks_error_handling_works(
   webhooks: WebhooksFixture,
-  webhook_secret: str,
   webhook_signature: WebhooksSignatureFixture,
 ) -> None:
   wh, client = webhooks
@@ -76,7 +67,10 @@ async def test_Webhooks_error_handling_works(
       topgg.Webhooks(None, None)
 
     with pytest.raises(TypeError, match='^The specified port must be an integer.$'):
-      topgg.Webhooks('foo', webhook_secret, port='')
+      topgg.Webhooks('foo', MOCK_SECRET, port='')
+
+    with pytest.raises(TypeError, match='^The specified timeout must be a float.$'):
+      topgg.Webhooks('foo', MOCK_SECRET, timeout=1)
 
   with pytest.raises(
     ValueError, match=r'^The specified secret, route, and/or host must not be empty.$'
@@ -139,6 +133,15 @@ async def test_Webhooks_error_handling_works(
 
     assert response.status == 403
     assert (await response.json()).get('error') == 'Invalid signature'
+
+    response = await client.post(
+      '/webhook',
+      data='',
+      headers={'Content-Length': '2', 'Content-Type': 'application/json'},
+    )
+
+    assert response.status == 400
+    assert (await response.json()).get('error') == 'Malformed request'
 
 
 @cache

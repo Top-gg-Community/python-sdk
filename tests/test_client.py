@@ -1,6 +1,6 @@
 from multidict import CIMultiDict
 from datetime import datetime
-from os import getenv, path
+from os import path
 import sys
 
 sys.path.insert(0, path.join(path.dirname(path.realpath(__file__)), '..'))
@@ -17,16 +17,14 @@ import topgg
 from util import _test_attributes, RequestMock
 
 
+MOCK_TOKEN = '.eyJfdCI6IiIsImlkIjoiMzY0ODA2MDI5ODc2NTU1Nzc2In0=.'
+
+
 @pytest_asyncio.fixture
 async def client(
   monkeypatch: pytest.MonkeyPatch,
 ) -> AsyncGenerator[topgg.Client, None]:
-  token = getenv('TOPGG_TOKEN')
-
-  if TYPE_CHECKING:
-    assert token is not None, 'Missing Top.gg API token'
-
-  client = topgg.Client(token)
+  client = topgg.Client(MOCK_TOKEN)
 
   monkeypatch.setattr(topgg.Ratelimiter, '_calls', deque([time()]))
 
@@ -50,12 +48,7 @@ async def test_Client_basic_error_handling_works() -> None:
       pass
 
   with pytest.raises(topgg.Error, match='^Client session is already closed.$'):
-    token = getenv('TOPGG_TOKEN')
-
-    if TYPE_CHECKING:
-      assert token is not None, 'Missing Top.gg API token'
-
-    test_client = topgg.Client(token)
+    test_client = topgg.Client(MOCK_TOKEN)
 
     await test_client.close()
     await test_client.get_self()
