@@ -63,7 +63,7 @@ class Webhooks:
   :type port: :py:class:`int`
   :param app: The :class:`~aiohttp.web.Application` instance to use. Defaults to creating one with default configurations.
   :type app: :class:`~aiohttp.web.Application` | :class:`~aiohttp.test_utils.TestClient` | :py:obj:`None`
-  :param timeout: The timeout for reading payloads in seconds. Defaults to one second.
+  :param timeout: The timeout for reading payloads in seconds. Defaults to five seconds.
   :type timeout: :py:class:`float`
 
   :exception TypeError: One or more specified arguments has an invalid type.
@@ -100,7 +100,7 @@ class Webhooks:
     host: str = '0.0.0.0',
     port: int = 8080,
     app: web.Application | test_utils.TestClient | None = None,
-    timeout: float = 1.0,
+    timeout: float = 5.0,
   ):
     if (
       not isinstance(secret, str)
