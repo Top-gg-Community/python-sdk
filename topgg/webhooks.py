@@ -214,7 +214,7 @@ class Webhooks:
         payload_type = PayloadType(json_body['type'])
         payload = payload_type._deserialize(json_body['data'])
       except TimeoutError:
-        return web.json_response({'error': 'Malformed request'}, status=400)
+        return web.json_response({'error': 'Request timed out'}, status=408)
       except web.HTTPRequestEntityTooLarge:  # pragma: nocover
         return web.json_response({'error': 'Request body too large'}, status=413)
       except Exception as err:  # pragma: nocover
