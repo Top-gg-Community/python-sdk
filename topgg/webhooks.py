@@ -55,7 +55,7 @@ class Webhooks:
 
   :param route: The route for receiving all webhook payloads.
   :type route: :py:class:`str`
-  :param secret: The webhook secret to use to authorize external requests.
+  :param secret: The secret to use to authorize external requests.
   :type secret: :py:class:`str`
   :param host: The web server host to use. Defaults to '0.0.0.0'.
   :type host: :py:class:`str`
@@ -139,9 +139,9 @@ class Webhooks:
   @secret.setter
   def secret(self, new_secret: str):
     """
-    Sets the webhook secret to use to authorize external requests.
+    Sets the secret to use to authorize external requests.
 
-    :param new_secret: The new webhook secret to use to authorize external requests.
+    :param new_secret: The new secret to use to authorize external requests.
     :type new_secret: :py:class:`str`
 
     :exception TypeError: The specified secret's type is invalid.
