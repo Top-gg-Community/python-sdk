@@ -72,6 +72,11 @@ async def test_Webhooks_error_handling_works(
     with pytest.raises(TypeError, match='^The specified timeout must be a float.$'):
       topgg.Webhooks('foo', MOCK_SECRET, timeout=1)
 
+    with pytest.raises(
+      TypeError, match='^The specified timestamp window must be a float.$'
+    ):
+      topgg.Webhooks('foo', MOCK_SECRET, timestamp_window=1)
+
   with pytest.raises(
     ValueError, match=r'^The specified secret, route, and/or host must not be empty.$'
   ):
