@@ -8,6 +8,7 @@ from inspect import iscoroutinefunction
 from aiohttp import test_utils, web
 from typing import Any, TypeAlias
 from hashlib import sha256
+from time import time
 import warnings
 import hmac
 import json
@@ -65,6 +66,8 @@ class Webhooks:
   :type app: :class:`~aiohttp.web.Application` | :class:`~aiohttp.test_utils.TestClient` | :py:obj:`None`
   :param timeout: The timeout for reading payloads in seconds. Defaults to five seconds.
   :type timeout: :py:class:`float`
+  :param timestamp_window: The accepted time window for timestamps before they get rejected to help mitigate replay attacks in seconds. Defaults to 30 seconds.
+  :type timestamp_window: :py:class:`float`
 
   :exception TypeError: One or more specified arguments has an invalid type.
   :exception ValueError: One or more specified arguments is empty.
@@ -81,6 +84,7 @@ class Webhooks:
     '__is_running',
     '__listeners',
     '__timeout',
+    '__timestamp_window',
   )
 
   __route: str
@@ -91,6 +95,8 @@ class Webhooks:
   __web_server: web.TCPSite | None
   __is_running: bool
   __listeners: dict[PayloadType, list[Listener]]
+  __timeout: float
+  __timestamp_window: float
 
   def __init__(
     self,
@@ -101,6 +107,7 @@ class Webhooks:
     port: int = 8080,
     app: web.Application | test_utils.TestClient | None = None,
     timeout: float = 5.0,
+    timestamp_window: float = 30.0,
   ):
     if (
       not isinstance(secret, str)
@@ -116,6 +123,8 @@ class Webhooks:
       raise TypeError('The specified port must be an integer.')
     elif timeout is not None and not isinstance(timeout, float):
       raise TypeError('The specified timeout must be a float.')
+    elif timestamp_window is not None and not isinstance(timestamp_window, float):
+      raise TypeError('The specified timestamp window must be a float.')
 
     self.__route = route
     self.__host = host
@@ -126,6 +135,7 @@ class Webhooks:
     self.__is_running = False
     self.__listeners = {}
     self.__timeout = timeout
+    self.__timestamp_window = timestamp_window
 
   def __repr__(self) -> str:
     return f'<{__class__.__name__} route={self.__route!r} host={self.__host!r} port={self.__port} is_running={self.is_running}>'
@@ -201,6 +211,8 @@ class Webhooks:
       warnings.warn('No listeners are registered.', RuntimeWarning)
 
     async def handler(request: web.Request) -> web.Response:
+      current_timestamp = time()
+
       body = None
       payload_type = None
       payload: Any = None
@@ -238,10 +250,10 @@ class Webhooks:
           for key, value in map(lambda pair: pair.split('='), signature.split(','))
         }
 
-        t = signature['t']
+        t = int(signature['t'])
         signature = signature[API_VERSION]
 
-        assert t and signature
+        assert signature
 
         fail_status = 400
 
@@ -249,7 +261,9 @@ class Webhooks:
 
         fail_status = 403
 
-        assert hm.hexdigest() == signature
+        assert abs(
+          current_timestamp - t
+        ) <= self.__timestamp_window and hmac.compare_digest(hm.hexdigest(), signature)
       except RuntimeError:  # pragma: nocover
         return web.json_response({'error': 'Internal Server Error'}, status=500)
       except Exception:
