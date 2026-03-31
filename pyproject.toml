@@ -6,7 +6,7 @@ name = "topggpy"
 version = "2.0.0"
 description = "The community-maintained Python SDK for Top.gg."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "null8626" }, { name = "Top.gg" }]
 keywords = ["discord", "discord-bot", "topgg"]
 dependencies = ["aiohttp>=3.13.3", "yarl>=1.22.0"]
