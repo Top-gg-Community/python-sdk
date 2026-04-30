@@ -3,13 +3,13 @@ requires = ["setuptools"]
 
 [project]
 name = "topggpy"
-version = "3.0.0"
-description = "A community-maintained Python API Client for the Top.gg API."
+version = "2.0.0"
+description = "The community-maintained Python SDK for Top.gg."
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "null8626" }, { name = "Top.gg" }]
 keywords = ["discord", "discord-bot", "topgg"]
-dependencies = ["aiohttp>=3.13.5"]
+dependencies = ["aiohttp>=3.13.5", "yarl>=1.23.0"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
@@ -35,4 +35,15 @@ dev = ["mock>=5.2.0", "pytest>=8.4.2", "pytest-asyncio>=1.2.0", "pytest-mock>=3.
 Documentation = "https://topggpy.readthedocs.io/en/latest/"
 "Raw API Documentation" = "https://docs.top.gg/docs/"
 Repository = "https://github.com/top-gg-community/python-sdk"
-"Support server" = "https://discord.gg/dbl"
+"Support server" = "https://discord.gg/EYHTgJX"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "^\\s*async def __a\\w+__\\(",
+  "# pragma: nocover",
+  "TYPE_CHECKING:$"
+]
