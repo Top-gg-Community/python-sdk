@@ -1,11 +1,8 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2026 null8626 & Top.gg
 
-from typing import TYPE_CHECKING
+from datetime import datetime
 from enum import Enum
-
-if TYPE_CHECKING:
-  from datetime import datetime
 
 from .project import PartialProject
 from .user import User

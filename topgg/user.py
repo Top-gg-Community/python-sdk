@@ -2,13 +2,13 @@
 # SPDX-FileCopyrightText: 2026 null8626 & Top.gg
 
 from typing import TYPE_CHECKING
+from datetime import datetime
 from enum import Enum
 
 from .util import parse_timestamp
 
 if TYPE_CHECKING:
   from collections.abc import Iterator
-  from datetime import datetime
 
   from .client import Client
 
