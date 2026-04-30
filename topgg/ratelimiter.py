@@ -2,6 +2,8 @@
 # SPDX-FileCopyrightText: 2021-2024 Assanali Mukhanov & Top.gg
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
+
+from dataclasses import dataclass
 from collections import deque
 from time import time
 import asyncio
@@ -11,32 +13,21 @@ if typing.TYPE_CHECKING:
   from types import TracebackType
 
 
+@dataclass(repr=False, slots=True)
 class Ratelimiter:
   """Handles ratelimits for a specific endpoint."""
 
-  __slots__: tuple[str, ...] = ('_calls', '__period', '__max_calls', '__lock')
-
-  _calls: deque[float]
-  __period: float
-  __max_calls: int
-  __lock: asyncio.Lock
-
-  def __init__(
-    self,
-    max_calls: int,
-    period: float = 1.0,
-  ):
-    self._calls = deque()
-    self.__period = period
-    self.__max_calls = max_calls
-    self.__lock = asyncio.Lock()
+  _max_calls: int
+  _period: float = 1.0
+  _calls: deque[float] = deque()
+  _lock: asyncio.Lock = asyncio.Lock()
 
   async def __aenter__(self) -> 'Ratelimiter':
     """Delays the request to this endpoint if it could lead to a ratelimit."""
 
-    async with self.__lock:
-      if len(self._calls) >= self.__max_calls:
-        until = time() + self.__period - self._timespan
+    async with self._lock:
+      if len(self._calls) >= self._max_calls:
+        until = time() + self._period - self._timespan
 
         if (sleep_time := until - time()) > 0:
           await asyncio.sleep(sleep_time)
@@ -51,10 +42,10 @@ class Ratelimiter:
   ) -> None:
     """Stores the previous request's timestamp."""
 
-    async with self.__lock:
+    async with self._lock:
       self._calls.append(time())
 
-      while self._timespan >= self.__period:
+      while self._timespan >= self._period:
         self._calls.popleft()
 
   @property
