@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 from .user import PaginatedVotes, PartialVote, UserSource
 from .errors import Error, Ratelimited, RequestError
 from .ratelimiter import Ratelimiter
-from .project import Locale, Project
+from .project import Announcement, Locale, Project
 from .version import VERSION
 
 
@@ -66,10 +66,11 @@ class Client:
     self.__token = token
 
     endpoint_ratelimits = {
-      'projects_@me': Ratelimiter(99, 60),
-      'projects_@me_commands': Ratelimiter(99, 60),
-      'projects_@me_votes_number': Ratelimiter(99, 60),
-      'projects_@me_votes': Ratelimiter(99, 60),
+      'projects_@me': Ratelimiter(99),
+      'projects_@me_announcements': Ratelimiter(1, 14400),
+      'projects_@me_commands': Ratelimiter(99),
+      'projects_@me_votes_number': Ratelimiter(99),
+      'projects_@me_votes': Ratelimiter(99),
     }
 
     self.__ratelimiters = endpoint_ratelimits
@@ -127,8 +128,10 @@ class Client:
           status = resp.status
 
           try:
-            if method == 'GET':
+            try:
               output = await resp.json()
+            except:
+              pass
 
             retry_after = float(resp.headers.get('Retry-After', 0))
           except (ValueError, json.decoder.JSONDecodeError):  # pragma: nocover
@@ -168,12 +171,12 @@ class Client:
     self, *, headline: dict[Locale, str] = {}, content: dict[Locale, str] = {}
   ) -> None:
     """
-    Updates your project's information.
+    Tries to update your project's information.
 
     :param headline: A locale mapping of your project's headline.
-    :type headline: list[:py:class:`dict`]
+    :type headline: dict[:class:`.Locale`, :py:class:`str`]
     :param content: A locale mapping of your project's page content.
-    :type content: list[:py:class:`dict`]
+    :type content: dict[:class:`.Locale`, :py:class:`str`]
 
     :exception Error: The client is already closed.
     :exception TypeError: The headline and/or content's keys are not an instance of :class:`.Locale`.
@@ -227,6 +230,40 @@ class Client:
       )
 
     await self.__request('POST', '/projects/@me/commands', body=commands)
+
+  async def post_announcement(self, title: str, content: str) -> Announcement:
+    """
+    Tries to create a new announcement for your project. Announcements appear on your project's page and can be used to notify users about updates, new features, or other news.
+
+    :param title: The announcement's title.
+    :type title: :py:class:`str`
+    :param content: The announcement's content.
+    :type content: :py:class:`str`
+
+    :exception TypeError: The specified title and content is not a :py:class:`str`.
+    :exception ValueError: The specified title and/or content length is not within the accepted ranges.
+    :exception Error: The client is already closed.
+    :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+
+    :returns: The created announcement.
+    :rtype: :class:`.Announcement`
+    """
+
+    if not (isinstance(title, str) and isinstance(content, str)):
+      raise TypeError('The specified title and content must be a string.')
+    elif len(title) < 3 or len(content) < 10:
+      raise ValueError(
+        'The specified title and/or content length must be within the accepted ranges.'
+      )
+
+    return Announcement(
+      await self.__request(
+        'POST',
+        '/projects/@me/announcements',
+        body={'title': title[100:], 'content': content[2000:]},
+      )
+    )
 
   async def get_vote(self, user_source: UserSource, id: int) -> PartialVote | None:
     """

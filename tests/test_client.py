@@ -143,6 +143,13 @@ async def test_Client_post_commands_works(
   monkeypatch: pytest.MonkeyPatch,
   client: topgg.Client,
 ) -> None:
+  if not TYPE_CHECKING:
+    with pytest.raises(
+      TypeError,
+      match="^The specified commands is not a list of dicts in the form of Discord API's raw JSON format.$",
+    ):
+      await client.post_commands(None)
+
   with RequestMock(204, 'No Content') as request:
     monkeypatch.setattr('aiohttp.ClientSession.request', request)
 
@@ -162,12 +169,36 @@ async def test_Client_post_commands_works(
 
     request.assert_called_once()
 
+
+@pytest.mark.asyncio
+async def test_Client_post_announcement_works(
+  monkeypatch: pytest.MonkeyPatch,
+  client: topgg.Client,
+) -> None:
   if not TYPE_CHECKING:
     with pytest.raises(
       TypeError,
-      match="^The specified commands is not a list of dicts in the form of Discord API's raw JSON format.$",
+      match=r'^The specified title and content must be a string\.$',
     ):
-      await client.post_commands(None)
+      await client.post_announcement(None, 2)
+
+  with pytest.raises(
+    ValueError,
+    match=r'^The specified title and\/or content length must be within the accepted ranges\.$',
+  ):
+    await client.post_announcement('test', 'test')
+
+  with RequestMock(200, 'OK', response='mocks/post_announcement.json') as request:
+    monkeypatch.setattr('aiohttp.ClientSession.request', request)
+
+    announcement = await client.post_announcement(
+      'Version 2.0 Released!',
+      'We just released version 2.0 with a bunch of new features and improvements.',
+    )
+
+    _test_attributes(announcement)
+
+    request.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -175,6 +206,12 @@ async def test_Client_get_vote_works(
   monkeypatch: pytest.MonkeyPatch,
   client: topgg.Client,
 ) -> None:
+  if not TYPE_CHECKING:
+    with pytest.raises(
+      TypeError, match="^The specified user's source and/or ID's type is invalid.$"
+    ):
+      await client.get_vote(topgg.UserSource.DISCORD, None)
+
   with RequestMock(200, 'OK', response='mocks/get_vote.json') as request:
     monkeypatch.setattr('aiohttp.ClientSession.request', request)
 
@@ -206,18 +243,18 @@ async def test_Client_get_vote_works(
     _test_attributes(raises.value)
     request.assert_called_once()
 
-  if not TYPE_CHECKING:
-    with pytest.raises(
-      TypeError, match="^The specified user's source and/or ID's type is invalid.$"
-    ):
-      await client.get_vote(topgg.UserSource.DISCORD, None)
-
 
 @pytest.mark.asyncio
 async def test_Client_get_votes_works(
   monkeypatch: pytest.MonkeyPatch,
   client: topgg.Client,
 ) -> None:
+  if not TYPE_CHECKING:
+    with pytest.raises(
+      TypeError, match=r'The specified earliest possible date\'s type is invalid.$'
+    ):
+      await client.get_votes(None)
+
   with RequestMock(200, 'OK', response='mocks/get_votes.json') as request:
     monkeypatch.setattr('aiohttp.ClientSession.request', request)
 
@@ -230,9 +267,3 @@ async def test_Client_get_votes_works(
     _test_attributes(second_page)
 
     assert request.call_count == 2
-
-  if not TYPE_CHECKING:
-    with pytest.raises(
-      TypeError, match=r'The specified earliest possible date\'s type is invalid.$'
-    ):
-      await client.get_votes(None)

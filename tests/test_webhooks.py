@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from aiohttp import test_utils, web
 from typing import TYPE_CHECKING
 from functools import cache
@@ -9,7 +10,7 @@ import pytest
 import hmac
 
 if TYPE_CHECKING:
-  from collections.abc import AsyncGenerator, Callable
+  from collections.abc import AsyncGenerator
 
 import topgg
 
@@ -64,7 +65,7 @@ async def test_Webhooks_error_handling_works(
   if not TYPE_CHECKING:
     with pytest.raises(
       TypeError,
-      match='^The specified secret, route, and/or host must be a valid string.$',
+      match='^The specified secret, route, and/or host must be a string.$',
     ):
       topgg.Webhooks(None, None)
 
@@ -87,9 +88,7 @@ async def test_Webhooks_error_handling_works(
   _test_attributes(wh)
 
   if not TYPE_CHECKING:
-    with pytest.raises(
-      TypeError, match=r'^The specified secret must be a valid string.$'
-    ):
+    with pytest.raises(TypeError, match=r'^The specified secret must be a string.$'):
       wh.secret = 5
 
     with pytest.raises(TypeError, match="^The specified payload's type is invalid.$"):

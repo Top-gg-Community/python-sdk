@@ -19,7 +19,14 @@ from .payload import (
   VoteCreatePayload,
 )
 from .user import PaginatedVotes, PartialVote, User, UserSource, Vote
-from .project import Locale, PartialProject, Platform, Project, ProjectType
+from .project import (
+  Announcement,
+  Locale,
+  PartialProject,
+  Platform,
+  Project,
+  ProjectType,
+)
 from .client import API_VERSION, BASE_URL, Client
 from .errors import Error, Ratelimited, RequestError
 from .ratelimiter import Ratelimiter
@@ -36,6 +43,7 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright (c) 2024-2026 null8626 & Top.gg'
 __version__ = VERSION
 __all__ = (
+  'Announcement',
   'API_VERSION',
   'BASE_URL',
   'Client',

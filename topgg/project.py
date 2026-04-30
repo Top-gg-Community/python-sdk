@@ -1,7 +1,13 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2026 null8626 & Top.gg
 
+from typing import TYPE_CHECKING
 from enum import Enum
+
+if TYPE_CHECKING:
+  from datetime import datetime
+
+from .util import parse_timestamp
 
 
 class Platform(Enum):
@@ -139,3 +145,26 @@ class Locale(Enum):
   UKRAINIAN = 'uk'
   VIETNAMESE = 'vi'
   CHINESE = 'zh'
+
+
+class Announcement:
+  """A project's announcement."""
+
+  __slots__: tuple[str, ...] = ('title', 'content', 'created_at')
+
+  title: str
+  """The announcement's title."""
+
+  content: str
+  """The announcement's content."""
+
+  created_at: datetime
+  """When the announcement was created."""
+
+  def __init__(self, json: dict):
+    self.title = json['title']
+    self.content = json['content']
+    self.created_at = parse_timestamp(json['created_at'])
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} title={self.title!r} content={self.content!r}>'

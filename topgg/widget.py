@@ -4,9 +4,10 @@
 from typing import TYPE_CHECKING
 
 from .client import BASE_URL
+from .project import ProjectType
 
 if TYPE_CHECKING:
-  from .project import Platform, ProjectType
+  from .project import Platform
 
 
 class Widget:

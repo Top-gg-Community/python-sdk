@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2021-2024 Assanali Mukhanov & Top.gg
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
+from collections.abc import Awaitable, Callable
 from asyncio import wait_for, TimeoutError
 from inspect import iscoroutinefunction
 from aiohttp import test_utils, web
@@ -12,19 +13,17 @@ import warnings
 import hmac
 import json
 
-from .client import API_VERSION
-
 if TYPE_CHECKING:
-  from collections.abc import Awaitable, Callable
   from typing import Any, TypeAlias
 
-  from .payload import (
-    IntegrationCreatePayload,
-    IntegrationDeletePayload,
-    TestPayload,
-    PayloadType,
-    VoteCreatePayload,
-  )
+from .client import API_VERSION
+from .payload import (
+  IntegrationCreatePayload,
+  IntegrationDeletePayload,
+  TestPayload,
+  PayloadType,
+  VoteCreatePayload,
+)
 
 
 IntegrationCreateListener: TypeAlias = Callable[
@@ -118,9 +117,7 @@ class Webhooks:
       or not isinstance(route, str)
       or not isinstance(host, str)
     ):
-      raise TypeError(
-        'The specified secret, route, and/or host must be a valid string.'
-      )
+      raise TypeError('The specified secret, route, and/or host must be a string.')
     elif not secret or not route or not host:
       raise ValueError('The specified secret, route, and/or host must not be empty.')
     elif port is not None and not isinstance(port, int):
@@ -164,7 +161,7 @@ class Webhooks:
     """
 
     if not isinstance(new_secret, str):
-      raise TypeError('The specified secret must be a valid string.')
+      raise TypeError('The specified secret must be a string.')
     elif not new_secret:
       raise ValueError('The specified secret must not be empty.')
 
