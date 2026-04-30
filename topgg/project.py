@@ -1,13 +1,18 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2026 null8626 & Top.gg
 
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+
+from .util import parse_timestamp, safe_dict
 
 
 class Platform(Enum):
   """A project's platform."""
 
   DISCORD = 'discord'
+  ROBLOX = 'roblox'
 
 
 class ProjectType(Enum):
@@ -15,6 +20,7 @@ class ProjectType(Enum):
 
   BOT = 'bot'
   SERVER = 'server'
+  GAME = 'game'
 
 
 class PartialProject:
@@ -116,3 +122,72 @@ class Project:
 
   def __eq__(self, other: object) -> bool:
     return isinstance(other, __class__) and self.id == other.id
+
+
+class Announcement:
+  """A project's announcement."""
+
+  __slots__: tuple[str, ...] = ('title', 'content', 'created_at')
+
+  title: str
+  """The announcement's title."""
+
+  content: str
+  """The announcement's content."""
+
+  created_at: datetime
+  """When the announcement was created."""
+
+  def __init__(self, json: dict):
+    self.title = json['title']
+    self.content = json['content']
+    self.created_at = parse_timestamp(json['created_at'])
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} title={self.title!r} content={self.content!r}>'
+
+
+@dataclass(frozen=True, repr=False, slots=True)
+class Metrics:
+  """A project metrics."""
+
+  _json: dict
+
+  @staticmethod
+  def discord_bot(
+    server_count: int | None = None, shard_count: int | None = None
+  ) -> 'Metrics':
+    """Creates a new Discord bot metrics."""
+
+    if not (server_count or shard_count) or not (
+      isinstance(server_count, int) or isinstance(shard_count, int)
+    ):
+      raise TypeError(
+        'The specified server count and/or shard count must be an integer.'
+      )
+
+    return Metrics(safe_dict(server_count=server_count, shard_count=shard_count))
+
+  @staticmethod
+  def discord_server(
+    member_count: int | None = None, online_count: int | None = None
+  ) -> 'Metrics':
+    """Creates a new Discord server metrics."""
+
+    if not (member_count or online_count) or not (
+      isinstance(member_count, int) or isinstance(online_count, int)
+    ):
+      raise TypeError(
+        'The specified member count and/or online count must be an integer.'
+      )
+
+    return Metrics(safe_dict(member_count=member_count, online_count=online_count))
+
+  @staticmethod
+  def roblox_game(player_count: int) -> 'Metrics':
+    """Creates a new Roblox game metrics."""
+
+    if not isinstance(player_count, int):
+      raise TypeError('The specified player count must be an integer.')
+
+    return Metrics(safe_dict(player_count=player_count))

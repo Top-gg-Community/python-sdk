@@ -3,19 +3,24 @@
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from typing import TYPE_CHECKING
 from datetime import datetime
 from asyncio import sleep
-from typing import Any
-from yarl import Query
 from time import time
 from re import sub
 import json
 
+if TYPE_CHECKING:
+  from typing import Any
+  from yarl import Query
+
 from .user import PaginatedVotes, PartialVote, UserSource
 from .errors import Error, Ratelimited, RequestError
+from .project import Announcement, Metrics, Project
+from .util import insert_locale_mapping
 from .ratelimiter import Ratelimiter
-from .project import Project
 from .version import VERSION
+from .locale import Locale
 
 
 API_VERSION = 'v1'
@@ -63,10 +68,13 @@ class Client:
     self.__token = token
 
     endpoint_ratelimits = {
-      'projects_@me': Ratelimiter(99, 60),
-      'projects_@me_commands': Ratelimiter(99, 60),
-      'projects_@me_votes_number': Ratelimiter(99, 60),
-      'projects_@me_votes': Ratelimiter(99, 60),
+      'projects_@me': Ratelimiter(99),
+      'projects_@me_announcements': Ratelimiter(1, 14400),
+      'projects_@me_commands': Ratelimiter(99),
+      'projects_@me_metrics': Ratelimiter(99),
+      'projects_@me_metrics_batch': Ratelimiter(99),
+      'projects_@me_votes_number': Ratelimiter(99),
+      'projects_@me_votes': Ratelimiter(99),
     }
 
     self.__ratelimiters = endpoint_ratelimits
@@ -76,8 +84,8 @@ class Client:
     return f'<{__class__.__name__} {self.__session!r}>'
 
   async def __request(
-    self, method: str, path: str, *, params: Query = None, body: Any = None
-  ) -> Any:
+    self, method: str, path: str, *, params: 'Query' = None, body: 'Any' = None
+  ) -> 'Any':
     if self.__session.closed:
       raise Error('Client session is already closed.')
 
@@ -124,8 +132,10 @@ class Client:
           status = resp.status
 
           try:
-            if method == 'GET':
+            try:
               output = await resp.json()
+            except:
+              pass
 
             retry_after = float(resp.headers.get('Retry-After', 0))
           except (ValueError, json.decoder.JSONDecodeError):  # pragma: nocover
@@ -161,7 +171,71 @@ class Client:
 
     return Project(await self.__request('GET', '/projects/@me'))
 
-  async def post_commands(self, commands: list[dict]):
+  async def edit_self(
+    self, *, headline: dict[Locale, str] = {}, content: dict[Locale, str] = {}
+  ) -> None:
+    """
+    Tries to update your project's information.
+
+    :param headline: A locale mapping of your project's headline.
+    :type headline: dict[:class:`.Locale`, :py:class:`str`]
+    :param content: A locale mapping of your project's page content.
+    :type content: dict[:class:`.Locale`, :py:class:`str`]
+
+    :exception Error: The client is already closed.
+    :exception TypeError: The headline and/or content's keys are not an instance of :class:`.Locale`.
+    :exception ValueError: The headline and content are left unspecified.
+    :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+    """
+
+    body = {}
+
+    if headline:
+      insert_locale_mapping('headline', headline, body)
+
+    if content:
+      insert_locale_mapping('content', content, body)
+    elif not headline:
+      raise ValueError('headline or content must be specified.')
+
+    await self.__request('PATCH', '/projects/@me', body=body)
+
+  async def post_announcement(self, title: str, content: str) -> Announcement:
+    """
+    Tries to create a new announcement for your project. Announcements appear on your project's page and can be used to notify users about updates, new features, or other news.
+
+    :param title: The announcement's title.
+    :type title: :py:class:`str`
+    :param content: The announcement's content.
+    :type content: :py:class:`str`
+
+    :exception TypeError: The specified title and content is not a :py:class:`str`.
+    :exception ValueError: The specified title and content length is not within the accepted ranges.
+    :exception Error: The client is already closed.
+    :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+
+    :returns: The created announcement.
+    :rtype: :class:`.Announcement`
+    """
+
+    if not (isinstance(title, str) and isinstance(content, str)):
+      raise TypeError('The specified title and content must be a string.')
+    elif len(title) < 3 or len(content) < 10:
+      raise ValueError(
+        'The specified title and content length must be within the accepted ranges.'
+      )
+
+    return Announcement(
+      await self.__request(
+        'POST',
+        '/projects/@me/announcements',
+        body={'title': title[100:], 'content': content[2000:]},
+      )
+    )
+
+  async def post_commands(self, commands: list[dict]) -> None:
     """
     Tries to update the application commands list in your Discord bot's Top.gg page.
 
@@ -182,6 +256,46 @@ class Client:
       )
 
     await self.__request('POST', '/projects/@me/commands', body=commands)
+
+  async def post_metrics(self, metrics: Metrics | dict[datetime, Metrics]) -> None:
+    """
+    Tries to post a single or batch of metrics payloads for your project. Use this to push fresh numbers after an event such as joining or leaving a guild or a player connecting.
+
+    :param metrics: A single or batch of metrics.
+    :type metrics: :class:`.Metrics` | dict[:py:class:`~datetime.datetime`, :class:`.Metrics`]
+
+    :exception TypeError: The specified metrics has an invalid type.
+    :exception ValueError: The specified batch of metrics is empty.
+    :exception Error: The client is already closed.
+    :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+    """
+
+    if not isinstance(metrics, Metrics) and not (
+      isinstance(metrics, dict)
+      and all(
+        isinstance(timestamp, datetime) and isinstance(metrics, Metrics)
+        for timestamp, metrics in metrics.items()
+      )
+    ):
+      raise TypeError('The specified metrics has an invalid type.')
+    elif not metrics:
+      raise ValueError('The specified batch of metrics must not be empty.')
+    elif isinstance(metrics, Metrics):
+      await self.__request(
+        'PATCH',
+        '/projects/@me/metrics',
+        body=metrics._json,
+      )
+    else:
+      await self.__request(
+        'POST',
+        '/projects/@me/metrics/batch',
+        body=[
+          {'timestamp': timestamp.isoformat(), 'metrics': metrics._json}
+          for timestamp, metrics in metrics.items()
+        ],
+      )
 
   async def get_vote(self, user_source: UserSource, id: int) -> PartialVote | None:
     """

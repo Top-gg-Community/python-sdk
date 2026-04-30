@@ -2,44 +2,42 @@
 # SPDX-FileCopyrightText: 2021-2024 Assanali Mukhanov & Top.gg
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 from collections import deque
 from time import time
 import asyncio
-import typing
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
   from types import TracebackType
 
 
+MAXIMUM_DELAY_THRESHOLD = 5 * 60
+
+
+@dataclass(repr=False, slots=True)
 class Ratelimiter:
   """Handles ratelimits for a specific endpoint."""
 
-  __slots__: tuple[str, ...] = ('_calls', '__period', '__max_calls', '__lock')
-
-  _calls: deque[float]
-  __period: float
-  __max_calls: int
-  __lock: asyncio.Lock
-
-  def __init__(
-    self,
-    max_calls: int,
-    period: float = 1.0,
-  ):
-    self._calls = deque()
-    self.__period = period
-    self.__max_calls = max_calls
-    self.__lock = asyncio.Lock()
+  _max_calls: int
+  _period: float = 1.0
+  _calls: deque[float] = field(default_factory=deque)
+  _lock: asyncio.Lock = asyncio.Lock()
+  _cancelled_delay: bool = field(default=False, init=False)
 
   async def __aenter__(self) -> 'Ratelimiter':
     """Delays the request to this endpoint if it could lead to a ratelimit."""
 
-    async with self.__lock:
-      if len(self._calls) >= self.__max_calls:
-        until = time() + self.__period - self._timespan
+    async with self._lock:
+      if len(self._calls) >= self._max_calls:
+        now = time()
+        until = now + self._period - self._timespan
 
-        if (sleep_time := until - time()) > 0:
-          await asyncio.sleep(sleep_time)
+        if (sleep_time := until - now) > 0:
+          if sleep_time <= (MAXIMUM_DELAY_THRESHOLD):
+            await asyncio.sleep(sleep_time)
+          else:
+            self._cancelled_delay = True
 
       return self
 
@@ -51,11 +49,14 @@ class Ratelimiter:
   ) -> None:
     """Stores the previous request's timestamp."""
 
-    async with self.__lock:
-      self._calls.append(time())
+    async with self._lock:
+      if self._cancelled_delay:
+        self._cancelled_delay = False
+      else:
+        self._calls.append(time())
 
-      while self._timespan >= self.__period:
-        self._calls.popleft()
+        while self._timespan >= self._period:
+          self._calls.popleft()
 
   @property
   def _timespan(self) -> float:
