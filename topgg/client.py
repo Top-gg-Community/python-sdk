@@ -16,9 +16,11 @@ if TYPE_CHECKING:
 
 from .user import PaginatedVotes, PartialVote, UserSource
 from .errors import Error, Ratelimited, RequestError
+from .project import Announcement, Metrics, Project
+from .util import insert_locale_mapping
 from .ratelimiter import Ratelimiter
-from .project import Announcement, Locale, Metrics, Project
 from .version import VERSION
+from .locale import Locale
 
 
 API_VERSION = 'v1'
@@ -190,22 +192,10 @@ class Client:
     body = {}
 
     if headline:
-      body['headline'] = {}
-
-      for locale, value in headline.items():
-        if not isinstance(locale, Locale):
-          raise TypeError("The headline's keys must be an instance of Locale.")
-
-        body['headline'][locale.value] = value
+      insert_locale_mapping('headline', headline, body)
 
     if content:
-      body['content'] = {}
-
-      for locale, value in content.items():
-        if not isinstance(locale, Locale):
-          raise TypeError("The content's keys must be an instance of Locale.")
-
-        body['content'][locale.value] = value
+      insert_locale_mapping('content', content, body)
     elif not headline:
       raise ValueError('headline or content must be specified.')
 

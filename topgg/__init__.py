@@ -21,17 +21,17 @@ from .payload import (
 from .user import PaginatedVotes, PartialVote, User, UserSource, Vote
 from .project import (
   Announcement,
-  Locale,
   Metrics,
   PartialProject,
   Platform,
   Project,
   ProjectType,
 )
-from .client import API_VERSION, BASE_URL, Client
 from .errors import Error, Ratelimited, RequestError
+from .client import API_VERSION, BASE_URL, Client
 from .ratelimiter import Ratelimiter
 from .version import VERSION
+from .locale import Locale
 from .widget import Widget
 
 

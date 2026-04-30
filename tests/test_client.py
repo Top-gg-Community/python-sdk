@@ -113,17 +113,17 @@ async def test_Client_edit_self_works(
 ) -> None:
   if not TYPE_CHECKING:
     with pytest.raises(
-      TypeError, match=r'^The headline\'s keys must be an instance of Locale\.$'
+      TypeError, match=r'^The locale mapping\'s keys must be an instance of Locale\.$'
     ):
       await client.edit_self(headline={'en': 'test'})
 
     with pytest.raises(
-      TypeError, match=r'^The headline\'s keys must be an instance of Locale\.$'
+      TypeError, match=r'^The locale mapping\'s keys must be an instance of Locale\.$'
     ):
       await client.edit_self(headline={'en': 'test'}, content=MOCK_LOCALE_MAPPING)
 
     with pytest.raises(
-      TypeError, match=r'^The content\'s keys must be an instance of Locale\.$'
+      TypeError, match=r'^The locale mapping\'s keys must be an instance of Locale\.$'
     ):
       await client.edit_self(content={'en': 'test'})
 
