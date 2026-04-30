@@ -6,27 +6,27 @@ name = "topggpy"
 version = "3.0.0"
 description = "A community-maintained Python API Client for the Top.gg API."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "null8626" }, { name = "Top.gg" }]
 keywords = ["discord", "discord-bot", "topgg"]
-dependencies = ["aiohttp>=3.12.15"]
+dependencies = ["aiohttp>=3.13.5"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "Natural Language :: English",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Internet",
   "Topic :: Software Development :: Libraries",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Utilities"
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.optional-dependencies]
 dev = ["mock>=5.2.0", "pytest>=8.4.2", "pytest-asyncio>=1.2.0", "pytest-mock>=3.15.0", "pytest-cov>=7.0.0", "ruff>=0.13.0"]
