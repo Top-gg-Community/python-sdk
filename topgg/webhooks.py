@@ -2,25 +2,29 @@
 # SPDX-FileCopyrightText: 2021-2024 Assanali Mukhanov & Top.gg
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
-from collections.abc import Awaitable, Callable
 from asyncio import wait_for, TimeoutError
 from inspect import iscoroutinefunction
 from aiohttp import test_utils, web
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING
 from hashlib import sha256
 from time import time
 import warnings
 import hmac
 import json
 
-from .payload import (
-  IntegrationCreatePayload,
-  IntegrationDeletePayload,
-  TestPayload,
-  PayloadType,
-  VoteCreatePayload,
-)
 from .client import API_VERSION
+
+if TYPE_CHECKING:
+  from collections.abc import Awaitable, Callable
+  from typing import Any, TypeAlias
+
+  from .payload import (
+    IntegrationCreatePayload,
+    IntegrationDeletePayload,
+    TestPayload,
+    PayloadType,
+    VoteCreatePayload,
+  )
 
 
 IntegrationCreateListener: TypeAlias = Callable[

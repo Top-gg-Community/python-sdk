@@ -4,12 +4,12 @@
 
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 from collections import deque
 from time import time
 import asyncio
-import typing
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
   from types import TracebackType
 
 

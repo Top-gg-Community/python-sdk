@@ -1,4 +1,3 @@
-from collections.abc import AsyncGenerator, Callable
 from aiohttp import test_utils, web
 from typing import TYPE_CHECKING
 from functools import cache
@@ -8,6 +7,9 @@ from time import time
 import pytest_asyncio
 import pytest
 import hmac
+
+if TYPE_CHECKING:
+  from collections.abc import AsyncGenerator, Callable
 
 import topgg
 

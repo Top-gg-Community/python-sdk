@@ -1,8 +1,12 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2026 null8626 & Top.gg
 
-from .project import Platform, ProjectType
+from typing import TYPE_CHECKING
+
 from .client import BASE_URL
+
+if TYPE_CHECKING:
+  from .project import Platform, ProjectType
 
 
 class Widget:

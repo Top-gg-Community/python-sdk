@@ -3,7 +3,10 @@
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from typing import Any
 
 
 class Error(Exception):

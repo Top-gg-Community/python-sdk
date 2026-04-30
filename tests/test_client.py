@@ -6,11 +6,15 @@ import sys
 sys.path.insert(0, path.join(path.dirname(path.realpath(__file__)), '..'))
 
 
-from typing import AsyncGenerator, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from collections import deque
 from time import time
 import pytest_asyncio
 import pytest
+
+if TYPE_CHECKING:
+  from typing import AsyncGenerator
+
 
 import topgg
 
