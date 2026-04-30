@@ -107,7 +107,7 @@ class PaginatedVotes:
   def __len__(self) -> int:
     return len(self.__votes)
 
-  def __iter__(self) -> Iterator[Vote]:
+  def __iter__(self) -> 'Iterator[Vote]':
     return iter(self.__votes)
 
 

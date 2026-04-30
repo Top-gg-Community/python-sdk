@@ -19,7 +19,7 @@ class Error(Exception):
 class RequestError(Error):
   """Thrown upon HTTP request failure. Extends :class:`~.errors.Error`."""
 
-  data: Any
+  data: 'Any'
   """The JSON error data returned from the API."""
 
   status: int | None

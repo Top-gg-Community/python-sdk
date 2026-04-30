@@ -28,7 +28,7 @@ MOCK_LOCALE_MAPPING = {topgg.Locale.ENGLISH: 'test', topgg.Locale.JAPANESE: 'tes
 @pytest_asyncio.fixture
 async def client(
   monkeypatch: pytest.MonkeyPatch,
-) -> AsyncGenerator[topgg.Client, None]:
+) -> 'AsyncGenerator[topgg.Client, None]':
   client = topgg.Client(MOCK_TOKEN)
 
   monkeypatch.setattr(topgg.Ratelimiter, '_calls', deque([time()]))

@@ -24,7 +24,7 @@ WebhooksSignatureFixture = Callable[[str], tuple[str, str]]
 
 
 @pytest_asyncio.fixture
-async def webhooks() -> AsyncGenerator[WebhooksFixture, None]:
+async def webhooks() -> 'AsyncGenerator[WebhooksFixture, None]':
   app = test_utils.TestClient(test_utils.TestServer(web.Application()))
   webhooks = topgg.Webhooks('/webhook', MOCK_SECRET, app=app)
 

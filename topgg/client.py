@@ -84,8 +84,8 @@ class Client:
     return f'<{__class__.__name__} {self.__session!r}>'
 
   async def __request(
-    self, method: str, path: str, *, params: Query = None, body: Any = None
-  ) -> Any:
+    self, method: str, path: str, *, params: 'Query' = None, body: 'Any' = None
+  ) -> 'Any':
     if self.__session.closed:
       raise Error('Client session is already closed.')
 

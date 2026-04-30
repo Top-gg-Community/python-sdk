@@ -16,7 +16,7 @@ class Widget:
   __slots__: tuple[str, ...] = ()
 
   @staticmethod
-  def large(platform: Platform, project_type: ProjectType, id: int) -> str:
+  def large(platform: 'Platform', project_type: ProjectType, id: int) -> str:
     """
     Generates a large widget URL.
 
@@ -41,7 +41,7 @@ class Widget:
     return f'{BASE_URL}/widgets/large/{platform.value}/{project_type.value}/{id}'
 
   @staticmethod
-  def votes(platform: Platform, project_type: ProjectType, id: int) -> str:
+  def votes(platform: 'Platform', project_type: ProjectType, id: int) -> str:
     """
     Generates a small widget URL for displaying votes.
 
@@ -66,7 +66,7 @@ class Widget:
     return f'{BASE_URL}/widgets/small/votes/{platform.value}/{project_type.value}/{id}'
 
   @staticmethod
-  def owner(platform: Platform, project_type: ProjectType, id: int) -> str:
+  def owner(platform: 'Platform', project_type: ProjectType, id: int) -> str:
     """
     Generates a small widget URL for displaying a project's owner.
 
@@ -91,7 +91,7 @@ class Widget:
     return f'{BASE_URL}/widgets/small/owner/{platform.value}/{project_type.value}/{id}'
 
   @staticmethod
-  def social(platform: Platform, project_type: ProjectType, id: int) -> str:
+  def social(platform: 'Platform', project_type: ProjectType, id: int) -> str:
     """
     Generates a small widget URL for displaying social stats.
 

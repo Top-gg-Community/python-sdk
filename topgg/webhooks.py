@@ -26,25 +26,25 @@ from .payload import (
 )
 
 
-IntegrationCreateListener: TypeAlias = Callable[
+IntegrationCreateListener: 'TypeAlias' = Callable[
   [IntegrationCreatePayload, str], Awaitable[web.Response]
 ]
 """Fires when a user has connected to your webhook integration."""
 
-IntegrationDeleteListener: TypeAlias = Callable[
+IntegrationDeleteListener: 'TypeAlias' = Callable[
   [IntegrationDeletePayload, str], Awaitable[web.Response | None]
 ]
 """Fires when a user has disconnected from your webhook integration."""
 
-TestListener: TypeAlias = Callable[[TestPayload, str], Awaitable[web.Response | None]]
+TestListener: 'TypeAlias' = Callable[[TestPayload, str], Awaitable[web.Response | None]]
 """Fires upon sent test from the project dashboard."""
 
-VoteCreateListener: TypeAlias = Callable[
+VoteCreateListener: 'TypeAlias' = Callable[
   [VoteCreatePayload, str], Awaitable[web.Response | None]
 ]
 """Fires when a user votes for your project."""
 
-Listener: TypeAlias = (
+Listener: 'TypeAlias' = (
   IntegrationCreateListener
   | IntegrationDeleteListener
   | TestListener
@@ -216,7 +216,7 @@ class Webhooks:
 
       body = None
       payload_type = None
-      payload: Any = None
+      payload: 'Any' = None
 
       try:
         assert request.body_exists and request.has_body and request.can_read_body
