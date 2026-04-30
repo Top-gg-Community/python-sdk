@@ -12,6 +12,7 @@ class Platform(Enum):
   """A project's platform."""
 
   DISCORD = 'discord'
+  ROBLOX = 'roblox'
 
 
 class ProjectType(Enum):
@@ -19,6 +20,7 @@ class ProjectType(Enum):
 
   BOT = 'bot'
   SERVER = 'server'
+  GAME = 'game'
 
 
 class PartialProject:
