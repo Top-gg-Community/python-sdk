@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools"]
+
+[project]
+name = "topggpy"
+version = "2.0.0"
+description = "The community-maintained Python SDK for Top.gg."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "null8626" }, { name = "Top.gg" }]
+keywords = ["discord", "discord-bot", "topgg"]
+dependencies = ["aiohttp>=3.13.5", "yarl>=1.23.0"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Internet",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Utilities"
+]
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["mock>=5.2.0", "pytest>=9.0.3", "pytest-asyncio>=1.3.0", "pytest-mock>=3.15.1", "pytest-cov>=7.1.0", "ruff>=0.15.12"]
+
+[project.urls]
+Documentation = "https://topggpy.readthedocs.io/en/latest/"
+"Raw API Documentation" = "https://docs.top.gg/docs/"
+Repository = "https://github.com/top-gg-community/python-sdk"
+"Support server" = "https://discord.gg/EYHTgJX"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "^\\s*async def __a\\w+__\\(",
+  "# pragma: nocover",
+  "TYPE_CHECKING:$"
+]

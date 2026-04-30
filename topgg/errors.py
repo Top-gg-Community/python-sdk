@@ -1,103 +1,51 @@
-# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2021-2024 Assanali Mukhanov & Top.gg
+# SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
-# The MIT License (MIT)
-
-# Copyright (c) 2021 Assanali Mukhanov
-
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-
-__all__ = [
-    "TopGGException",
-    "ClientException",
-    "ClientStateException",
-    "HTTPException",
-    "Unauthorized",
-    "UnauthorizedDetected",
-    "Forbidden",
-    "NotFound",
-    "ServerError",
-]
-
-from typing import TYPE_CHECKING, Union
-
-if TYPE_CHECKING:
-    from aiohttp import ClientResponse
+from typing import Any
 
 
-class TopGGException(Exception):
-    """Base exception class for topggpy.
+class Error(Exception):
+  """The base error class. Extends :py:class:`Exception`."""
 
-    Ideally speaking, this could be caught to handle any exceptions thrown from this library.
-    """
-
-
-class ClientException(TopGGException):
-    """Exception that's thrown when an operation in the :class:`~.DBLClient` fails.
-
-    These are usually for exceptions that happened due to user input.
-    """
+  __slots__: tuple[str, ...] = ()
 
 
-class ClientStateException(ClientException):
-    """Exception that's thrown when an operation happens in a closed :obj:`~.DBLClient` instance."""
+class RequestError(Error):
+  """Thrown upon HTTP request failure. Extends :class:`~.errors.Error`."""
+
+  __slots__: tuple[str, ...] = ('data', 'status')
+
+  data: Any
+  """The JSON error data returned from the API."""
+
+  status: int | None
+  """The status code returned from the API."""
+
+  def __init__(self, data: Any, status: int | None):
+    self.data = data
+    self.status = status
+
+    super().__init__(f'Got {status}: {data!r}')
+
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} data={self.data!r} status={self.status}>'
 
 
-class HTTPException(TopGGException):
-    """Exception that's thrown when an HTTP request operation fails.
+class Ratelimited(Error):
+  """Thrown upon HTTP request failure due to the client being ratelimited. Because of this, the client is not allowed to make requests for a period of time. Extends :class:`~.errors.Error`."""
 
-    Attributes:
-        response (:class:`aiohttp.ClientResponse`)
-            The response of the failed HTTP request.
-        text (str)
-            The text of the error. Could be an empty string.
-    """
+  __slots__: tuple[str, ...] = ('retry_after',)
 
-    def __init__(self, response: "ClientResponse", message: Union[dict, str]) -> None:
-        self.response = response
-        if isinstance(message, dict):
-            self.text = message.get("message", "")
-            self.code = message.get("code", 0)
-        else:
-            self.text = message
+  retry_after: float
+  """How long the client should wait (in seconds) until it can make a request to the API again."""
 
-        fmt = f"{self.response.reason} (status code: {self.response.status})"
-        if self.text:
-            fmt = f"{fmt}: {self.text}"
+  def __init__(self, retry_after: float):
+    self.retry_after = retry_after
 
-        super().__init__(fmt)
+    super().__init__(
+      f'The client is blocked by the API. Please try again in {retry_after} seconds.'
+    )
 
-
-class Unauthorized(HTTPException):
-    """Exception that's thrown when status code 401 occurs."""
-
-
-class UnauthorizedDetected(TopGGException):
-    """Exception that's thrown when no API Token is provided."""
-
-
-class Forbidden(HTTPException):
-    """Exception that's thrown when status code 403 occurs."""
-
-
-class NotFound(HTTPException):
-    """Exception that's thrown when status code 404 occurs."""
-
-
-class ServerError(HTTPException):
-    """Exception that's thrown when Top.gg returns "Server Error" responses (status codes such as 500 and 503)."""
+  def __repr__(self) -> str:
+    return f'<{__class__.__name__} retry_after={self.retry_after}>'

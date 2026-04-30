@@ -1,26 +1,69 @@
-# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2021-2024 Assanali Mukhanov & Top.gg
+# SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
-"""
-Top.gg Python API Wrapper
-~~~~~~~~~~~~~~~~~~~~~~~~~
-A basic wrapper for the Top.gg API.
-:copyright: (c) 2021 Assanali Mukhanov & Top.gg
-:license: MIT, see LICENSE for more details.
-"""
+from .webhooks import (
+  Listener,
+  IntegrationCreateListener,
+  IntegrationDeleteListener,
+  TestListener,
+  VoteCreateListener,
+  Webhooks,
+)
+from .payload import (
+  IntegrationCreatePayload,
+  IntegrationDeletePayload,
+  Payload,
+  PayloadType,
+  TestPayload,
+  VoteCreatePayload,
+)
+from .user import PaginatedVotes, PartialVote, User, UserSource, Vote
+from .project import PartialProject, Platform, Project, ProjectType
+from .client import API_VERSION, BASE_URL, Client
+from .errors import Error, Ratelimited, RequestError
+from .ratelimiter import Ratelimiter
+from .version import VERSION
+from .widget import Widget
 
-__title__ = "topggpy"
-__author__ = "Assanali Mukhanov"
-__maintainer__ = "Norizon"
-__license__ = "MIT"
-__version__ = "2.0.0a1"
 
-from .autopost import *
-from .client import *
-from .data import *
-from .errors import *
-from .http import *
-
-# can't be added to __all__ since they'd clash with automodule
-from .types import *
-from .types import BotVoteData, GuildVoteData
-from .webhook import *
+__title__ = 'topggpy'
+__author__ = 'null8626 & Top.gg'
+__credits__ = ('null8626', 'Top.gg')
+__maintainer__ = 'null8626'
+__status__ = 'Production'
+__license__ = 'MIT'
+__copyright__ = 'Copyright (c) 2024-2026 null8626 & Top.gg'
+__version__ = VERSION
+__all__ = (
+  'API_VERSION',
+  'BASE_URL',
+  'Client',
+  'Error',
+  'IntegrationCreateListener',
+  'IntegrationCreatePayload',
+  'IntegrationDeleteListener',
+  'IntegrationDeletePayload',
+  'Listener',
+  'PaginatedVotes',
+  'PartialProject',
+  'PartialVote',
+  'Payload',
+  'PayloadType',
+  'Platform',
+  'Project',
+  'ProjectType',
+  'Ratelimited',
+  'Ratelimiter',
+  'RequestError',
+  'TestListener',
+  'TestPayload',
+  'User',
+  'UserSource',
+  'VERSION',
+  'Vote',
+  'VoteCreateListener',
+  'VoteCreatePayload',
+  'Webhooks',
+  'Widget',
+)
