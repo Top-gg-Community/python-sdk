@@ -116,3 +116,26 @@ class Project:
 
   def __eq__(self, other: object) -> bool:
     return isinstance(other, __class__) and self.id == other.id
+
+
+class Locale(Enum):
+  """A project's supported locale."""
+
+  __slots__: tuple[str, ...] = ()
+
+  ENGLISH = 'en'
+  GERMAN = 'de'
+  FRENCH = 'fr'
+  PORTUGUESE = 'pt'
+  TURKISH = 'tr'
+  HINDI = 'hi'
+  JAPANESE = 'ja'
+  ARABIC = 'ar'
+  DUTCH = 'nl'
+  KOREAN = 'ko'
+  ITALIAN = 'it'
+  SPANISH = 'es'
+  RUSSIAN = 'ru'
+  UKRAINIAN = 'uk'
+  VIETNAMESE = 'vi'
+  CHINESE = 'zh'

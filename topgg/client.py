@@ -3,18 +3,21 @@
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
 from aiohttp import ClientResponseError, ClientSession, ClientTimeout
+from typing import TYPE_CHECKING
 from datetime import datetime
 from asyncio import sleep
-from typing import Any
-from yarl import Query
 from time import time
 from re import sub
 import json
 
+if TYPE_CHECKING:
+  from typing import Any
+  from yarl import Query
+
 from .user import PaginatedVotes, PartialVote, UserSource
 from .errors import Error, Ratelimited, RequestError
 from .ratelimiter import Ratelimiter
-from .project import Project
+from .project import Locale, Project
 from .version import VERSION
 
 
@@ -161,7 +164,49 @@ class Client:
 
     return Project(await self.__request('GET', '/projects/@me'))
 
-  async def post_commands(self, commands: list[dict]):
+  async def edit_self(
+    self, *, headline: dict[Locale, str] = {}, content: dict[Locale, str] = {}
+  ) -> None:
+    """
+    Updates your project's information.
+
+    :param headline: A locale mapping of your project's headline.
+    :type headline: list[:py:class:`dict`]
+    :param content: A locale mapping of your project's page content.
+    :type content: list[:py:class:`dict`]
+
+    :exception Error: The client is already closed.
+    :exception TypeError: The headline and/or content's keys are not an instance of :class:`.Locale`.
+    :exception ValueError: The headline and content are left unspecified.
+    :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+    """
+
+    body = {}
+
+    if headline:
+      body['headline'] = {}
+
+      for key, value in headline.items():
+        if not isinstance(key, Locale):
+          raise TypeError("The headline's keys must be an instance of Locale.")
+
+        body['headline'][key.value] = value
+
+    if content:
+      body['content'] = {}
+
+      for key, value in content.items():
+        if not isinstance(key, Locale):
+          raise TypeError("The content's keys must be an instance of Locale.")
+
+        body['content'][key.value] = value
+    elif not headline:
+      raise ValueError('headline or content must be specified.')
+
+    await self.__request('PATCH', '/projects/@me', body=body)
+
+  async def post_commands(self, commands: list[dict]) -> None:
     """
     Tries to update the application commands list in your Discord bot's Top.gg page.
 

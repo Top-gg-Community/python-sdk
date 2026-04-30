@@ -18,6 +18,7 @@ from util import _test_attributes, RequestMock
 
 
 MOCK_TOKEN = '.eyJfdCI6IiIsImlkIjoiMzY0ODA2MDI5ODc2NTU1Nzc2In0=.'
+MOCK_LOCALE_MAPPING = {topgg.Locale.ENGLISH: 'test', topgg.Locale.JAPANESE: 'test'}
 
 
 @pytest_asyncio.fixture
@@ -97,6 +98,38 @@ async def test_Client_get_self_works(
     project = await client.get_self()
 
     _test_attributes(project)
+
+    request.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_Client_edit_self_works(
+  monkeypatch: pytest.MonkeyPatch,
+  client: topgg.Client,
+) -> None:
+  if not TYPE_CHECKING:
+    with pytest.raises(
+      TypeError, match=r'^The headline\'s keys must be an instance of Locale\.$'
+    ):
+      await client.edit_self(headline={'en': 'test'})
+
+    with pytest.raises(
+      TypeError, match=r'^The headline\'s keys must be an instance of Locale\.$'
+    ):
+      await client.edit_self(headline={'en': 'test'}, content=MOCK_LOCALE_MAPPING)
+
+    with pytest.raises(
+      TypeError, match=r'^The content\'s keys must be an instance of Locale\.$'
+    ):
+      await client.edit_self(content={'en': 'test'})
+
+  with pytest.raises(ValueError, match=r'^headline or content must be specified\.$'):
+    await client.edit_self()
+
+  with RequestMock(204, 'No Content') as request:
+    monkeypatch.setattr('aiohttp.ClientSession.request', request)
+
+    await client.edit_self(headline=MOCK_LOCALE_MAPPING, content=MOCK_LOCALE_MAPPING)
 
     request.assert_called_once()
 

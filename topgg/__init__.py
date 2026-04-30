@@ -19,7 +19,7 @@ from .payload import (
   VoteCreatePayload,
 )
 from .user import PaginatedVotes, PartialVote, User, UserSource, Vote
-from .project import PartialProject, Platform, Project, ProjectType
+from .project import Locale, PartialProject, Platform, Project, ProjectType
 from .client import API_VERSION, BASE_URL, Client
 from .errors import Error, Ratelimited, RequestError
 from .ratelimiter import Ratelimiter
@@ -45,6 +45,7 @@ __all__ = (
   'IntegrationDeleteListener',
   'IntegrationDeletePayload',
   'Listener',
+  'Locale',
   'PaginatedVotes',
   'PartialProject',
   'PartialVote',

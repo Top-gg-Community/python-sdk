@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2024-2026 null8626 & Top.gg
 
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from collections import deque
 from time import time
 import asyncio
@@ -19,7 +19,7 @@ class Ratelimiter:
 
   _max_calls: int
   _period: float = 1.0
-  _calls: deque[float] = deque()
+  _calls: deque[float] = field(default_factory=deque)
   _lock: asyncio.Lock = asyncio.Lock()
 
   async def __aenter__(self) -> 'Ratelimiter':
