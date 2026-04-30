@@ -2,11 +2,8 @@
 # SPDX-FileCopyrightText: 2026 null8626 & Top.gg
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from datetime import datetime
 from enum import Enum
-
-if TYPE_CHECKING:
-  from datetime import datetime
 
 from .util import parse_timestamp, safe_dict
 
