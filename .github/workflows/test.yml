@@ -2,8 +2,8 @@ name: Test
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
+  pull_request: null
+  workflow_dispatch: null
 jobs:
   build:
     runs-on: ubuntu-latest
