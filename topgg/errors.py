@@ -15,7 +15,7 @@ class Error(Exception):
   __slots__: tuple[str, ...] = ()
 
 
-@dataclass(repr=False, slots=True)
+@dataclass(frozen=True, repr=False, slots=True)
 class RequestError(Error):
   """Thrown upon HTTP request failure. Extends :class:`~.errors.Error`."""
 
@@ -32,7 +32,7 @@ class RequestError(Error):
     return f'<{__class__.__name__} data={self.data!r} status={self.status}>'
 
 
-@dataclass(repr=False, slots=True)
+@dataclass(frozen=True, repr=False, slots=True)
 class Ratelimited(Error):
   """Thrown upon HTTP request failure due to the client being ratelimited. Because of this, the client is not allowed to make requests for a period of time. Extends :class:`~.errors.Error`."""
 

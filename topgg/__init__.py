@@ -22,6 +22,7 @@ from .user import PaginatedVotes, PartialVote, User, UserSource, Vote
 from .project import (
   Announcement,
   Locale,
+  Metrics,
   PartialProject,
   Platform,
   Project,
@@ -54,6 +55,7 @@ __all__ = (
   'IntegrationDeletePayload',
   'Listener',
   'Locale',
+  'Metrics',
   'PaginatedVotes',
   'PartialProject',
   'PartialVote',

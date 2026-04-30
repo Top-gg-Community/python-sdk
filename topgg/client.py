@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 from .user import PaginatedVotes, PartialVote, UserSource
 from .errors import Error, Ratelimited, RequestError
 from .ratelimiter import Ratelimiter
-from .project import Announcement, Locale, Project
+from .project import Announcement, Locale, Metrics, Project
 from .version import VERSION
 
 
@@ -69,6 +69,8 @@ class Client:
       'projects_@me': Ratelimiter(99),
       'projects_@me_announcements': Ratelimiter(1, 14400),
       'projects_@me_commands': Ratelimiter(99),
+      'projects_@me_metrics': Ratelimiter(99),
+      'projects_@me_metrics_batch': Ratelimiter(99),
       'projects_@me_votes_number': Ratelimiter(99),
       'projects_@me_votes': Ratelimiter(99),
     }
@@ -190,24 +192,58 @@ class Client:
     if headline:
       body['headline'] = {}
 
-      for key, value in headline.items():
-        if not isinstance(key, Locale):
+      for locale, value in headline.items():
+        if not isinstance(locale, Locale):
           raise TypeError("The headline's keys must be an instance of Locale.")
 
-        body['headline'][key.value] = value
+        body['headline'][locale.value] = value
 
     if content:
       body['content'] = {}
 
-      for key, value in content.items():
-        if not isinstance(key, Locale):
+      for locale, value in content.items():
+        if not isinstance(locale, Locale):
           raise TypeError("The content's keys must be an instance of Locale.")
 
-        body['content'][key.value] = value
+        body['content'][locale.value] = value
     elif not headline:
       raise ValueError('headline or content must be specified.')
 
     await self.__request('PATCH', '/projects/@me', body=body)
+
+  async def post_announcement(self, title: str, content: str) -> Announcement:
+    """
+    Tries to create a new announcement for your project. Announcements appear on your project's page and can be used to notify users about updates, new features, or other news.
+
+    :param title: The announcement's title.
+    :type title: :py:class:`str`
+    :param content: The announcement's content.
+    :type content: :py:class:`str`
+
+    :exception TypeError: The specified title and content is not a :py:class:`str`.
+    :exception ValueError: The specified title and content length is not within the accepted ranges.
+    :exception Error: The client is already closed.
+    :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
+    :exception Ratelimited: Ratelimited from sending more requests.
+
+    :returns: The created announcement.
+    :rtype: :class:`.Announcement`
+    """
+
+    if not (isinstance(title, str) and isinstance(content, str)):
+      raise TypeError('The specified title and content must be a string.')
+    elif len(title) < 3 or len(content) < 10:
+      raise ValueError(
+        'The specified title and content length must be within the accepted ranges.'
+      )
+
+    return Announcement(
+      await self.__request(
+        'POST',
+        '/projects/@me/announcements',
+        body={'title': title[100:], 'content': content[2000:]},
+      )
+    )
 
   async def post_commands(self, commands: list[dict]) -> None:
     """
@@ -231,39 +267,45 @@ class Client:
 
     await self.__request('POST', '/projects/@me/commands', body=commands)
 
-  async def post_announcement(self, title: str, content: str) -> Announcement:
+  async def post_metrics(self, metrics: Metrics | dict[datetime, Metrics]) -> None:
     """
-    Tries to create a new announcement for your project. Announcements appear on your project's page and can be used to notify users about updates, new features, or other news.
+    Tries to post a single or batch of metrics payloads for your project. Use this to push fresh numbers after an event such as joining or leaving a guild or a player connecting.
 
-    :param title: The announcement's title.
-    :type title: :py:class:`str`
-    :param content: The announcement's content.
-    :type content: :py:class:`str`
+    :param metrics: A single or batch of metrics.
+    :type metrics: :class:`.Metrics` | dict[:py:class:`~datetime.datetime`, :class:`.Metrics`]
 
-    :exception TypeError: The specified title and content is not a :py:class:`str`.
-    :exception ValueError: The specified title and/or content length is not within the accepted ranges.
+    :exception TypeError: The specified metrics has an invalid type.
+    :exception ValueError: The specified batch of metrics is empty.
     :exception Error: The client is already closed.
     :exception RequestError: The specified bot does not exist or the client has received other non-favorable responses from the API.
     :exception Ratelimited: Ratelimited from sending more requests.
-
-    :returns: The created announcement.
-    :rtype: :class:`.Announcement`
     """
 
-    if not (isinstance(title, str) and isinstance(content, str)):
-      raise TypeError('The specified title and content must be a string.')
-    elif len(title) < 3 or len(content) < 10:
-      raise ValueError(
-        'The specified title and/or content length must be within the accepted ranges.'
+    if not isinstance(metrics, Metrics) and not (
+      isinstance(metrics, dict)
+      and all(
+        isinstance(timestamp, datetime) and isinstance(metrics, Metrics)
+        for timestamp, metrics in metrics.items()
       )
-
-    return Announcement(
+    ):
+      raise TypeError('The specified metrics has an invalid type.')
+    elif not metrics:
+      raise ValueError('The specified batch of metrics must not be empty.')
+    elif isinstance(metrics, Metrics):
+      await self.__request(
+        'PATCH',
+        '/projects/@me/metrics',
+        body=metrics._json,
+      )
+    else:
       await self.__request(
         'POST',
-        '/projects/@me/announcements',
-        body={'title': title[100:], 'content': content[2000:]},
+        '/projects/@me/metrics/batch',
+        body=[
+          {'timestamp': timestamp.isoformat(), 'metrics': metrics._json}
+          for timestamp, metrics in metrics.items()
+        ],
       )
-    )
 
   async def get_vote(self, user_source: UserSource, id: int) -> PartialVote | None:
     """

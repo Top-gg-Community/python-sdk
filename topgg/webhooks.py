@@ -174,7 +174,7 @@ class Webhooks:
     :param payload_type: The corresponding webhook payload type.
     :type payload_type: :class:`.PayloadType`
 
-    :exception TypeError: The specified payload type and/or listener's type is invalid.
+    :exception TypeError: The specified payload type is invalid.
     :exception UnicodeDecodeError: The specified secret is not valid UTF-8.
 
     :returns: A decorator of the specified listener.

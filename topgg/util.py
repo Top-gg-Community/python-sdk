@@ -3,6 +3,7 @@
 
 from datetime import datetime
 from sys import version_info
+from typing import Any
 
 
 if version_info.major == 3 and version_info.minor <= 10:  # pragma: nocover
@@ -21,3 +22,9 @@ def parse_timestamp(timestamp: str) -> datetime:
     )
 
   return datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+
+
+def safe_dict(**kwargs: Any) -> dict:
+  """Creates a new dictionary from a set of keyword arguments where None properties are not included."""
+
+  return {key: value for key, value in kwargs.items() if value is not None}

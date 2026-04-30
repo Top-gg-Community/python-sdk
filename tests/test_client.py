@@ -139,6 +139,37 @@ async def test_Client_edit_self_works(
 
 
 @pytest.mark.asyncio
+async def test_Client_post_announcement_works(
+  monkeypatch: pytest.MonkeyPatch,
+  client: topgg.Client,
+) -> None:
+  if not TYPE_CHECKING:
+    with pytest.raises(
+      TypeError,
+      match=r'^The specified title and content must be a string\.$',
+    ):
+      await client.post_announcement(None, 2)
+
+  with pytest.raises(
+    ValueError,
+    match=r'^The specified title and content length must be within the accepted ranges\.$',
+  ):
+    await client.post_announcement('test', 'test')
+
+  with RequestMock(200, 'OK', response='mocks/post_announcement.json') as request:
+    monkeypatch.setattr('aiohttp.ClientSession.request', request)
+
+    announcement = await client.post_announcement(
+      'Version 2.0 Released!',
+      'We just released version 2.0 with a bunch of new features and improvements.',
+    )
+
+    _test_attributes(announcement)
+
+    request.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_Client_post_commands_works(
   monkeypatch: pytest.MonkeyPatch,
   client: topgg.Client,
@@ -171,34 +202,57 @@ async def test_Client_post_commands_works(
 
 
 @pytest.mark.asyncio
-async def test_Client_post_announcement_works(
+async def test_Client_post_metrics_works(
   monkeypatch: pytest.MonkeyPatch,
   client: topgg.Client,
 ) -> None:
   if not TYPE_CHECKING:
     with pytest.raises(
       TypeError,
-      match=r'^The specified title and content must be a string\.$',
+      match=r'^The specified metrics has an invalid type\.$',
     ):
-      await client.post_announcement(None, 2)
+      await client.post_metrics('test')
+
+    with pytest.raises(
+      TypeError, match=r'^The specified player count must be an integer\.$'
+    ):
+      await client.post_metrics(topgg.Metrics.roblox_game(None))
 
   with pytest.raises(
     ValueError,
-    match=r'^The specified title and\/or content length must be within the accepted ranges\.$',
+    match=r'^The specified batch of metrics must not be empty\.$',
   ):
-    await client.post_announcement('test', 'test')
+    await client.post_metrics({})
 
-  with RequestMock(200, 'OK', response='mocks/post_announcement.json') as request:
+  with pytest.raises(
+    TypeError,
+    match=r'^The specified server count and\/or shard count must be an integer\.$',
+  ):
+    await client.post_metrics(topgg.Metrics.discord_bot())
+
+  with pytest.raises(
+    TypeError,
+    match=r'^The specified member count and\/or online count must be an integer\.$',
+  ):
+    await client.post_metrics(topgg.Metrics.discord_server())
+
+  with RequestMock(204, 'No Content') as request:
     monkeypatch.setattr('aiohttp.ClientSession.request', request)
 
-    announcement = await client.post_announcement(
-      'Version 2.0 Released!',
-      'We just released version 2.0 with a bunch of new features and improvements.',
+    await client.post_metrics(topgg.Metrics.discord_bot(server_count=1, shard_count=1))
+    await client.post_metrics(topgg.Metrics.discord_bot(server_count=1))
+
+    await client.post_metrics(
+      topgg.Metrics.discord_server(member_count=1, online_count=1)
     )
+    await client.post_metrics(topgg.Metrics.discord_server(member_count=1))
 
-    _test_attributes(announcement)
+    metrics = topgg.Metrics.roblox_game(1)
 
-    request.assert_called_once()
+    await client.post_metrics(metrics)
+    await client.post_metrics({datetime.now(): metrics})
+
+    assert request.call_count == 6
 
 
 @pytest.mark.asyncio
