@@ -6,6 +6,7 @@ from enum import Enum
 
 from .project import PartialProject
 from .user import User
+from .util import parse_timestamp
 
 
 class IntegrationCreatePayload:
@@ -114,8 +115,8 @@ class VoteCreatePayload:
   def __init__(self, json: dict):
     self.id = int(json['id'])
     self.weight = json['weight']
-    self.voted_at = datetime.fromisoformat(json['created_at'].replace('Z', '+00:00'))
-    self.expires_at = datetime.fromisoformat(json['expires_at'].replace('Z', '+00:00'))
+    self.voted_at = parse_timestamp(json['created_at'])
+    self.expires_at = parse_timestamp(json['expires_at'])
     self.project = PartialProject(json['project'])
     self.user = User(json['user'])
 

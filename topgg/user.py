@@ -9,6 +9,8 @@ from enum import Enum
 if TYPE_CHECKING:
   from .client import Client
 
+from .util import parse_timestamp
+
 
 class UserSource(Enum):
   """A user account from an external platform that is linked to a Top.gg user account."""
@@ -32,8 +34,8 @@ class PartialVote:
   """The number of votes this vote counted for. This is a rounded integer value which determines how many points this individual vote was worth."""
 
   def __init__(self, json: dict):
-    self.voted_at = datetime.fromisoformat(json['created_at'].replace('Z', '+00:00'))
-    self.expires_at = datetime.fromisoformat(json['expires_at'].replace('Z', '+00:00'))
+    self.voted_at = parse_timestamp(json['created_at'])
+    self.expires_at = parse_timestamp(json['expires_at'])
     self.weight = json['weight']
 
   def __repr__(self) -> str:
