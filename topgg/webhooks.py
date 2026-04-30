@@ -6,13 +6,17 @@ from collections.abc import Awaitable, Callable
 from asyncio import wait_for, TimeoutError
 from inspect import iscoroutinefunction
 from aiohttp import test_utils, web
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING
 from hashlib import sha256
 from time import time
 import warnings
 import hmac
 import json
 
+if TYPE_CHECKING:
+  from typing import Any, TypeAlias
+
+from .client import API_VERSION
 from .payload import (
   IntegrationCreatePayload,
   IntegrationDeletePayload,
@@ -20,28 +24,27 @@ from .payload import (
   PayloadType,
   VoteCreatePayload,
 )
-from .client import API_VERSION
 
 
-IntegrationCreateListener: TypeAlias = Callable[
+IntegrationCreateListener: 'TypeAlias' = Callable[
   [IntegrationCreatePayload, str], Awaitable[web.Response]
 ]
 """Fires when a user has connected to your webhook integration."""
 
-IntegrationDeleteListener: TypeAlias = Callable[
+IntegrationDeleteListener: 'TypeAlias' = Callable[
   [IntegrationDeletePayload, str], Awaitable[web.Response | None]
 ]
 """Fires when a user has disconnected from your webhook integration."""
 
-TestListener: TypeAlias = Callable[[TestPayload, str], Awaitable[web.Response | None]]
+TestListener: 'TypeAlias' = Callable[[TestPayload, str], Awaitable[web.Response | None]]
 """Fires upon sent test from the project dashboard."""
 
-VoteCreateListener: TypeAlias = Callable[
+VoteCreateListener: 'TypeAlias' = Callable[
   [VoteCreatePayload, str], Awaitable[web.Response | None]
 ]
 """Fires when a user votes for your project."""
 
-Listener: TypeAlias = (
+Listener: 'TypeAlias' = (
   IntegrationCreateListener
   | IntegrationDeleteListener
   | TestListener
@@ -114,9 +117,7 @@ class Webhooks:
       or not isinstance(route, str)
       or not isinstance(host, str)
     ):
-      raise TypeError(
-        'The specified secret, route, and/or host must be a valid string.'
-      )
+      raise TypeError('The specified secret, route, and/or host must be a string.')
     elif not secret or not route or not host:
       raise ValueError('The specified secret, route, and/or host must not be empty.')
     elif port is not None and not isinstance(port, int):
@@ -160,7 +161,7 @@ class Webhooks:
     """
 
     if not isinstance(new_secret, str):
-      raise TypeError('The specified secret must be a valid string.')
+      raise TypeError('The specified secret must be a string.')
     elif not new_secret:
       raise ValueError('The specified secret must not be empty.')
 
@@ -173,7 +174,7 @@ class Webhooks:
     :param payload_type: The corresponding webhook payload type.
     :type payload_type: :class:`.PayloadType`
 
-    :exception TypeError: The specified payload type and/or listener's type is invalid.
+    :exception TypeError: The specified payload type is invalid.
     :exception UnicodeDecodeError: The specified secret is not valid UTF-8.
 
     :returns: A decorator of the specified listener.
@@ -215,7 +216,7 @@ class Webhooks:
 
       body = None
       payload_type = None
-      payload: Any = None
+      payload: 'Any' = None
 
       try:
         assert request.body_exists and request.has_body and request.can_read_body

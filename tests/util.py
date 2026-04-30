@@ -1,6 +1,6 @@
 from multidict import CIMultiDict, CIMultiDictProxy
-from typing import Any, TYPE_CHECKING
 from contextlib import nullcontext
+from typing import TYPE_CHECKING
 from inspect import getmembers
 from sys import stdout
 from yarl import URL
@@ -11,6 +11,7 @@ import mock
 
 if TYPE_CHECKING:
   from io import TextIOWrapper
+  from typing import Any
 
 
 CURRENT_DIR = path.dirname(path.realpath(__file__))
@@ -158,7 +159,7 @@ class RequestMock:
   def __enter__(self) -> mock.Mock:
     return mock.Mock(return_value=nullcontext(self.__mock_response))
 
-  def __exit__(self, *_: Any) -> None:
+  def __exit__(self, *_: 'Any') -> None:
     if self.__mock_json_response is not None:
       self.__mock_json_response.close()
       self.__mock_json_response = None

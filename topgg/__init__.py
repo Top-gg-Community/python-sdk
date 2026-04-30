@@ -19,11 +19,19 @@ from .payload import (
   VoteCreatePayload,
 )
 from .user import PaginatedVotes, PartialVote, User, UserSource, Vote
-from .project import PartialProject, Platform, Project, ProjectType
-from .client import API_VERSION, BASE_URL, Client
+from .project import (
+  Announcement,
+  Metrics,
+  PartialProject,
+  Platform,
+  Project,
+  ProjectType,
+)
 from .errors import Error, Ratelimited, RequestError
+from .client import API_VERSION, BASE_URL, Client
 from .ratelimiter import Ratelimiter
 from .version import VERSION
+from .locale import Locale
 from .widget import Widget
 
 
@@ -36,6 +44,7 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright (c) 2024-2026 null8626 & Top.gg'
 __version__ = VERSION
 __all__ = (
+  'Announcement',
   'API_VERSION',
   'BASE_URL',
   'Client',
@@ -45,6 +54,8 @@ __all__ = (
   'IntegrationDeleteListener',
   'IntegrationDeletePayload',
   'Listener',
+  'Locale',
+  'Metrics',
   'PaginatedVotes',
   'PartialProject',
   'PartialVote',
